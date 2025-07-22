@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="requiresActiveX=true"/>
+<meta content="no-cache" http-equiv="pragma">
+<meta content="NO-CACHE" http-equiv="CACHE-CONTROL">
+<title>Connect</title>
+<script type="text/javascript" src="java/third/js/prototype/prototype.js"></script>
+<script type="text/javascript" src="java/third/jws.js"></script>
+<STYLE>
+BODY { font-family : Verdana,Arial; font-size: 12px; }
+TD   { font-family : Verdana,Arial; font-size : 12px; }
+A    { text-decoration : none; }
+input { border: 1px #000000; border-style:solid; }
+</STYLE>
+</head>
+
+<body bgcolor="FFFFFF" onload="BtnConnectscript()">
+<div id="preloadimage" name="preloadingimage" style="position:absolute; top:-200px; left:-200px; height:100px; width:100px;"><img src="java/third/images/bramus/custom1_bar.gif"/><img src="java/third/images/bramus/custom1_box.gif"/><img src="java/third/images/bramus/percentImage.png"/><img src="java/third/images/bramus/percentImage_back1.png"/><img src="java/third/images/bramus/percentImage_back2.png"/><img src="java/third/images/bramus/percentImage_back3.png"/><img src="java/third/images/bramus/percentImage_back4.png"/><img src="java/third/images/bramus/percentImage_back.png"/></div>
+
+<div id="javaappdiv" name="javasdiv" style="position:absolute; top:-200px; left:-200px; height:100px; width:100px;"></div>
+
+<script type="text/javascript">
+
+var opera=window.opera!=null;
+var ie=document.all != null && !opera;
+var moz = !ie && document.getElementById != null && document.layers == null && !opera;
+
+///////////////
+window.testoutputready = function(test) {
+ var javaappdiv=document.getElementById("myappletid");
+ if(!javaappdiv) { return false; }
+ var testbrows=false;
+ if(moz) { 
+  testbrows=typeof javaappdiv.isActive=="function"; 
+  if(!testbrows) { try { testbrows=(typeof javaappdiv.isActive!="undefined" && typeof javaappdiv.isActive()=="boolean"); } catch(e) { } }
+ } else if(opera) { testbrows=typeof javaappdiv.isActive()=="boolean"; } 
+ else if(ie) { testbrows=(typeof javaappdiv.isActive=="boolean") || (typeof javaappdiv.isActive!="undefined" && typeof javaappdiv.isActive()=="boolean"); }
+ if(testbrows && javaappdiv.isActive()) { if(test) { return javaappdiv.getoutputready(); } else { return true; } } 
+ else { return false; }
+}
+
+function butwait() {
+ var mybut=document.getElementById("mainbut").style;
+ mybut.display="block";
+}
+
+function butunwait() {
+ var mybut=document.getElementById("mainbut").style;
+ mybut.display="none";
+}
+
+var myopt = "0";
+//////////////////////////
+function BtnConnectscript() {
+ jwtsclickLinkAfter();
+
+ if(document.getElementById("mainbut").style.display!="none" || document.getElementById("mybar").style.display!="none") { return false; }
+ butwait();
+
+ var addedtest="<applet alt=\"You do not have Java activated or installed\" id=\"myappletid\" width=\"200\" height=\"200\" name=\"Remote Connect\" align=\"top\" code=\"testjava.class\" archive=\"java/printset.jar\">"+
+ "<param name=\"code\" value=\"printset.class\">"+
+ "<param name=\"archive\" value=\"java/printset.jar\">"+
+ "<param name=\"cabbase\" value=\"\">"+
+ "<param name=\"option\" value=\"" + myopt + "\">"+
+ "<\/applet>";
+ document.getElementById("javaappdiv").innerHTML=addedtest;
+
+ var myinterval=2;
+ var maximalinterval=180;
+ var valdefined=maximalinterval/myinterval;
+ var valchecking=0;
+ iv1 = setInterval(function () { 
+	if(testoutputready(true)) { 
+		butunwait(); 
+		clearInterval(iv1); 
+		window.setTimeout("window.close();",1000); 
+	} else { 
+		if(!testoutputready(false)) { valchecking++; }
+		if(valchecking >= valdefined) {
+		 clearInterval(iv1);
+		 alert("Attention, time of " + maximalinterval + " seconds exceeded!\nProbably you have not installed or activated Java\non your system or you did not accept the certificate!");
+		 window.innerHeight=screen.availHeight;
+		 window.innerWeidth=screen.availWidth;
+		 window.resizeTo(screen.availWidth,screen.availHeight);
+		 window.moveTo(0,0);
+		 document.location.href="http://java.com/download/";
+		} 
+	}
+ }, myinterval*1000);
+}//end function
+</script>
+<center>
+<table>
+<tr>
+<td>
+<img id="mainbut" style="display:none;" src="java/img/ladebalken.gif"><span id="mybar" style="display:none;">1%</span>
+</td>
+</tr>
+<tr>
+<td>
+<div id="percenttext" name="percentagetext" style="font-family: Verdana; font-size: 10px; color: #0000FF; font-weight:bold;"></div>
+</td>
+</tr>
+</table>
+</center>
+
+</body>
+</html>

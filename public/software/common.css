@@ -1,0 +1,247 @@
+﻿body {
+    margin: 0;
+    padding: 0;
+    font-family: Verdana, Arial;
+    font-size: 12px;
+}
+
+#container {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    text-align: center;
+}
+
+#header {
+    text-align: center;
+    font-size: 13px;
+}
+
+#content {
+    width: 791px;
+    margin: 70px auto 0 auto;
+}
+
+#footer {
+    text-align: center;
+}
+
+#formcontent {
+    position: relative;
+    left: -8px;
+    margin: 0 auto;
+    width: 330px;
+    padding-top: 1px;
+    color: #EAF4FF;
+}
+
+#formfooter {
+    height: 10px;
+}
+
+#accesstypeuserpanel {
+    text-align: center;
+    display: none;
+    margin: 0 auto;
+    width: 330px;
+}
+
+#accesstypeuserpanel label {
+    display: none;
+}
+
+#form h1 {
+    font-size: 22px;
+    color: #ffffff;
+    margin-bottom: 10px;
+    margin-top: 4px;
+}
+
+img {
+    border: 0;
+}
+
+label {
+    display: inline-block;
+    width: 83px;
+    text-align: right;
+    padding-right: 10px;
+}
+
+input[type="text"], input[type="password"] {
+    width: 200px;
+}
+
+select {
+    width: 204px;
+}
+
+h1 {
+    font-weight: normal;
+    font-size: 16px;
+}
+
+table {
+    border-spacing: 0px;
+}
+
+table, tr, td {
+    border: 0;
+}
+
+.td-icon {
+    width: 16px;
+}
+
+#buttonLogOn {
+    height: 30px;
+    width: 80px;
+}
+
+#tr-domain, #tr-password, #tr-verifypassword {
+    display: none;
+}
+
+#select-server {
+    display: none;
+}
+
+#span-login-ok, #span-password-ok, #span-login-ko, #span-password-ko, #span-credentials-ko, #span-twofa-ko {
+    display: none;
+}
+
+#span-credentials-ko {
+    color: red;
+    font-weight: bold;
+    padding-right: 50px;
+}
+
+#retype-password-input, #retype-password-label {
+    display: none;
+}
+
+#accesstypeuserpanel label {
+    width: auto;
+}
+
+.twofa-popin {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow: auto;
+    opacity: 0;
+    visibility: hidden;
+    color: black;
+    background-color: rgba(0,0,0,0.5);
+    -webkit-transition: all 0.4s ease;
+    -moz-transition: all 0.4s ease;
+    -ms-transition: all 0.4s ease;
+    -o-transition: all 0.4s ease;
+    transition: all 0.4s ease;
+}
+
+.twofa-popin h2 {
+    margin-top: 0;
+}
+
+.twofa-popin p {
+    margin-top: 0;
+}
+
+.twofa-popin input {
+    color: black;
+    border: 1px solid #000000;
+    margin-left: 40px;
+    text-align: center;
+}
+
+.twofa-popin input[type="button"] {
+    background: #FFFFFF;
+    display: block;
+    margin-top: 5px;
+}
+
+.twofa-popin:target {
+    opacity: 1;
+    visibility: visible;
+}
+
+.twofa-popin .sp-table {
+    display: table;
+    height: 100%;
+    width: 100%;
+}
+
+.twofa-popin .sp-cell {
+    display: table-cell;
+    vertical-align: middle;
+    padding: 10px;
+}
+
+.twofa-popin .sp-body {
+    z-index: 1;
+    min-width: 425px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 2em;
+    -webkit-box-shadow: 0 3px 5px 1px rgba(0,0,0,0.25);
+    box-shadow: 0 3px 5px 1px rgba(0,0,0,0.25);
+    width: 30%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.twofa-popin .sp-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 36px;
+    height: 36px;
+    text-align: center;
+    line-height: 36px;
+    font-size: 1.6em;
+    color: #000000;
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.twofa-popin input.invalid {
+    border-color: #900;
+    background-color: #FDD;
+}
+
+.twofa-popin input.invalid {
+    border-color: #900;
+    background-color: #FDD;
+}
+
+.twofa-popin input:focus.invalid {
+    outline: none;
+}
+
+.twofa-popin .error {
+    padding: 0;
+    font-size: 90%;
+    color: white;
+    background-color: #900;
+    border-radius: 0 0 5px 5px;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    display: inline-block;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 40px;
+}
+
+.twofa-popin .error.active {
+    padding: 0.3em;
+}
+
+.twofa-popin #twofaqrcode {
+	height: 250px;
+	width: 250px;
+}

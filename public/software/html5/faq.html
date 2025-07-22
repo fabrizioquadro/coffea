@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <style type="text/css">
+        body {
+            width: 100%;
+            height: 100%;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            font-family: Arial;
+            font-size: 14px;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+<div style="position:relative; left: 10px; top: 10px;">
+<b name="answer_1" id="answer_1">1. Accessing Hyper-V or VNC</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+1. edit www\software\html5\settings.js -> W.server = "****";
+
+2. W.server = "hyperv:A6B1BF18-47FA-8635-9C7F-1A5F093A9805:127.0.0.1"; //for hyperv the preconnection id can be retrieved via task-manager(execute taskmgr.exe) -> details/processes -> vmwp.exe -> user name 
+   W.server = "vnc:127.0.0.1"; //for vnc
+   the usage of W.server is in such case only effective if you call page http://your-server.com/software/html5.html directly since overwritten by main portal. 
+
+3. alternatively you may use www\index.html -> var server = "****";
+   index.html overwrites settings.js->W.server despite of its initial content
+
+PS: if you do not want to setup W.server then by VNC connections you may use login on main portal vnc:\\dummy and as password either empty or your VNC admin pass 
+and by hyperv connections you may use as login on main portal hyperv:\\A6B1BF18-47FA-8635-9C7F-1A5F093A9805:YOUR_WINDOWS_LOGIN and as password your RDP hyperv pass.
+In such case as server IP is prefered only localhost/127.0.0.1
+VNC server instance is disabled by default for security reasons, also reenable with \webserver\settings.bin > disable_vnc=false
+</pre>
+
+<b name="answer_2" id="answer_2">2. Reread configuration</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+Some configuration files can be hot-refreshed without restarting server via html5 GUI
+1. on server side directly open page http://127.0.0.1/w0j3?settings.bin
+
+2. or http://127.0.0.1/w0j3?balance.bin or http://127.0.0.1/w0j3?printer.bin or http://127.0.0.1/w0j3?cert.jks
+
+3. for checking actually free available memory inside Java VM call http://127.0.0.1/w0j4
+
+PS: by default initial reconfiguration password is empty, so if you want to lock configuration rereading by password call link
+http://127.0.0.1/w0j3?dummy.bin@newconfigpass=mypassword
+
+For changing old password to new call link
+http://127.0.0.1/w0j3?dummy.bin@configpass=mypassword@newconfigpass=mylastnewpassword
+
+By changed password reconfiguration can only be called together with password
+http://127.0.0.1/w0j3?balance.bin@configpass=mypassword or http://127.0.0.1/w0j3?printer.bin@configpass=mypassword or http://127.0.0.1/w0j3?cert.jks@configpass=mypassword
+By mismatching of @configpass= with previous password the change will fail.
+
+To set initial configuration to non emtpy password open/edit(create) \webserver\settings.bin and as next/last line: configuration_pass="mypassword", in such case it can be set only once.
+</pre>
+
+<b name="answer_3" id="answer_3">3. Accessing html5 client under own subfolder</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+Example: you have domain my-domain.com and actually you access it by opening webpage on root directly by http://my-domain.com/
+Now you want to access it by http://my-domain.com/html5client
+1. create subfolder www\html5client
+
+2. in GUI choose new folder
+
+3. in step 2. you would lock root to www\html5client and make it still available under http://my-domain.com/, therefore you have to tell
+where is the real root, also "www". That is done by setting, how many sublevels the program should go back to find root.
+3.1. locate/open/edit \webserver\runwebserver.ini
+3.2. add -Dwwwroot=1 ...rest of the line...(always space separated) (=1 would mean 1 sublevel, by www\sublevel1\sublevel2\sublevel3\ that would mean -Dwwwroot=3)
+
+4. restart html5 in GUI
+
+Remark: by IIS/Apache even if you use not folder access but alias access that points to different root folder, you have to create exactly
+matching subfolder like in given example www\html5client and point IIS/Apache to that folder "www\html5client" instead just "www"
+</pre>
+
+<b name="answer_4" id="answer_4">4. Gateway function</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+In order to access many subservers via one main server-gateway following example:
+Gateway my-domain.com (IP 200.200.200.200)
+        |_SubServer 192.168.0.1 (in example intranet, but can be internet address too)
+        |_SubServer 192.168.0.2
+        |_SubServer 192.168.0.3
+1. html5 allows access on two different ways, mostly common way by subfolder.
+http://my-domain.com/~~srv1 (192.168.0.1) (the names are variable except leading ~~ string to process requests as fast as possible)
+http://my-domain.com/~~srv2 (192.168.0.2)
+http://my-domain.com/~~srv3 (192.168.0.3)
+
+2. or/and (can be mixed) second way by different domains, let's make example as above, but accessed by domain
+my-domain.com (200.200.200.200 -> 192.168.0.1)
+second.my-domain.com (200.200.200.200 -> 192.168.0.2)
+some-domain.com (200.200.200.200 -> 192.168.0.3)
+
+To setup it open/edit(create) \webserver\balance.bin and add following as for example above
+/~~srv1=192.168.0.1:80;
+/~~srv1=192.168.0.1:3389 RDPPORT;
+my-domain.com=192.168.0.1:80;
+my-domain.com=192.168.0.1:3389 RDPPORT;
+/~~srv2=192.168.0.2:80;
+/~~srv2=192.168.0.2:3389 RDPPORT;
+second.my-domain.com=192.168.0.2:80;
+second.my-domain.com=192.168.0.2:3389 RDPPORT;
+/~~srv3=192.168.0.3:80;
+/~~srv3=192.168.0.3:3389 RDPPORT;
+some-domain.com=192.168.0.3:80;
+some-domain.com=192.168.0.3:3389 RDPPORT;
+
+For cases with forwarding to specific folder
+http://my-domain.com/ -> c:\www\folder1
+http://second.my-domain.com/ -> c:\newwww\example
+http://some-domain.com/ -> c:\whatever
+or via subfolder 
+http://my-domain.com/~~somesub1 -> c:\www\folder1
+http://my-domain.com/~~somesub2 -> c:\newwww\example
+http://my-domain.com/~~somesub3 -> c:\whatever
+insert
+/~~somesub1="c:\www\folder1";
+/~~somesub2="c:\newwww\example";
+/~~somesub3="c:\whatever";
+my-domain.com="c:\www\folder1";
+second.my-domain.com="c:\newwww\example";
+some-domain.com="c:\whatever";
+
+Notice: by usage of third web server like IIS/Apache the sub folder forwarding will be forwarded only internally, else you will need to remove this rule here
+and setup same rules insider your third part webserver.
+
+3. restart html5 in GUI or reread configuration http://127.0.0.1/w0j3?balance.bin
+</pre>
+
+<b name="answer_5" id="answer_5">5. Non gateway scenario for similar cases.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+Html5 solution is NOT LIMITED by usage of internal webserver, you can replace it by external webserver like IIS/Apache very easy and so
+include your actual infrastructure making it to support html5 and PHP/ASP/SQL thank to usage of third web server like IIS/Apache.
+
+1. in GUI switch to usage of third webserver 
+(usually the internal webserver starts on address 127.0.0.2:15367 and html5 forwards http requests from *:80/443 -> 127.0.0.2:15367, 
+so when you switch to third part webserver "IIS/Apache etc." this http forwarding will forward requests to your IIS/Apache webserver. By default GUI expects that you run
+IIS/Apache on 127.0.0.1:81 or 0.0.0.0:81, but technically you are unlimited in ports and address to forward, only GUI has internally such defaults)
+
+2. pick new folder according to IIS/Apache settings, the folder should also be the same where IIS/Apache are pointing according to their internal settings for www folder.
+
+3. by any such change restart html5 in GUI
+</pre>
+
+<b name="answer_6" id="answer_6">6. SNI (server name indication)</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+Html5 client has to be always first instance in network chain, it plays the role of SSL decrypter. 
+Even if you decide to use third web servers like IIS/Apache, the html5 instance has to be still the SSL decrypter,
+else no websocket connectivity will be available. The html5 instance has to decrypt it to distinguish packets to be correctly forwarded.
+Let's assume you have 3 different domains pointing to same IP
+my-domain.com (200.200.200.200 -> 127.0.0.1)
+second.my-domain.com (200.200.200.200 -> 127.0.0.1)
+some-domain.com (200.200.200.200 -> 127.0.0.1)
+
+In order to serve different certificates according to domain name do following.
+
+1. create subfolder "multicerts" under "webserver" folder.
+
+2. rename *.jks files for example above
+https://my-domain.com/ > ***\webserver\multicerts\my-domain.com.jks
+https://second.my-domain.com/ > ***\webserver\multicerts\second.my-domain.com.jks
+https://some-domain.com/ > ***\webserver\multicerts\some-domain.com.jks
+
+(if you have multidomain certificate *.my-multidomain.com and want to serve this certificate
+for all domains ending with .my-multidomain.com inclusive my-multidomain.com then add leading point to jks certificates name
+https://****.my-multidomain.com/ > ***\webserver\multicerts\.my-multidomain.com.jks)
+
+3. restart html5 in GUI or reread configuration http://127.0.0.1/w0j3?cert.jks
+
+In such case when ever you access
+https:\\my-domain.com, https:\\second.my-domain.com or https:\\some-domain.com you will get different certificates served 
+(however this requires SNI support by browser, but all modern browsers support it for longer time)
+For other unrecognized (not in "multicerts" folder) domains the default \webserver\cert.jks will be served
+This SNI feature makes sense only for authority signed certificates, for self signed certificates one such cert is enough, 
+since it makes no sense to serve different self signed certs.
+</pre>
+
+<b name="answer_7" id="answer_7">7. Any TCP application gateway - HTTPS proxy</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+Let's assume you want to access sub servers behind gateway by your application.
+The server is able to play the role of HTTPS Proxy. To allow it you have firstly to create filter 
+
+1. open/edit(create) \webserver\balance.bin and add following as example
+192.168.2.2:3389;
+your-wished-domain:443;
+etc..
+If you want to allow access on any port
+192.168.2.2:*;
+your-wished-domain:*;
+If you want to use basic auth (others are unsupported)
+192.168.2.2:3389 (login:pass);
+your-wished-domain:* (login:pass);
+(login/pass option was checked to work with SockCaps64 only)
+
+2. in your application as HTTPS proxy give the address of HTML5 gateway with listening port (default 443)
+
+3. if your application does not support HTTPS proxy you may use ProxyCap(shareware) 
+or SockCaps64(freeware https://www.sockscap64.com/) to enforce your applications to reroute traffic via HTTPS proxy
+As example mstsc.exe could access subservers behind gateway without gateway role by usage of these applications, 
+but gateway must still access subservers directly.
+
+To drop failded connects immediatelly open/edit(create)/add to \webserver\settings.bin -> drop_failed_connect=true
+To log the CONNECT tries open/edit(create)/add to \webserver\settings.bin -> enable_connect_log=true
+</pre>
+
+<b name="answer_8" id="answer_8">8. Bind server to specified address rather than 0.0.0.0</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+bind_nic = "127.0.0.3", "127.0.0.4" 
+It will bind default ports 80/443 to 127.0.0.3 + 127.0.0.4 in this example, and additionally for compatibility reasons it will bind to 127.0.0.1 too
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+</pre>
+
+<b name="answer_9" id="answer_9">9. Disable Universal Printer polling</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default Universal Printer is old printing way and requires one thread more per client, also more CPU/memory usage, to disable it and use Virtual Priner only
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+disable_print_polling=true
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+</pre>
+
+<b name="answer_10" id="answer_10">10. Allow only specified servers for RDP access for improving security</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+1. open/edit(create) \webserver\rdplist.bin
+2. add line separated as example 
+127.0.0.1:3389
+192.168.2.1
+etc.
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?rdplist.bin
+
+PS: if *\webserver\rdplist.bin is non empty and \webserver\settings.bin > disable_internet_servers=false
+was set then intranet and local IPs will be not accepted too else such IPs are accepted additionally to content of rdplist.bin
+</pre>
+
+<b name="answer_11" id="answer_11">11. Reenable remote RDP/VNC internet IP servers</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default non intranet RDP/VNC IPs (except 192.168.*.*, 10.*.*.*, 172.16-32.*.*, 127.*.*.*) are disabled to be accessed to avoid security risk
+that your gateway could be potentially reused to access unknown RDP/VNC servers outside of your intranet/local network.
+To reenable it to accept any IP do following
+
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+disable_internet_servers=false
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+
+However the option "10. Allow only specified servers for RDP access for improving security"
+allows more fine tuning and is better approach to control verified servers.
+</pre>
+
+<b name="answer_12" id="answer_12">12. Disable http only</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default you may access http as good https, to auto forward to https
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+disable_http_only=true
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+
+For fine tuning allowed are as example disable_http_only="domain.com:4431" or disable_http_only="domain.com"
+In that case the given address will be used to forward to https://domain.com:4431 or https://domain.com as in given example
+</pre>
+
+<b name="answer_13" id="answer_13">13. Disable http on https</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default it is allowed to access https://my-domain.com, https://my-domain.com:80, http://my-domain.com:443
+So it allows http on port 443 or allow https on port 80, it does not have impact on security and makes it easy to fallback to degraded xhr-connection when no websockets support is possible
+But if wished to disable it forcibly edit
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+disable_http_on_https=true
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+
+PS: even if it makes no sense due lesser security but wished to disable ssl/https on http port then open/edit(create) \webserver\settings.bin > disable_ssl_on_http=true
+</pre>
+
+<b name="answer_14" id="answer_14">14. Enable hsts</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default it is disbaled, because some customers still accessed http://links from https://pages for same domain
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+enable_hsts_https=true
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+</pre>
+
+<b name="answer_15" id="answer_15">15. By default RDP uses strongest available protocol, level1=RDP encryption, level2=SSL encryption, level3=SSL encryption + NTLM auth(CredSSP)</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+If experienced issue with level2/level3 to disable it
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+enabled_rdp_ssl=false  (stands for level2)
+enabled_rdp_credssp=false  (stands for level3)
+You can disable it separately or all together, disabling level2 automatically disables level3, since level3 requests SSL encryption anyway
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+</pre>
+
+<b name="answer_16" id="answer_16">16. CGI disable</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default http://server.com/cgi-bin/ will execute cgi scripts, to disable it
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+disable_cgi=true
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+</pre>
+
+<b name="answer_17" id="answer_17">17. Disable RDP compression</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default strongest compression is used by RDP level 6.1, to disable it
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+disable_rdp_compression=true
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+</pre>
+
+<b name="answer_18" id="answer_18">18. Disable non native clients</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default everything is enabled for fallback and best compatibility, but to avoid connection of clients with fallback strategy that do not 
+support native level of rdp processing due lacking on old browser necessary support, to disable such client support
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+disable_non_native_clients=true
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+</pre>
+
+<b name="answer_19" id="answer_19">19. Disable shared folder forcibly</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default shared folder access can be enabled/disabled via www/software/html5/settings.js -> W.sharedfolder
+To disable it so that it can not be affected via www/software/html5/settings.js
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+disable_shared_folder=true
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+</pre>
+
+<b name="answer_20" id="answer_20">20. Own origin for clipboard and regular webserver links.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default when requesting web links and/or clipboard data as origin is always used *. To change that
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+web_origin="https://your_domain"
+or/and
+clip_origin="https://your_domain"
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+
+For auto origin setting use web_origin="+" or/and clip_origin="+"
+In such case it will be extracted from header Origin if existing, or if not existing, then from header Host of http request.
+</pre>
+
+<b name="answer_21" id="answer_21">21. Mutual auth on SSL</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+To understand what that is in comparison to normal SSL is the extra check of browser if browser is authorized to create SSL connection.
+The default browser behaviour by accessing https://server.com server is to check if server is autorized instance for browser, and by mutual auth additionally to previous step 
+the server self after being autorized by  browser plays the role of browser and checks back if browser is autorized too. Also they both check them vice versa for being authorized.
+That mutual auth step requests installation of matching keypair into browsers repository so that browser can be autorized by server.
+To make it all working
+1. open/edit(create) \webserver\settings.bin 
+
+2. add following
+force_mutual_auth_on_https=true
+disable_http_only=true
+
+3. copy actual \webserver\cert.jks somewhere else just for case of backup
+
+4. create batch file in same folder with \webserver\cert.jks, as example \webserver\createcertuser.bat with following content, at least for test
+@rem uncomment next line, if you want to generate new self signed cert.jks
+@rem keytool -genkey -v -alias jwts -keyalg RSA -validity 3650 -keystore cert.jks -storepass secret -keypass secret -dname "CN=localhost, OU=my_ou, O=my_org, L=my_city, ST=my_state, C=MY"
+@keytool -genkey -v -alias AliasUser1 -keyalg RSA -storetype PKCS12 -keystore forBrowserUser1.p12 -dname "CN=Mr. Wagner, OU=some_ou, O=some_org, L=Paris, ST=UK, C=FR" -storepass mypassword -keypass mypassword
+@keytool -export -alias AliasUser1 -keystore forBrowserUser1.p12 -storetype PKCS12 -storepass mypassword -rfc -file forCertUser1.cer
+@keytool -alias AliasCertUser2 -import -v -file forCertUser1.cer -keystore cert.jks -storepass secret
+@del forCertUser1.cer
+
+It will also import automatically the cert of browsers keypair into cert.jks after creating this browsers keypair
+(but not browsers keypair self, it will not be imported into cert.jks, since not necessary to be imported on server, but only on browser)
+keytool.exe is part of Java JDK, so possibly you will need to install Java JDK firstly to be able to use this tool
+
+5. the batch example should have generated test file forBrowserUser1.p12 in step 3.
+If you open in browser the https page for first time, you will get security message and you will be unable to access webserver pages.. 
+For Chrome and IE it is enough to click on this forBrowserUser1.p12 file and import into Windows default keystore, as soon you imported it, you will be able to access https address.
+By FireFox you have to go to settings and import this file under your certificates
+about:preferences#advanced
+only so you will be able to open it on FireFox.
+
+administrator could create for each user separate keypair, that would add extra logon security level
+forBrowserUser1.p12
+forBrowserUser2.p12
+forBrowserUser3.p12
+export their certificates into cert.jks, and if some one should stop to be able to access webserver, 
+just delete this user from cert.jks and voila, the user will loose his authorization and not anymore being able to access server.
+
+6. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin and after http://127.0.0.1/w0j3?cert.jks
+</pre>
+
+<b name="answer_22" id="answer_22">22. Send and receive messages to browser and to server vice versa</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+1. Locate httpwebs*.jar > keymaps\src.zip > client.au3 and server.au3 or client_server_once.au3
+
+2. Download AutoIt
+
+3. Compile scripts to executables and execute inside session.
+
+4. For other steps/usage check *.au3 files
+</pre>
+
+<b name="answer_23" id="answer_23">23. Reverse proxy with Apache 2.2 Webserver and higher</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+You can setup Apache to work as intermediate SSL and Webserver processing instance with reverse proxy functionality.
+In this scenario Apache will be first instance in the chain before html5.
+
+Remember, Apache is third part software where we can not guaranty you that Apache's reverse proxy will meet fully all requirements.
+Therefore it is preferable that html5 is first instance in the chain and plays the role of reverse proxy.
+Use this scenario only when HTML5 can not process as first instance in your specific network environment.
+
+1. Locate www\software\html5\settings.js
+
+2. Go sure following variable is set to false > W.xhrreverse = false;
+
+2. install Apache 2.2 and higher with proxy_wstunnel support
+By old versions no WebSockets are possible 
+(in such case set W.xhrreverse = true; this will enforce slow xhr compatiblity mode)
+
+3. allow in Apache config (httpd.conf etc.) following modules.
+LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+LoadModule proxy_wstunnel_module modules/mod_proxy_wstunnel.so
+
+4. let's assume you want to access html5 main portal via subfolder "/html5/"
+As example
+http://your_ip_or_domain.net/html5/
+And Tsplus is installed in intranet on server "intranetxyz" (or it could be 127.0.0.1 if Apache runs locally on same sever with html5)
+then add to the config (httpd.conf etc.) following
+
+##
+##
+ProxyPass /html5 http://intranetxyz:80
+ProxyPassReverse /html5 http://intranetxyz:80
+
+&ltLocation "/html5/socket.io/websocket_https"&gt
+  ProxyPass "ws://intranetxyz:80/socket.io/websocket_https"
+&lt/Location&gt
+
+&ltLocation "/html5/socket.io/websocket"&gt
+  ProxyPass "ws://intranetxyz:80/socket.io/websocket"
+&lt/Location&gt
+
+&ltLocation "/html5/socket.io/flashsocket_https"&gt
+  ProxyPass "ws://intranetxyz:80/socket.io/flashsocket_https"
+&lt/Location&gt
+
+&ltLocation "/html5/socket.io/flashsocket"&gt
+  ProxyPass "ws://intranetxyz:80/socket.io/flashsocket"
+&lt/Location&gt
+##
+##
+
+5. Restart Apache to take changes effect.
+
+If you run Apache on same server with html5 then you should setup for html5 different ports to not make them to conflict with each other.
+Let's assume you run Apache on ports 80 and 443, then setup html5 to run as example on ports 808 and 4433, in such case config could look following.
+
+##
+##
+ProxyPass /html5 http://127.0.0.1:808
+ProxyPassReverse /html5 http://127.0.0.1:808
+
+&ltLocation "/html5/socket.io/websocket_https"&gt
+  ProxyPass "ws://127.0.0.1:4433/socket.io/websocket_https"
+&lt/Location&gt
+
+&ltLocation "/html5/socket.io/websocket"&gt
+  ProxyPass "ws://127.0.0.1:808/socket.io/websocket"
+&lt/Location&gt
+
+&ltLocation "/html5/socket.io/flashsocket_https"&gt
+  ProxyPass "ws://127.0.0.1:4433/socket.io/flashsocket_https"
+&lt/Location&gt
+
+&ltLocation "/html5/socket.io/flashsocket"&gt
+  ProxyPass "ws://127.0.0.1:808/socket.io/flashsocket"
+&lt/Location&gt
+##
+##
+
+PS: Apache's reverse-proxy Websockets solution doesn't work in conjunction with HTML5 reverse proxy forwarding "/~~***" by using rules above, 
+since Websockets is not HTML conform data flow. That means following link won't work http://your_server.com/html5/~~srv1/ when creating 
+Websockets connection. For each HTML5 balance.bin rule "/~~***" you have to add extra rule as in following example
+#
+#
+&ltLocation "/html5/~~srv1/socket.io/websocket"&gt
+  ProxyPass "ws://127.0.0.1:808/~~srv1/socket.io/websocket"
+&lt/Location&gt
+#
+#
+</pre>
+
+<b name="answer_24" id="answer_24">24. Reverse proxy with Microsoft IIS 8 Webserver and higher</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+You can setup IIS 8 to work as intermediate SSL and Webserver processing instance with reverse proxy functionality.
+In this scenario IIS will be first instance in the chain before html5.
+
+Remember, IIS is third part software where we can not guaranty you that IIS reverse proxy will meet fully all requirements.
+Therefore it is preferable that html5 is first instance in the chain and plays the role of reverse proxy.
+Use this scenario only when html5 can not process as first instance in your specific network environment.
+
+1. Locate www\software\html5\settings.js
+
+2. Go sure following variable is set to false > W.xhrreverse = false;
+
+3. Install IIS 8 or higher, older IIS will fail. In roles install Websockets support!
+Important, you should activate Websockets role in IIS 8 installation packet!
+By old versions no WebSockets are possible 
+(in such case set W.xhrreverse = true; this will enforce slow xhr compatiblity mode)
+
+4. Download and/or install URL Rewrite Module 2.0 
+(Google for link, if URL Rewrite is not listed in your install packet)
+
+5. Download and/or install Application Request Routing 3.0 (ARR v3.0 or higher) 
+(Google for link, if Application Request Routing is not listed in your install packet)
+
+6. let's assume you want to access html5 main portal via subfolder "/html5/"
+As example
+http://your_ip_or_domain.net/html5/
+And Tsplus is installed in intranet on server "intranetxyz" (or it could be 127.0.0.1 if IIS runs locally on same sever with html5)
+then locate your c:\inetpub\wwwroot\web.config file, or any other folder where you point to root folder, after put following
+
+&lt?xml version="1.0" encoding="UTF-8"?&gt
+&ltconfiguration&gt
+    &ltsystem.webServer&gt
+     &ltrewrite&gt
+      &ltrules&gt
+                &ltrule name="html5_1" stopProcessing="true"&gt
+                    &ltmatch url="^html5/socket.io/websocket_https(.*)" ignoreCase="false" /&gt
+                    &ltaction type="Rewrite" url="http://intranetxyz:80/socket.io/websocket_https{R:1}" /&gt
+                &lt/rule&gt
+                &ltrule name="html5_2" stopProcessing="true"&gt
+                    &ltmatch url="^html5/socket.io/websocket(.*)" ignoreCase="false" /&gt
+                    &ltaction type="Rewrite" url="http://intranetxyz:80/socket.io/websocket{R:1}" /&gt
+                &lt/rule&gt
+                &ltrule name="html5_3" stopProcessing="true"&gt
+                    &ltmatch url="^html5/socket.io/flashsocket_https(.*)" ignoreCase="false" /&gt
+                    &ltaction type="Rewrite" url="http://intranetxyz:80/socket.io/flashsocket_https{R:1}" /&gt
+                &lt/rule&gt
+                &ltrule name="html5_4" stopProcessing="true"&gt
+                    &ltmatch url="^html5/socket.io/flashsocket(.*)" ignoreCase="false" /&gt
+                    &ltaction type="Rewrite" url="http://intranetxyz:80/socket.io/flashsocket{R:1}" /&gt
+                &lt/rule&gt
+                &ltrule name="html5_5" stopProcessing="false"&gt
+                    &ltmatch url="^html5/(.*)" ignoreCase="false" /&gt
+                    &ltaction type="Rewrite" url="http://intranetxyz:80/{R:1}" /&gt
+                &lt/rule&gt
+      &lt/rules&gt
+     &lt/rewrite&gt
+    &lt/system.webServer&gt
+&lt/configuration&gt 
+
+7. Save this file
+
+8. Go to URL Rewrite module and go sure the new settings are refreshed and displayed.
+If not refreshed, then create empty dummy rule, then delete this rule and locate the new settings file, after repeat step 6. 
+
+9. Now go to Application Request Routing Cache > Server proxy settings... (in right column)
+
+10. Choose Enable Proxy, HTTP version > Pass through(leave if already set), choose Keep alive (leave if already set), the rest leave unchanged.
+
+11. Restart IIS Webserver
+
+If you run IIS on same server with html5 then you should setup for html5 different ports to not make them to conflict with each other.
+Let's assume you run IIS on ports 80 and 443, then setup html5 to run as example on ports 808 and 4433, in such case config could look following.
+
+&lt?xml version="1.0" encoding="UTF-8"?&gt
+&ltconfiguration&gt
+    &ltsystem.webServer&gt
+     &ltrewrite&gt
+      &ltrules&gt
+                &ltrule name="html5_1" stopProcessing="true"&gt
+                    &ltmatch url="^html5/socket.io/websocket_https(.*)" ignoreCase="false" /&gt
+                    &ltaction type="Rewrite" url="http://127.0.0.1:4433/socket.io/websocket_https{R:1}" /&gt
+                &lt/rule&gt
+                &ltrule name="html5_2" stopProcessing="true"&gt
+                    &ltmatch url="^html5/socket.io/websocket(.*)" ignoreCase="false" /&gt
+                    &ltaction type="Rewrite" url="http://127.0.0.1:808/socket.io/websocket{R:1}" /&gt
+                &lt/rule&gt
+                &ltrule name="html5_3" stopProcessing="true"&gt
+                    &ltmatch url="^html5/socket.io/flashsocket_https(.*)" ignoreCase="false" /&gt
+                    &ltaction type="Rewrite" url="http://127.0.0.1:4433/socket.io/flashsocket_https{R:1}" /&gt
+                &lt/rule&gt
+                &ltrule name="html5_4" stopProcessing="true"&gt
+                    &ltmatch url="^html5/socket.io/flashsocket(.*)" ignoreCase="false" /&gt
+                    &ltaction type="Rewrite" url="http://127.0.0.1:808/socket.io/flashsocket{R:1}" /&gt
+                &lt/rule&gt
+                &ltrule name="html5_5" stopProcessing="false"&gt
+                    &ltmatch url="^html5/(.*)" ignoreCase="false" /&gt
+                    &ltaction type="Rewrite" url="http://127.0.0.1:808/{R:1}" /&gt
+                &lt/rule&gt
+      &lt/rules&gt
+     &lt/rewrite&gt
+    &lt/system.webServer&gt
+&lt/configuration&gt 
+</pre>
+
+<b name="answer_25" id="answer_25">25. Lock on the fly reconfiguration.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default you may init reconfiguration by calling http link as example http://127.0.0.1/w0j3?settings.bin 
+or http://127.0.0.1/w0j3?cert.jks or http://127.0.0.1/w0j3?balance.bin etc.
+To disable it
+1. locate/open/edit \webserver\runwebserver.ini
+2. add -Dlockconfig=balance.bin,settings.bin,cert.jks ***the rest of line*** 
+   All configuration files are comma separated 
+3. restart html5 via GUI
+From now on all disabled configuration files can not be anymore reloaded by http request, but html5 restart required.
+
+Known config files that can be changed on the fly: balance.bin, settings.bin, cert.jks, printer.bin, headers.bin, rdgp.bin, rdplist.bin, third.bin
+(tls.bin is bound to cert.jks, therefore by any changes on ssl filter rules in tls.bin you need to reread cert.jks)
+</pre>
+
+<b name="answer_26" id="answer_26">26. HTML5 full screen.</b>
+<div style="position:relative; left: 10px; top: 0px;">
+<pre>
+In order to support full screen mode the server has to support either on-the-fly-resizing or reconnection-on-resize or be prepared for fullscreen mode.
+On-the-fly-resizing requests support of dynamic channels with Display channel that is available in newer Windows systems like Windows2012R2, Windows10 etc.
+
+<b>Server supports on-the-fly-resizing (dynamic Display channel)</b>
+</pre>
+<div style="position:relative; left: 10px; top: 0px;">
+<pre>
+1. no future configuration needed, the full screen button will be present in top menu, if not forcibly disabled (*\settings.js -> W.showfullscreenbutton = "no")
+
+2. even if server supports on-the-fly-resizing you still may configure/edit www\software\html5\settings.js -> W.full_screen = 2;
+   in this case the session will take from start the fully available screen size and will not anymore change it self during resizing.
+</pre>
+</div>
+
+<pre>
+<b>Server doesn't support on-the-fly-resizing (old systems like Windows2008, Windows XP)</b>
+</pre>
+<div style="position:relative; left: 10px; top: 0px;">
+<pre>
+1. either you must configure/edit www\software\html5\settings.js -> W.reconnectonresize = true;
+   in this reconnect-on-resize mode the client will try to reconnect session with new dimensions, but highly not recommended
+   because if you run file transfer or sound gets played these actions will be interrupted.
+
+2. or you must configure/edit www\software\html5\settings.js -> W.full_screen = 2;
+   in this case the session will take from start the fully available screen size.
+
+Notice: if no one of these points above (W.reconnectonresize = true or W.full_screen = 2) is effective the full screen button will be deactivated. 
+</pre>
+</div>
+
+<pre>
+<b>Smartfit setting, only effective if server doesn't support on-the-fly-resizing or was preset to fullscreen (W.full_screen = 2)</b>
+</pre>
+<div style="position:relative; left: 10px; top: 0px;">
+<pre>
+1. by deafult www\software\html5\settings.js -> W.smartfit = true; is enabled. (* = 1)
+   in this case if rdp area overflows browser area the rdp area will be squeezed to fit browser area.
+
+2. or configure/edit www\software\html5\settings.js -> W.smartfit = false; to disable it. (* = 0)
+   in this case if rdp area overflows browser area then the browser tab will automatically display scroll bars.
+
+3. smartfit set to true or 1 squeezes the rdp area by underflowing, if you set it to 2 additionally it will stretch by overflowing.
+</pre>
+</div>
+
+<pre>
+<b>Full screen enforced with W.full_screen = 2; or W.full_screen = 1; </b>
+</pre>
+<div style="position:relative; left: 10px; top: 0px;">
+<pre>
+1. by default when using enforced full screen mode any click inside working area will switch automatically to full screen.
+   to disable it edit settings.js > W.allowOnclickFullScreen = false;
+</pre>
+</div>
+</div>
+
+<b name="answer_27" id="answer_27">27. Port 80 still bound by IIS service even after changing to port 81.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By using IIS as third server sometimes it is not possible to force IIS to stop using port 80, mostly caused by running Microsoft SQL server.
+To move Microsoft SQL from port 80 as example to port 81 do following.
+
+1. Open - Start > Programs > SQL Server 2008 R2 > Configuration Tools > Reporting Services Configuration Manager
+   Sometimes it is not exactly named so as described above but should be called similar
+2. Open - Web Service URL
+3. Change port as example to 81
+4. Open - Report Manager URL > Advanced
+5. Click on entry with port 80 > Edit
+6. Change the port to same as in step 3.
+</pre>
+
+<b name="answer_28" id="answer_28">28. Convert and import SSL certificate from *.key format.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+Sometimes signing authority sends the private key in domain_private.key/domain_cert.crt/CA.crt format that can not be imported with Portecle
+In such case you need OpenSSL for converting to pfx format and then import to cert.jks with Portecle.
+You must download OpenSSL binaries firstly
+https://wiki.openssl.org/index.php/Binaries or http://gnuwin32.sourceforge.net/packages/openssl.htm
+
+1. run openssl.exe pkcs12 -export -out full_key.pfx -inkey domain_private.key -in domain_cert.crt -certfile CA.crt
+   type as pass for export as example: secret 
+2. start new instance of portecle
+3. drop full_key.pfx to portecle > (if step 1. was skipped, use own pass else type pass as in our step 1. example: secret)
+4. Top-Menu > Tools > Change Keystore Type > JKS (case sensitive) > (if step 1. was skipped, use own pass else type pass as in our step 1. example: secret)
+5. Top-Menu > Tools > Change Keystore Type > JKS (unnecessary step, but do anyway)
+6. with RIGHT mouse click on private key entry > Set Password: secret
+7. Top-Menu > Tools > Set Keystore Password: secret
+8. Top-Menu > File > Save Keystore As > cert.jks
+9. locate old \webserver\cert.jks and replace it by new cert.jks
+10. restart html5 in GUI to make the change effective
+</pre>
+
+<b name="answer_29" id="answer_29">29. Convert and import SSL certificate from other Windows importable formats.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+Sometimes signing authority sends *.pfx/*.cer or other file formats that do not contain trust path, as result the key in cert.jks is not trusted. 
+Most peoples import all files they get from signing authority but Portecle is unable to create trust path automatically (or it is not done automatically).
+Remember *.jks is just a container format, you do not need to import extra certificates since they are not used for server instance
+but only for client instance (which is not used by html5 server). 
+The private key entry should contain full trust path, as example you see then in details of such private key in Portecle: Certificates 1 of 2, or 1 of 3, or 1 of 4 etc.
+To fix the trust path do following
+
+1. firstly import all certificates (usually *.cer/*.crt format) you get from authority into Windows keystore
+   just click on each file and press Install Certificate
+2. import private key (usually *.pfx/*.p12 format) by clicking on it
+   when you import the private key go sure you check check-boxes "Mark this key as exportable" and "Include all extended properties"
+3. start certmgr.msc
+4. open - Personal > Certificates
+5. right click on your freshly imported private key > All Tasks > Export
+6. choose > "yes, export the private key"
+7. (very important) check check-boxes "Include all certificates in the certification path if possible" and "Export all extended properties"
+   in this step Windows automatically includes certificates to trust path
+8. with saved *.pfx file you may proceed as described in faq.html#answer_28 (<b>28. Convert and import SSL certificate from *.key format.</b>) starting by step 2!
+</pre>
+
+<b name="answer_30" id="answer_30">30. Export SSL certificate from IIS store.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+The certificates store of IIS is different compared to store that you get by certmgr.msc
+
+1. start mmc.exe
+2. open - File > Add/Remove Snap-In > Certificates > Computer Account > Local Computer
+3. now you may proceed as described in faq.html#answer_29 (<b>29. Convert and import SSL certificate from other Windows importable formats.</b>) starting by step 4!
+
+Notice: if you are going to export already present SSL certificate from Windows store used by IIS, you may face the problem that "Export" entry is not clickable
+because "Mark this key as exportable" was not checked by importing that key. 
+In such case you must have administrator rights and use free tool called "Mimikatz" to export such keys from Windows keystore.
+</pre>
+
+<b name="answer_31" id="answer_31">31. Java VM memory on server to low: ***.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+If you get this error by starting html5 client according to your situation you get proposal either to install Java-64-bit or extend your RAM memory.
+Remember, any 32bit application can not access more than 4Gb RAM, but Java computes its maximal usable RAM amount so: Actual-Free-Physical-Memory / 4,
+also 25% of free physical memory. That means if you have 4Gb RAM / 4 = 1Gb only. But mostly the amount of free memory usable for 32bit applications
+is even lower. You can check it by calling link http://localhost/w0j4 but according to experience on Windows-64-bit with Java-32-bit this amount is mostly about ~250 Mb.
+<b>It makes sense to install Java-64-bit only if you have Windows-64-bit!</b>
+
+1. open link in browser https://java.com/en/download/manual.jsp
+2. download Windows Offline (64-bit)
+3. install Java-64-bit
+4. restart html5 server via GUI to make this change effective
+   (you can but you do not need to deinstall Java-32-bit since GUI will automatically prefer Java-64-bit instead its Java-32-bit version)
+
+There are cases when server has as example 30Gb RAM installed with Windows-32-bit, in such cases only what could help you is to upgrade to Windows-64-bit because 
+Windows-32-bit can not use more than 4Gb RAM and 1Gb of RAM is already used by Windows-System and so finally you have only 3Gb RAM usable with all consequences.
+</pre>
+
+<b name="answer_32" id="answer_32">32. Using logon tickets.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+Usually for logon the html5 clients reuse window.name variable but you can use ticket logon system to create own portal page with your specific logon scenario.
+
+1. without WebPassword, login only
+   http://your-server.com/socket.io/LPW?WinUser=your-user&WinPassword=your-password
+   http://your-server.com/software/html5.html?user=*xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+1.2. with WebPassword
+   http://your-server.com/socket.io/LPW?WinUser=your-user&WinPassword=your-password&WebPassword=your-webpassword
+   http://your-server.com/software/html5.html?user=*xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&pwd=your-webpassword
+
+1.3. with subserver access
+   http://your-server.com/~~subserver1/socket.io/LPW?WinUser=your-user&WinPassword=your-password
+   http://your-server.com/~~subserver1/software/html5.html?user=*xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+1.4. with domain
+   http://your-server.com/socket.io/LPW?WinUser=your-user&WinPassword=your-password&WinDomain=your-domain
+   http://your-server.com/software/html5.html?user=*xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   
+1.5. with cmdline
+   http://your-server.com/socket.io/LPW?WinUser=your-user&WinPassword=your-password&WinCmdline=your-cmd-line
+   (if &WinCmdline= provided empty the browser initial value will be deleted)
+
+1.6. since HTML5 7.92 with environment value set by webime channel to HTML5_ENV and HTML5_BASE64_UTF8_ENV
+   http://your-server.com/socket.io/LPW?WinUser=your-user&WinPassword=your-password&WinEnvvalue=your-env-value-for-webime-channel
+   (if &WinEnvvalue= provided empty the browser initial value will be deleted)
+
+1.7. since HTML5 7.92 with forbidding devices and functions: nofiletransfer,noclipboard,nosharedfolder,noctraltdel,noplaysound,noprint
+   http://your-server.com/socket.io/LPW?WinUser=your-user&WinPassword=your-password&WinNoaccess=nofiletransfer,noclipboard,nosharedfolder,noctraltdel,noplaysound,noprint
+
+2. if you experience issue with passing non-latin chars in the request you can send it as UTF-8 > Base64 encoded string
+   A. concatenate string: WinUser=your-user&WinPassword=your-password
+   B. firstly encode the string as UTF-8
+   C. then encode it as Base64
+   D. attach after ****/LPW?base64=
+      http://your-server.com/socket.io/LPW?base64=#####################################
+      http://your-server.com/software/html5.html?user=*xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+      Since version HTML5 7.90 it is possible to get plain text in response instead JavaScript header.
+      http://your-server.com/socket.io/LPW?base64nojs=#####################################
+
+      Since version HTML5 7.90 it is possible to send RSA encrypted string by runtime public key modulus and its exponent
+      E1. For most RSA implementations it is enough to get public modulus and exponent > modulus:exponent
+          http://your-server.com/socket.io/WCREDS?GetRuntimePublicModulusExponent
+          or public key "as is" containing information above
+          http://your-server.com/socket.io/WCREDS?GetRuntimePublicKey
+          By that runtime public key it is possible to encrypt by yourself sensitive data locally before sending over the line
+          Displayed data will be formatted as usual two chars hex data, modulus and exponent is separated by colon : char
+
+      E2. Before encrypting by yourself > encode your plain text as UTF-8, encrypt with runtime public key and encode as base64
+          Created so base64 string can be then passed by following example
+          http://your-server.com/socket.io/LPW?rsabase64nojs=############rsa_encrypted_utf-8_text_as_base64_encoded##############
+
+      E3. If you don't have own RSA_BASE64(UTF-8) implementation for LPW?rsabase64nojs=**** you can use following command
+          http://your-server.com/socket.io/WCREDS?EncryptByRuntimePublicKey=*****your_sensitive_data*****
+          however that makes no big sense since you still must send sensitive data to server to encrypt it but so at least you can test 
+          and compare your own RSA encryption to work correctly with HTML5 server.
+
+      E3.2. Alternatively you can pass sensitive data to encrypt as UTF-8>Base64 encoded string to go sure that all chars get encoded correctly
+            http://your-server.com/socket.io/WCREDS?EncryptByRuntimePublicKeyFromUTF8Base64=*****your_sensitive_data*****
+ 
+      E4. If you want to accept by LPW only RSA secured lines /LPW?rsabase64nojs=***** (or with JavaScript header in response /LPW?rsabase64=*****)
+          then add as last line to *\Clients\webserver\settings.bin > accept_lpw_only_rsa_secured=true
+ 
+    <b>Advanced security features</b>
+     In the file *\Clients\webserver\settings.bin add as last line
+     logon_type_allowance="1"  (or "2", or "3)
+
+     "1" means that both Web credentials or Token based URLs are allowed to open a session
+      The Windows credential based logon will be rejected.
+
+     "2" means that only the Web credentials are allowed to open a session
+      The Windows credential based logon and Token based URLs will be rejected.
+
+     "3" means that only Token based URLs are allowed to open a session
+      The Windows credential based logon and Web credentials logon will be rejected.
+
+    <b>Extended advanced security features</b>
+      Since version HTML5 5.75(check web_log.txt) the sensitive logon data for */html5.html can now be passed as hash.
+      http://your-server.com/software/html5.html#user=*xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&pwd=your-webpassword
+      http://your-server.com/software/html5.html?#user=*xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&pwd=your-webpassword
+      In such case this data won't be sent to server since anyway processed only locally in browser.
+      However hash approach is not allowed inside */socket.io/LPW?WinUser** since the data must be still passed 
+      to server so go sure you use https as protocol to avoid exposing sensitive data via unsecured line.
+
+3. Since version HTML5 6.37 you can use POST method to create ticket with "application/x-www-form-urlencoded" encoding only
+   If you use form go sure each passed variable WinUser, WinPassword, WinDomain etc. has own name="*" tag as in example below
+   If you use JavaScript way go sure the content is url encoded with encodeURIComponent and concatenated as string like in example below
+
+    <b>By form</b>
+      &ltform action="/socket.io/LPW" method="post"&gt
+        &ltp&gt&ltinput type="text" name="WinUser" value="TestUser"&gt&lt/p&gt
+        &ltp&gt&ltinput type="text" name="WinPassword" value="TestPass"&gt&lt/p&gt
+        &ltp&gt&ltinput type="submit" value="Send Form"&gt&lt/p&gt
+      &lt/form&gt
+
+    <b>By JavaScript</b>
+      &ltscript type="text/javascript"&gt
+        var byJS = function() {
+          var xhr = new XMLHttpRequest();
+          var WinUser = "TestUser";
+          var WinPassword = "TestPass";
+          var body = "WinUser=" + encodeURIComponent(WinUser) + "&WinPassword=" + encodeURIComponent(WinPassword);
+          xhr.open("POST", "/socket.io/LPW", true);
+          xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+          xhr.onreadystatechange = function(a) { 
+            if(xhr.readyState == 4) {
+              alert(xhr.responseText);
+            }
+          };
+          xhr.send(body);
+        };
+      &lt/script&gt
+      &ltinput type="submit" value="Send JS" onclick="byJS();"&gt&lt/p&gt
+
+4. Since version HTML5 7.88 you can now pass validity timeout in seconds for the ticket, by default 10 minutes in seconds > &WinTimeoutSeconds=120
+   http://your-server.com/socket.io/LPW?WinUser=your-user&WinPassword=your-password&WinDomain=your-domain&WinTimeoutSeconds=120
+
+   A: maximal timeout is 31 days in seconds or until server restart.
+
+   B: by default due security for using custom timeout only requests from localhost allowed, it can be controlled by 
+      \webserver\settings.bin > lpw_timeout_ip="-1"
+      means that no one IP allowed to set timeout
+
+      \webserver\settings.bin > lpw_timeout_ip="0"
+      means that localhost only source IP allowed (that is default value)
+
+      \webserver\settings.bin > lpw_timeout_ip="1"
+      means that intranet only source IPs allowed (192.168.*, 10.*, etc.)
+
+      \webserver\settings.bin > lpw_timeout_ip="2"
+      means that any source IP allowed
+
+   C: it is possible to add extra accepted IP or IPs (this option is not affected by "lpw_timeout_ip=" behavior!)
+      \webserver\settings.bin > lpw_timeout_list_ip="|44.33.22.11|"
+      or specific list of IPs
+      \webserver\settings.bin > lpw_timeout_list_ip="|44.33.22.11|55.44.33.22|75.45.33.99|127.0.0.1|"
+
+   D: Since version HTML5 7.90 you can set LPW accepting secret phrase in query string
+      add as last line to *\Clients\webserver\settings.bin > lpw_phrase="my_secret"
+      http://your-server.com/socket.io/LPW?WinUser=your-user&WinPassword=your-password&WinLPWphrase=my_secret
+      so only users knowing that phrase are allowed to add LPW tickets else such a ticket won't be registered
+
+5. Since version HTML5 7.89 you can now revoke any ticket so making it outdated.
+   http://your-server.com/socket.io/LPW?WinUser=your-user&WinDelUnique=*xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+   A: passing WinUser=*** to outdate the ticket is mandatory due security so that only creator of the ticket can revoke it.
+
+6. Since version HTML5 7.90 there are included helper tools that may be used for improving security with *\UserDesktop\files\webcredentials.ini
+   A: Following commands are already descibed above
+      http://your-server.com/socket.io/WCREDS?GetRuntimePublicModulusExponent
+      http://your-server.com/socket.io/WCREDS?GetRuntimePublicKey
+      these comands provide runtime RSA public key valid until next HTML5 server restart and can be only used for runtime encryption of tickets sensitive data.
+
+   B: Next commands provide one time generated RSA public key stored in *\Clients\webserver\creds.key
+      and it gets used for encryption of stored data in *\UserDesktop\files\webcredentials.ini
+      http://your-server.com/socket.io/WCREDS?GetPublicModulusExponent
+      http://your-server.com/socket.io/WCREDS?GetPublicKey
+      Displayed data will be formatted as usual two chars hex data, modulus and exponent is separated by colon : char
+
+   C: If you don't have own RSA_BASE64(UTF-8) implementation you can encrypt your data by following command
+      http://your-server.com/socket.io/WCREDS?EncryptByPublicKey=*****your_sensitive_data*****
+      So file originally could contain secured string counterpart
+      *\UserDesktop\files\webcredentials.ini
+        [demo]
+        WebPassword=sometest
+        WinUser=realuser
+        WinPassword=realpassword
+        [demo2]
+        WebPasswordSec=***sometest_encrypted***
+        WinUserSec=***realuser_encrypted***
+        WinPasswordSec=***realpassword_encrypted***
+        [demo3]
+        WebPassword=sometest
+        WinUser=realuser
+        WinPasswordSec=***realpassword_encrypted***
+
+   C.2: Alternatively you can pass sensitive data to encrypt as UTF-8>Base64 encoded string to go sure that all chars get encoded correctly
+        http://your-server.com/socket.io/WCREDS?EncryptByPublicKeyFromUTF8Base64=*****your_sensitive_data*****
+
+   C.3: Since version HTML5 7.92 you can now add additional variables to *\UserDesktop\files\webcredentials.ini
+        (if WinEnvvalue= or WinCmdline= are provided empty the browser initial values will be deleted)
+        [demo4]
+        WebPassword=
+        WinUser=realuser
+        WinPassword=realpassword
+        WinNoaccess=nofiletransfer,noclipboard,nosharedfolder,noctraltdel,noplaysound,noprint
+        WinEnvvalue=your-env-value-for-webime-channel        
+
+   D: additionally you can call encryption from a command line under folder cmd.exe > *\Clients\webserver\ 
+      1. by following example you must firstly UTF-8 encode passed text and then encode it as Base64 indicated by parameter "utf-8_base64"
+      @"..\..\Java\bin\HTML5service.exe" -cp "httpwebs.jar" "com.wcreds" "utf-8_base64" "****your_data_utf-8_and_base64_encoded****">enc.txt
+      so parameter "utf-8_base64" tells to decode passed text firstly from Base64 and then from UTF-8 before final RSA encrypting.
+
+      2. if you want verbose option to go sure you correctly encoded UTF-8 Base64 string so use "@utf-8_base64"
+      @"..\..\Java\bin\HTML5service.exe" -cp "httpwebs.jar" "com.wcreds" "@utf-8_base64" "****your_data_utf-8_and_base64_encoded****">enc.txt
+      in such case with "@utf-8_base64" you will see your text provided decoded as Base64>UTF-8 before being encrypted
+
+      3. if you want to encrypt by systems default chars table then provide only one parameter that will be your text to encrypt
+      @"..\..\Java\bin\HTML5service.exe" -cp "httpwebs.jar" "com.wcreds" "****your_data_to_encrypt****">enc.txt
+      chars not present in your systems default chars table can't be correctly passed by cmd.exe command line (usually displayed ? instead)
+
+7. Since version HTML5 7.91 you can now compare encrypted text with its supposed plain password, by equality output will be OK else KO
+   A: Passing encrypted by public key text supposed to be compared and password as plain text (for *\UserDesktop\files\webcredentials.ini)
+      http://your-server.com/socket.io/WCREDS?CompareByPublicKeyEncrypted=*****your_encrypted_data_to_compare*****&PlainData=*****your_sensitive_data*****
+
+   A.2: Alternatively passing encrypted by public key text supposed to be compared and password as UTF-8>Base64 encoded string (for *\UserDesktop\files\webcredentials.ini)
+      http://your-server.com/socket.io/WCREDS?CompareByPublicKeyEncrypted=*****your_encrypted_data_to_compare*****&PlainDataUTF8Base64=*****your_sensitive_data_as_ut8_base64*****
+
+   B: Passing encrypted by runtime public key text supposed to be compared and password as plain text (for LPW tickets)
+      http://your-server.com/socket.io/WCREDS?CompareByRuntimePublicKeyEncrypted=*****your_encrypted_data_to_compare*****&PlainData=*****your_sensitive_data*****
+
+   B.2 Alternatively passing encrypted by runtime public key text supposed to be compared and password as UTF-8>Base64 encoded string (for LPW tickets)
+      http://your-server.com/socket.io/WCREDS?CompareByRuntimePublicKeyEncrypted=*****your_encrypted_data_to_compare*****&PlainDataUTF8Base64=*****your_sensitive_data_as_ut8_base64*****
+</pre>
+
+<b name="answer_33" id="answer_33">33. Fixed width/height on PC browser</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+If you wish fixed width/height on PC browser despite of real browser area size 
+
+1. open/edit www\software\html5\settings.js 
+2. and add/save as example > W.fixedWidthHeight = function() { W.preferwidth = 800; W.preferheight = 600; W.smartfit = 2; }();
+
+Notice: that is PC only feature and does not affect mobile devices, W.smartfit = 2 will squeeze or stretch the resoliution of RDP area (800x600 in this example) to browsers area.
+</pre>
+
+<b name="answer_34" id="answer_34">34. Change initial resolution on mobile device</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+If you wish initial resolution on mobile devices 
+
+1. open/edit www\software\html5\settings.js 
+2. and change it as example to > W.viewportwidth = "1280";
+PS: the height will be computed by browser on browsers internal logic.
+</pre>
+<div style="position:relative; left: 10px; top: 0px;">
+<pre>
+<b>Set minimum width/height</b>
+  3. settings.js > W.viewportminwidth = "1400";
+     settings.js > W.viewportminheight = "1800";
+  Notice: the extended height and width will always overflow visible viewport area!
+  As example by W.viewportwidth = "1280" and W.viewportminwidth = "1400" => 1400 - 1280 = 120px as scrollable overflowing area on right side.
+</pre>
+</div>
+
+<b name="answer_35" id="answer_35">35. Map network drive \\tsclient\WebFile to drive letter.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+1. execute> net use x: \\tsclient\WebFile
+2. the file will be available now in this example under drive x:
+
+Notice: Do not use remote network drive \\tsclient\WebFile for temporary file storage with Winword/Word or similar! Such programs create temp copies
+and by using WebFile folder you will get each time temp file for downloading too. It is recommended to use WebFile only for final file upload/download.
+</pre>
+
+<b name="answer_36" id="answer_36">36. Printing in raw format.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+Important notice: PDF files can not be printed to RAW printer, RAW prints can not be converted to PDF (there is no ready to use RAW to PDF converter provided)
+Finally you can not print to barcode or other RAW type printer from inside html5 rpd session. Supported are only PostScript, XPS and PCL6 print formats.
+Raw format is officially unsupported by html5 client and there will be no support for it on common way since technically not doable with browsers onboard tools.
+Since version html5_4.97 the program correctly recognizes if print can be converted to PDF format to avoid blank page instead print.
+In case if program recognized RAW format you have two options how to handle.
+
+A. by default without future configuration all RAW print files will be provided as downloadable files.
+or
+B. raw prints can be sent via registered protocol to specific program that will send the print to wished printer directly bypassing printer driver.
+If you decided your self for approach B. you need to prepare not only server but all clients to be able to accept self registered protocols.
+Important notice, raw printing is officially unsupported any everything what you do in following steps you do at your own risk!
+</pre>
+<div style="position:relative; left: 10px; top: 0px;">
+<b>On your server</b>
+<pre>
+  1. locate/open/edit(create) file \webserver\settings.bin (if not found, create this file manually with Notepad)
+  2. add there as next line
+     unknown_print_protocol="printraw://"
+  3. restart html5 in GUI to take change effect (after go sure weblog.txt contains - Set unknown print protocol: printraw://)
+  this finishes server preparation
+</pre>
+</div>
+<div style="position:relative; left: 10px; top: 0px;">
+<b>On your client where you are going to use raw direct printing via browser</b>
+<pre>
+  1. download and execute http://your_server.com/software/html5/imgs/scr.zip > customprint/register_raw_protocol.reg
+     this will add raw protocol handler to your system (you need admin rights on your client in order to add this registry key)
+  2. compile httpwebs*.jar > keymaps\src.zip > customprint/spoolraw.au3 to spoolraw.exe with AutoIt
+  3. create directory c:\customprint and place spoolraw.exe there, also c:\customprint\spoolraw.exe
+     (you can spread your compiled spoolraw.exe to other clients, not necessary to recompile on each client)
+  4. download small utility http://www.compuphase.com/software_spool.htm > Spool version 1.2 (23 KiB) 
+     (the link existing at time of creation this FAQ http://www.compuphase.com/software/spool12.zip)
+     after unpacking place this spool.exe together with spoolraw.exe in same directory, also c:\customprint\spool.exe
+  this finishes client preparation
+
+Now start new html5 rdp session, print in raw format to wished printer and accept access to printraw:// protocol when requested by browser, you can save your protocol choice permanently.
+PS: the steps above describe ready to use solution but you can freely change in .reg file the path or set own wished handler protocol.
+    if you want to choose specific raw printer that is not default you have to adapt and recompile spoolraw.au3 according to info from spool.exe (just execute spool.exe and follow instructions)
+PPS: the raw printing is officially unsupported and therefore there is no ensurement that this approach will work in your case and since spool.exe is third part program use it at your own risk!
+With example above you can reuse it only on Windows PC clients, however potentially it could be rewritten for Mac and Linux, but there will be no future investigation for these systems.
+</pre>
+</div>
+
+<b name="answer_37" id="answer_37">37. Printing directly to default printer.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default it is technically not possible to print directly to your local printer through browser, so officially direct printing is unsupported by html5 client.
+However you may reuse registered protocol to bypass this limitation which requests future client preparation. 
+You need to prepare not only server but all clients to be able to accept self registered protocols.
+</pre>
+
+<div style="position:relative; left: 10px; top: 0px;">
+<b>On your server</b>
+<pre>
+  1. locate/open/edit(create) file \webserver\printer.bin
+  2. locate the line beginning by PRINTERS=******
+  3. attach on the end of this line new printer: PS:%FORCEPROTOCOL(printdir://)%MS Publisher Imagesetter%Virtual Printer Direct %;
+     (if you want that printer to be default inside rdp session remove %DEFAULT% tag from other printer and attach it by new printer PS:%DEFAULT%%FORCEPROTOCOL(printdir://)%********)
+  4. restart html5 in GUI to take changes effect.
+  this finishes server preparation
+</pre>
+</div>
+
+<div style="position:relative; left: 10px; top: 0px;">
+<b>On your client where you are going to use direct printing via browser</b>
+<pre>
+  1. download and execute http://your_server.com/software/html5/imgs/src.zip > customprint/register_direct_protocol.reg
+     this will add direct protocol handler to your system (you need admin rights on your client in order to add this registry key)
+  2. compile httpwebs*.jar > keymaps\src.zip > customprint/spooldirect.au3 to spooldirect.exe with AutoIt
+  3. create directory c:\customprint and place spooldirect.exe there, also c:\customprint\spooldirect.exe
+     (you can spread your compiled spooldirect.exe to other clients, not necessary to recompile it on each client)
+  this finishes client preparation
+  Now inside your rdp session according to example above print to "Virtual Printer Direct ", this will initiate printer protocol so you must accept access to printdir:// protocol when requested by browser.
+  You can save your protocol choice permanently.
+PS: This feature requests ability of your system to read and print PDF files. If you don't have it by default then install Adobes PDF reader or any other PDF viewer like SumatraPDF that is able to print PDF files.
+PPS: When being officially unsupported feature use it at your own risk.
+With example above you can reuse it only on Windows PC clients, however potentially it could be rewritten for Mac and Linux, but there will be no future investigation for these systems.
+</pre>
+</div>
+
+<b name="answer_38" id="answer_38">38. ClipBoard text usage with html5 client.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+Remember, access to the clipboard on browsers level is highly privileged security related action and may not work at all depending on system or browser you use.  
+
+1. to paste clipboard text data to session use Ctrl + V, this works mostly on all browsers, on Mac browsers Ctrl button has no effect, there you must use it with Right_CMD + V
+2. to copy text data to your local environment use Ctrl + C or for cut Ctrl + X, on Mac Ctrl has no effect, use it with Right_CMD + C or Right_CMD + X 
+   (Mac Safari has bug and does not wait for data from server on privileged action or adds data only on second cmd+c pressing)
+3. to copy data by mouse to your local browser environment is very tricky and requests browser support of ClipBoard API. On each mouse click you give the system grace time of 1 second, if in this time
+the data arrives from server and ClipBoard Api is supported, this data will be added to your system, but if the data was to late because of slow speed between server or data amount was just to big, then this
+data will be added to server on next(second) click if ClipBoard Api supported.
+4. there is no technical way to paste clipboard data by mouse click from your local environment and send it to server therefore use Ctrl + V (or on Mac Right_CMD + V). 
+Chrome and FireFox considered it as big potential security risk and do not allow that even on privileged action like mouse click. However Internet Explorer partially supports it 
+but with displaying of security message which when not accepted will break future clipboard input therefore this approach is not implemented for IE since considered as unstable.
+
+PS: copy files between browser and rdp session via ClipBoard access by Ctrl + V or by mouse click is technically not possible! 
+Use drag-and-drop instead to send to session and send files back to browser via \\tsclient\WebServer
+</pre>
+
+<b name="answer_39" id="answer_39">39. ClipBoard image usage with html5 client.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By image copy/pasting you get same limitations like on ClipBoard text transfer from answer 38. but with even more limiations.
+1. To paste image data from your computer into rdp session just press Ctrl + V (on Mac Safari has bug and does not allow to access such pasted images therefore use Mac Chrome or Mac FireFox if you need to paste images on Mac)
+   (there is no way to paste images by mouse click)
+2. To copy image to your local environment is tricky, you may however use Ctrl + C, but this will not add the image from inside rdp session to your local clipboard automatically.
+   Ctrl + C will just initialize sending of image clipboard data to browser, with same success you may initialize image clipboard data transfer with the mouse. When image arrives on your browser you will see shortly
+   small preview of copied image area on top right side of your browser, as soon you saw that image arrived indicated by preview just make next click with right mouse button, this will initialize browsers native handler
+   for right click. From that menu you must choose to copy the image to your local clipboard environment. Depending on browser you will see different menu and entries of the native handler for right click.
+   Actually image clipboard transfer was successfully tested on modern/newest versions of IE11, IE12(Edge), Chrome, FireFox, and on Mac browsers too. However on Mac Safari as mentioned you can not paste images!
+</pre>
+
+<b name="answer_40" id="answer_40">40. Single Sign On - authenticate once use permanently.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+In order to authenticate only once and then login with same credentials
+
+1. locate www\software\html5\settings.js
+2. change variable W.singlelogon = true;
+   (true value defaults to realm "jwts", it is internal browser store tag, in order to use own realm use W.singlelogon = "myownrealm";) 
+3. (if you use portal page that checks for empty logon field just type some dummy login as example 1)
+4. now important, by first time you will be requested to insert login/pass, the program does not check validity of your login/pass, 
+   therefore be careful when inserting login/pass else you must delete browser data.
+5. if asked to save credentials permanently just confirm it.
+From now on despite of what you passed from portal or if you open html5.html directly the program will prefer logon from your browsers internal store.
+</pre>
+
+<b name="answer_41" id="answer_41">41. Set CGI filter on executables for internal webserver.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+In order to increase security and limit executing of CGI script to specified programs do following
+
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save as next line: cgi_filter="hb.exe"
+   (you can separate it by vertical bar: cgi_filter="hb.exe|dummy.exe")
+   (additionally you can lower restriction by using asterics on left or/and right side only: cgi_filter="*.exe") 
+   (or cgi_filter="hb.exe|*/hb.exe" would set to any subdirectory for hb.exe)
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+
+Notice: that is internal webserver feature only, for third part servers like IIS/Apache this rule has no effect.
+</pre>
+
+<b name="answer_42" id="answer_42">42. Set own cert/private key pass and store pass at run time.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default GUI is preset to "secret" as pass for private key and for store. GUI has no default ability to change it manually,
+however you may edit \webserver\runwebserver.bat and change the passwords *** secret secret *** to your own, but it requests to
+set read-only attribute on runwebserver.bat file to not allow GUI to overwrite it and then restart html5 server.
+But this would still reveal real password if someone gains admin access to your server. 
+To mitigate that scenario you can reuse one hidden option. 
+
+1. locate httpwebs*.jar > keymaps\src.zip > set_cert_pass.au3 
+2. insert your own passes for cert(private-key) and store
+3. compile it with AutoIt to set_cert_pass.exe 
+4. go sure html5 client service runs
+5. and finally start set_cert_pass.exe on that server
+6. program will call the link http://127.0.0.1/w0j3?cert.jks#certpass=secret#storepass=secret
+7. and server will accept it as new passes until next html5 server restart.
+
+Notice: browsers will truncate everything after # so opening the link in browser won't bring desired result, use provided AutoIt script
+or urlencode the string before opening in browser #certpass=secret#storepass=secret >>> %23certpass%3Dsecret%23storepass%3Dsecret
+Such update can be made only one time during html5 client running, to reset it restart html5 server in GUI or provide assumed old passes
+#certpass=newsecret#storepass=newsecretstore#oldcertpass=secret#oldstorepass=secret
+You will need to redo the steps 4-5 each time you restart html5 server.
+
+PS: if you want to prohibit such live change then open/edit/(create) \webserver\settings.bin and add as next line > allow_cert_pass_change=false
+</pre>
+
+<b name="answer_43" id="answer_43">43. Disable RDP or/and SSH2 or/and VNC or/and HyperV access forwarding.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+To disable RDP, SSH2, VNC or HyperV port forwarding.
+
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save as next line: 
+    disable_rdp=true
+    or/and
+    disable_ssh2=true
+    or/and
+    disable_vnc=true
+    or/and
+    disable_hyperv=true
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+
+PS: by RDP disabled forwarding any access on default html5 server listening ports (as example 80/443) will be discarded.
+    Use for RDP then direct access by default port (as example 3389) 
+    VNC server instance is disabled by default for security reasons, also reenable with \webserver\settings.bin > disable_vnc=false
+</pre>
+
+<b name="answer_44" id="answer_44">44. Disable file access.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+To disable file access on server side.
+
+1. open/edit(create) \webserver\settings.bin 
+   (create if not existing)
+2. and add/save as next line: disable_file_access=true
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+</pre>
+
+<b name="answer_45" id="answer_45">45. SSLv3 and IE6 - Internet Explorer 6,7</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default SSLv3 is not enabled on Java8 and higher, which makes usage of IE6,7 with SSL not possible.
+To enable SSLv3 and maximally reduce risks of its usage it is limited to IE6 only so still successfully passing SSL Labs check.
+
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+ie6_ssl_workaround=true
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+</pre>
+
+<b name="answer_46" id="answer_46">46. Disable balanced server log output.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default balanced server strings may be requested by browser via the link http://server.xyz/w0j2
+where in first line you will see http(and rdp as fallback) balanced strings and in second line rdp only balanced strings
+beginning usually by /~~*****. This may be unwished due security reasons.
+
+1. open/edit(create) \webserver\settings.bin 
+   (create if not existing)
+2. and add/save as next line: balance_log_output=0
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+
+PS: additionally possible are values =1 (http in first line) and =2 (rdp only in second line) allowed to be displayed.
+</pre>
+
+<b name="answer_47" id="answer_47">47. Default RDP cookie for HTML5-to-RDP connections.</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+Sometimes the remote RDP server may require specific RDP cookie due additional processing steps for HTML5 client connection.
+
+1. open/edit(create) \webserver\settings.bin 
+   (create if not existing)
+2. and add/save as next line: default_rdp_cookie="/~~antibruteforce"
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+
+PS: following property would override default RDP cookie value *\html5\settings.js > W.rdpCookieSet = "/~~another_cookie"; 
+
+PPS: such cookie may be required in scenario when balanced subserver has disabled direct RDP access by *\webserver\settings.bin > disable_rdp=true 
+and at same time the balanced subserver has setup balanced RDP only string like *\webserver\balanced.bin > /~~antibruteforce=127.0.0.1:3390 RDPPORT;
+to forward incoming RDP traffic approved by this balancing string /~~antibruteforce where gateway server may setup default_rdp_cookie="/~~antibruteforce"
+to enforce HTML5 client to use that string to bypass limitation of disabled direct RDP traffic forwarding.
+</pre>
+
+<b name="answer_48" id="answer_48">48. Disable RDP NLA CredSSP encryption level downgrading on wrong password</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default rdp-html5 client tries NLA CredSSP encryption and downgrades to lower encryption by wrong password, to disable downgrading
+
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+avoid_nla_degrade_on_wrong_pass=true
+3. restart html5 via GUI (just rereading configuration not enough!)
+</pre>
+
+<b name="answer_49" id="answer_49">49. Disable RDP empty passwords</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default when lacking password rdp-html5 client skips CredSSP encryption password check, to enforce non empty passwords by rdp-html5
+
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+rdp_no_empty_password=true
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+</pre>
+
+<b name="answer_50" id="answer_50">50. Gateway function > back-balance</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+Since HTML5 version 7.82 back balance supported by HTML5 gateway, if gateway is accessible by client and subserver when gateway is unable to access
+subservers directly. By back-balance feature subgateway creates the control connection to gateway, and after subserver creates
+new TCP connections to gateway on request from gateway via initially created control connection. This feature requires preparation of subserver 
+settings too for creating first initial control connection.
+
+On gateway side 
+1. open/edit(create) \webserver\balance.bin
+2. and add/save 
+/~~srvBACK=mypassword1234#:1;
+or
+/~~srvBACK=mypassword1234#:*;
+   (password in that example > mypassword1234 has mandatory hash char # on end, this example accepts any IP)
+
+or
+/~~srvBACK=mypassword1234#:*51.254.22.85;
+   (like previously but gateway accepts connections from single IP 51.254.22.85 only)
+
+or
+/~~srvBACK=mypassword1234#:*51.254.*;
+   (like previously but gateway accepts connections from IP range 51.254.0.0 to 51.254.255.255)
+
+or
+/~~srvBACK=mypassword1234#:*demo.mydyndns.net;
+   (like previously but gateway accepts connections from single IP resolved for demo.mydyndns.net)
+
+or
+SSL /~~srvBACK=mypassword1234#:*; 
+   (like previously but connection gets encrypted additionally by SSL for HTTP requests)
+
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+
+On subserver side - mandatory preparation step!!!
+1. open/edit(create) \webserver\backbalance.bin (attention, not anymore balance.bin!!!)
+2. and add/save 
+   /~~srvBACK=mypassword1234#demo.tsplus.net:443;
+   (will connect to gateway demo.tsplus.net:443, as by example with password used > mypassword1234 and mandatory hash char # on end)
+
+or
+/~~srvBACK=mypassword1234#demo.tsplus.net:443 -> \myuser1:mypass@192.168.10.11:808;
+   (this will connect to demo.tsplus.net:443 via proxy 192.168.10.11:808 by using NTLM logon: \myuser1 and password mypass)
+
+or
+/~~srvBACK=mypassword1234#demo.tsplus.net:443 -> mydomain\myuser1:mypass@192.168.10.11:808;
+   (this will connect to demo.tsplus.net:443 via proxy 192.168.10.11:808 by using NTLM logon: mydomain\myuser1 and password mypass)
+
+or
+/~~srvBACK=mypassword1234#demo.tsplus.net:443 -> myuser1:mypass@192.168.10.11:808;
+   (this will connect to demo.tsplus.net:443 via proxy 192.168.10.11:808 by using Basic logon: myuser1 and password mypass)
+
+or
+/~~srvBACK=mypassword1234#demo.tsplus.net:443 -> 192.168.10.11:808;
+   (this will connect to demo.tsplus.net:443 via proxy 192.168.10.11:808 by using no password)
+
+or
+/~~srvBACK=mypassword1234#demo.tsplus.net:443 -> \myuser1:mypass@192.168.10.11:808 -> \myuser2:mypass@192.168.12.12:809;
+   (same like before but additionally next cascade proxy server used 192.168.12.12:809)
+
+3. restart HTML5 via GUI to take changes effect, hot refresh not supported for backbalance.bin!!!
+
+Important, due usage of TLS in client mode on subservers ensure that subservers have up-to-date Java version, or at least equal to Java version on gateway!
+</pre>
+
+<b name="answer_51" id="answer_51">51. Data forwarding listener direct</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+To start server listener on specific port where all incoming TCP connection will be rerouted directly
+
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+system_set_own_property="pass_through=*:1111->demo.tsplus.net:-443;*:1112->demo.tsplus.net:-80"
+   (on any interface on port 1111 forward traffic to demo.tsplus.net:443 and any interface on 1112 to demo.tsplus.net:80)
+   (check examples for proxy usage in answer #50, so you could use basic auth, or no auth etc., minus char by remote port is mandatory!!!)
+
+system_set_own_property="pass_through=*:99->/~~srvBACK:-1"
+   (on gateway any interface on port 99 forward traffic to /~~srvBACK subserver) 
+   (the remote subserver may be back-balanced, so that remote subserver is mapped on gateways port for any traffic, minus char by remote port is mandatory!!!)
+3. restart html5 via GUI to take changes effect
+</pre>
+
+<b name="answer_52" id="answer_52">52. Data forwarding listener with proxy</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+To start server listener on specific port where all incoming TCP connection will be rerouted via additional TCP proxy
+
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+system_set_own_property="pass_through_proxy=*:811-> demo.tsplus.net:-443 -> \myuser1:mypass@192.168.1.11:808"
+   (on any interface on port 811 forward traffic to demo.tsplus.net:443 via NTLM proxy 192.168.1.11:808 by using NTLM logon \myuser1:mypass)
+   (check examples for proxy usage in answer #50, so you could use basic auth, or no auth etc., minus char by remote port is mandatory!!!)
+
+system_set_own_property="pass_through_proxy=*:811-> demo.tsplus.net:-443 -> \myuser1:mypass@192.168.1.11:808 -> \myuser2:mypass@192.168.12.12:809"
+   (same like before but additionally next cascade proxy server used 192.168.12.12:809)
+3. restart html5 via GUI  to take changes effect
+Important: this proxy setting doesn't support back-balance scenario where subserver initiates connection to gateway but here gateway via proxy to subserver.
+</pre>
+
+<b name="answer_53" id="answer_53">53. Forward OpenVPN TCP traffic to wished port</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default OpenVPN local listening TCP port is 1194, you can change it in following manner
+
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+vpn_forward_host_port="192.168.88.142:2023"
+   (this will forward detected OpenVpn traffic to port 192.168.88.142:2023)
+or
+vpn_forward_host_port="/~~srvBACK:1"
+   (this will forward detected OpenVpn traffic in balanced or back-balanced scenario to subserver)
+
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+</pre>
+
+<b name="answer_54" id="answer_54">54. Forward any undetected TCP traffic to wished port</b>
+<pre style="position:relative; left: 10px; top: 0px;">
+By default undetected TCP data gets discarded and logged, but it can be rerouted instead. 
+You can start so own TCP port listener for unknown traffic, by back-balance scenario even for subserver behind router not visible to gateway directly.
+
+1. open/edit(create) \webserver\settings.bin 
+2. and add/save 
+unknown_forward_host_port="192.168.88.142:2023"
+   (this will forward any undetected traffic to port 192.168.88.142:2023)
+or
+unknown_forward_host_port="/~~srvBACK:1"
+   (this will forward any undetected traffic in balanced or back-balanced scenario to subserver)
+
+3. restart html5 via GUI or reread configuration http://127.0.0.1/w0j3?settings.bin
+</pre>
+
+</div>
+<br /><br /><br />
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="requiresActiveX=true"/>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"> 
+<meta content="no-cache" http-equiv="pragma">
+<meta content="NO-CACHE" http-equiv="CACHE-CONTROL">
+<style type="text/css">
+#loading, #printingalert {
+    margin:0px;padding:0px;
+    position:absolute;left:40%;top:40%;
+    width:224px;
+    display:block;
+    color:#000;background-color:#eee;
+    border:4px #999 solid;
+    font-size:1em;
+    overflow:auto;
+    z-index:10;
+}
+#loading p, #printingalert p, #printing p {margin:0px;padding:8px}
+
+#printing {
+    margin:0px;padding:0px;
+    position:absolute;left:40%;top:40%;
+    display:block;
+    color:#000;background-color:#eee;
+    border:4px #999 solid;
+    font-size:1em;
+    overflow:auto;
+    z-index:10;
+}
+</style>
+
+<script type="text/javascript">
+var usebinaryifpossible = "yes";
+var disablewebsocket = false;
+var forcesslforxhr = true;
+var xhrreverse = true;
+//do not touch
+var pjwsize = "68552";
+var sepproc = "no"; //or yes
+
+function jsreadCookie(name) {
+  var nameEQ = name + "=";
+  var ca = document.cookie.split(';');
+  for(var i=0;i < ca.length;i++) {
+    var c = ca[i];
+    while (c.charAt(0)==' ') c = c.substring(1,c.length);
+    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+  }
+  return null;
+}
+
+function jscreateCookie(name,value,days) {
+  if (days) {
+    var date = new Date();
+    date.setTime(date.getTime()+(days*24*60*60*1000));
+    var expires = "; expires="+date.toGMTString();
+  }
+  else var expires = "";
+  document.cookie = name+"="+value+expires+"; path=/";
+}
+var toloadappl = "Force Applet from <a href=\"?applet=http://localhost:18888\">http://localhost:18888</a>";
+</script>
+<script type="text/javascript" src="socket.io.js"></script>
+<script type="text/javascript" src="jwres.core.js"></script>
+</head>
+<body onload="beginme();" width="100%" height="100%" marginheight="0" marginwidth="0" spacing="0" style="width:100%;height:100%;overflow:hidden;">
+<div id="javaappdiv" name="javasdiv" style="position:absolute; top:200px; left:5px; height:200px; width:100px;"></div>
+<a href="web.jar">Download LocalWebserver</a><center><div id="loadappl"></div></center>
+</body>
+</html>

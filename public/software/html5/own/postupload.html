@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style type="text/css">
+        body {
+            width: 100%;
+            height: 100%;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            font-family: Arial;
+            font-size: 13px;
+            color: #777777;
+        }
+    </style>
+    <script type="text/javascript">
+      (function() {
+        var WIND, DOC, OPR;
+        (function() { WIND = window; DOC = WIND.document; })();
+
+        WIND.langString = false;
+        try { 
+          if((OPR = "pa"+"re"+"nt") && WIND[OPR] && WIND[OPR].W && WIND[OPR].W !== WIND[OPR]) {
+            WIND.langString = WIND[OPR].W.langstring;
+          } else if((OPR = "ope"+"ne"+"r") && WIND[OPR] && WIND[OPR].W && WIND[OPR].W !== WIND[OPR]) {
+            WIND.langString = WIND[OPR].W.langstring;
+          } else { OPR = "undefined_1"; } 
+        } catch(e) { OPR = "ope"+"ner"; }
+
+        WIND.pIaReal = false;
+        (function() { 
+          var sTrA; 
+          try {
+            if("sessionStorage" in WIND && (sTrA = WIND.sessionStorage)) {
+              var varSess = "win_name_jwts";
+              if(varSess in sTrA) {
+                var kA = sTrA[varSess];
+                if(kA && kA.length > 0) { WIND.name = kA; }
+              }
+            }
+          } catch(exc) { }
+          try {
+            if(WIND.name.length > 0) {
+              var pIaR = false;
+              if(WIND[OPR] && WIND[OPR].W) {
+                pIaR = WIND[OPR].W.my64Dec(WIND.name);
+              }
+              if(pIaR && pIaR.length > 0) {
+                var hX = { };
+                eval("function F(W) { var window=W; " + pIaR + " };F;")(hX);
+                if(hX.pIaR) { WIND.pIaReal = hX.pIaR; }
+              } 
+            }
+          } catch(exc) { }
+        })();
+
+        WIND.onerror = function(a, b, c, d) {
+          try {
+            if(WIND[OPR] && WIND[OPR].onerror) { return WIND[OPR].onerror(a, b, c, d); }
+          } catch(exc) { }
+        };
+        WIND.uploadRulesRun = "";
+        if(WIND.pIaReal && "uploadRulesRun" in WIND.pIaReal) { WIND.uploadRulesRun = WIND.pIaReal.uploadRulesRun; }
+
+        WIND.languaize = function() {
+          try { 
+            if(WIND.langString && WIND.langString.ownpu1) { 
+              DOC.getElementById("ownpu1")["inn"+"erH"+"TML"] = "<br/>&nbsp;<b>" + WIND.langString.ownpu1 + "</b>"; 
+            }
+          } catch(a) { } 
+        }
+
+        WIND.loadme = function() {
+            WIND.languaize();
+            if(WIND[OPR] != null) {
+                try {
+                    WIND[OPR].W.sendF5();
+                } catch(e) { }
+                if(!WIND.fromGetUpload) {
+                  try { 
+                    WIND.sendFinishUpload(WIND.realpathmain, WIND.filename, WIND.filenamereal, WIND.uploadRulesRun);
+                  } catch(e) { }
+                }
+                if(OPR == "ope"+"ner") {
+                  if(!WIND[OPR].W || !WIND[OPR].W.myver) {
+                      WIND[OPR].location.reload(true);
+                  } else if(WIND[OPR].W && WIND[OPR].W.FileDeleteRefresh) {
+                      WIND[OPR].W.FileDeleteRefresh();
+                  }
+                  WIND.close();
+                }
+            }
+        }
+
+        WIND.sendFinishUpload = function(a, f, d, u) {
+            try {
+                if(WIND[OPR] && WIND[OPR].W) {
+                    WIND[OPR].W.sendFinishUpload(a, f, false, d, u);
+                }
+            } catch(e) { }
+        }
+      })();
+    </script>
+</head>
+
+<body onload="window.loadme();" onclick="window.close();">
+    <div id="ownpu1"><br/>&nbsp;<b>UPLOADED</b></div>
+</body>
+
+</html>

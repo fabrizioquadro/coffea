@@ -1,0 +1,50 @@
+<!--[if IE]><!DOCTYPE><![endif]-->
+<html>
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"> 
+<meta content="no-cache" http-equiv="pragma">
+<meta content="NO-CACHE" http-equiv="CACHE-CONTROL">
+<script type="text/javascript">
+function jsreadCookie(name) {
+  var nameEQ = name + "=";
+  var ca = document.cookie.split(';');
+  for(var i=0;i < ca.length;i++) {
+    var c = ca[i];
+    while (c.charAt(0)==' ') c = c.substring(1,c.length);
+    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+  }
+  return null;
+}
+
+function jscreateCookie(name,value,days) {
+  if (days) {
+    var date = new Date();
+    date.setTime(date.getTime()+(days*24*60*60*1000));
+    var expires = "; expires="+date.toGMTString();
+  }
+  else var expires = "";
+  document.cookie = name+"="+value+expires+"; path=/";
+}
+
+function beginme() {
+ var myportmany = document.location.port;
+ if(myportmany < 1 && document.location.protocol.indexOf('https') > -1) {
+  myportmany = 443;
+ }
+ myportmany = myportmany || 80;
+ window.jscreateCookie("srvs" + myportmany,"",-1);
+ var a = window.location.search;
+ if(a != "") {
+   a = a.substring(1);
+   if(a != "") { 
+     a = decodeURIComponent(a);
+     window.jscreateCookie("srvs" + myportmany,a,365);
+   }
+ }
+ try { self.close(); } catch(e) { }
+}
+</script>
+</head>
+<body onload="beginme();" width="100%" height="100%" marginheight="0" marginwidth="0" spacing="0" style="width:100%;height:100%;overflow:hidden;">
+</body>
+</html>

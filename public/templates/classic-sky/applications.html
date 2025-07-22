@@ -1,0 +1,54 @@
+<!-- ##TEMPLATEVALUES## -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html> 
+  <head> 
+    <meta content="no-cache" http-equiv="pragma" />
+	<meta content="NO-CACHE" http-equiv="CACHE-CONTROL" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>##APPSPAGETITLE##</title>
+    <link rel="stylesheet" type="text/css" href="software/common.css" />
+	<style>
+	  #appsbox { text-align: center; margin-top: 50px; margin-bottom: 50px; margin-left: 25px; margin-right: 25px; }
+	  #appsboxinner { display: inline-block; border: 1px solid ##APPSBOXBORDERCOLOR##; }
+	  #appstitlebar { background-color: ##APPSBOXCOLOR##; height: 25px; line-height: 25px; }
+	  #appstitle { text-align: left; margin-left: 6px; }
+	  #appslogoff { float: right; margin-right: 6px; font-weight: bold; font-size: 15px; }
+	  #appslogoff a { text-decoration: none; color: #000000; }
+	  #appscontainer { clear: both; }
+	  .app { width: 120px; display: inline-block; margin-bottom: 20px; margin-top: 20px; margin-right: 15px; margin-left: 15px; height: 60px; vertical-align: top; }
+      .appbutton { text-decoration: none; color: #000000; }
+      .appbutton span { font-weight: normal; }
+    </style>
+	<script src="software/js/jquery.min.js"></script>
+	<script type="text/javascript" src="software/remoteapp2.js?v=17.20"></script>
+	<script>var numberOfAppsPerLine = ##APPSNUMBEROFAPPSPERLINE##;</script>
+	<script src="software/common_applications.js?v=5"></script>
+	<link rel="stylesheet" type="text/css" href="custom.css" />
+	<script type="text/javascript" src="custom.js"></script>
+  </head> 
+  <body onload="displayAssignedApps(true);" style="color: ##PAGECOLOR##; background-color: ##PAGEBACKGROUNDCOLOR##; font-family: ##PAGEFONT##;">
+    <div id="container">
+      <div id="header">
+	    <div id="logo" style="background-color: ##LOGOBACKGROUNDCOLOR##;">
+          <img src="##LOGO##" />
+        </div>
+        <span style="font-size: ##BASELINESIZE##px;">
+            ##BASELINE##
+        </span>
+      </div>
+      <div id="appsbox">
+		<div id="appsboxinner">
+		  <div id="appstitlebar">
+			<div id="appslogoff"><a href="#" onclick="window.name = ''; window.location.replace(window.applications_portal_return_url ? window.applications_portal_return_url : '/index.html'); return false;"><span style="font-size:12px;font-weight:normal;">##APPSLOGOFF##</span> &times;</a></div>
+			<div id="appstitle">##APPSTITLE##</div>
+		  </div>
+		  <div id="appscontainer">
+			<div id="apps">
+			</div>
+		  </div>
+		</div>
+	  </div>
+    </div>
+  </body>
+</html>

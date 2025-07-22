@@ -1,0 +1,305 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="x-ua-compatible" content="IE=10, requiresActiveX=true">
+<meta content="no-cache" http-equiv="pragma">
+<meta content="NO-CACHE" http-equiv="CACHE-CONTROL">
+
+<title>Internet Access</title>
+<style>BODY { margin: 0; padding: 0; height:100%; width:100%; }</style>
+<script language="vbscript">
+<!--
+
+sub loadactivex(server, domain, username, password, port, width, height, depth, map, sound, startprog)
+      On Error Resume Next
+      Err.Clear
+
+      MsTsc.Server = server
+      MsTsc.Domain = domain
+      MsTsc.FullScreen = FALSE
+      MsTsc.UserName =  username
+      MsTsc.AdvancedSettings2.ClearTextPassword = password
+      MsTsc.AdvancedSettings2.RDPPort = port
+      MsTsc.AdvancedSettings2.PluginDlls = "TSFTPClient.DLL"
+
+      MsTsc.DesktopWidth = width
+      MsTsc.DesktopHeight = height
+      MsTsc.Width = width
+      MsTsc.Height = height
+      MsTsc.ColorDepth = depth
+
+      MsTsc.AdvancedSettings.Compress = true
+      MsTsc.AdvancedSettings.CachePersistenceActive = true
+      MsTsc.AdvancedSettings.BitmapPeristence = true
+      MsTsc.AdvancedSettings2.EnableAutoReconnect = true
+      'MsTsc.AdvancedSettings2.PublicMode = true
+
+      if MsTsc.SecuredSettingsEnabled then
+          MsTsc.SecuredSettings.StartProgram = startprog
+      else
+          'msgbox "Cannot access secured setting (startprogram) in the current browser zone"
+      end if
+
+      MsTsc.AdvancedSettings.RedirectDrives     = map
+      MsTsc.AdvancedSettings.RedirectPrinters   = true
+      MsTsc.AdvancedSettings.RedirectPorts      = false
+      MsTsc.AdvancedSettings.RedirectSmartCards = false
+      MsTsc.StartConnected = true
+      MsTsc.Connect
+end sub
+
+sub MsTsc_OnDisconnected(disconnectCode)
+ call onownexit
+end sub
+
+-->
+</script>
+<script language="JavaScript">
+//up 11.92
+var addedtest = "";
+
+var widtha = 0;
+var heighta = 0;
+
+
+function createCookie(name,value,days) {
+	if (days) {
+		var date = new Date();
+		date.setTime(date.getTime()+(days*24*60*60*1000));
+		var expires = "; expires="+date.toGMTString();
+	}
+	else var expires = "";
+	document.cookie = name+"="+value+expires+"; path=/";
+}
+
+function readCookie(name) {
+	var nameEQ = name + "=";
+	var ca = document.cookie.split(';');
+	for(var i=0;i < ca.length;i++) {
+		var c = ca[i];
+		while (c.charAt(0)==' ') c = c.substring(1,c.length);
+		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+	}
+	return null;
+}
+
+var referrer = "";
+
+var b64array = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+function decode64(input) {
+    var output = "";
+    var hex = "";
+    var chr1, chr2, chr3 = "";
+    var enc1, enc2, enc3, enc4 = "";
+    var i = 0;
+    input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+    do {
+        enc1 = b64array.indexOf(input.charAt(i++));
+        enc2 = b64array.indexOf(input.charAt(i++));
+        enc3 = b64array.indexOf(input.charAt(i++));
+        enc4 = b64array.indexOf(input.charAt(i++));
+        chr1 = (enc1 << 2) | (enc2 >> 4);
+        chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+        chr3 = ((enc3 & 3) << 6) | enc4;
+        output = output + String.fromCharCode(chr1);
+        if (enc3 != 64) {
+            output = output + String.fromCharCode(chr2);
+        }
+        if (enc4 != 64) {
+            output = output + String.fromCharCode(chr3);
+        }
+        chr1 = chr2 = chr3 = "";
+        enc1 = enc2 = enc3 = enc4 = "";
+    } while (i < input.length);
+    return unescape(output);
+}
+
+var doonexit = ""; 
+function clickLink() {
+ self.focus();
+
+ var wnl = String(window.name);
+ if(window.opener != null) {
+  try {
+   var wnlop = String(window.opener.name);
+   if(wnlop.length > 10 && wnlop != wnl) {
+    window.name = wnlop;
+    wnl = wnlop;
+   }
+  } catch (e) { }
+ }
+
+ wnl = wnl.length;
+
+ var tosplit = document.location.search.substring(1);
+ var tosplittemp = tosplit;
+ var findall = tosplit.indexOf('&dimension=');
+ tosplit = tosplit.substring(0, findall);
+ var splitdim = tosplittemp.substring(findall + 11);
+ findall = splitdim.indexOf('x');
+ widtha = splitdim.substring(0, findall);
+ heighta = splitdim.substring(findall + 1);
+
+ if(tosplit.length < 30) {
+   if(wnl > 10) {
+    tosplit = window.name;
+   } else {
+    tosplit = readCookie("tswebsecuredrun" + tosplit);
+   }
+   if(!tosplit && wnl < 11) { alert("Something wrong with cookies!\nContact your administrator!"); return false; }
+ }
+
+ if(wnl > 10) {
+   tosplit = unescape(decode64(window.name.replace(/_/g,'=')));
+ } else {
+   tosplit = unescape(decode64(tosplit.replace(/_/g,'=')));
+ }
+
+ var width = "800";
+ var height = "600";
+ var doreplace = true;
+
+ var find = tosplit.indexOf('|');
+ doonexit = tosplit.substring(0, find);
+ tosplit = tosplit.substring(find + 1);
+ find = tosplit.indexOf('|');
+ referrer = tosplit.substring(0, find);
+ tosplit = tosplit.substring(find + 1);
+
+ var find = tosplit.indexOf('#');
+ var execcommand = tosplit.substring(0, find);
+ var loadjars = tosplit.substring(find + 1);
+ var newloadjars = "";
+ loadjars = loadjars.split(';');
+ var llen = loadjars.length;
+ var file = "";
+ if(loadjars[0].substring(0, 1) == "/") { file = "file://"; }
+ else if(loadjars[0].substring(1, 2) == ":") { file = "file:///"; }
+
+ for(var i=0; i < llen; i++) {
+  if(loadjars[i].length > 0 && loadjars[i + 1].length > 0) newloadjars += file + loadjars[i] + ',';
+  else if(loadjars[i].length > 0) { newloadjars += file + loadjars[i]; }
+ }
+ loadjars = newloadjars;
+
+
+ find = execcommand.indexOf('-g ');
+ var geometry = "";
+ if(find > -1) {
+   geometry = execcommand.substring(find + 3);
+   find = geometry.indexOf(' ');
+   if(find > -1) {
+    geometry = geometry.substring(0, find);
+    if(geometry=="640x480" || geometry=="800x600" || geometry=="1024x768" || geometry=="1280x1024" || geometry=="1600x1200") {
+      doreplace = false;
+    }
+    find = geometry.indexOf('x');
+    if(find > -1) {
+      width = geometry.substring(0, find);
+      height = geometry.substring(find + 1);
+    }
+   }
+ }
+
+loadjars = loadjars.replace(/\\/g, "\\\\");
+
+if(doreplace) {
+ execcommand = execcommand.replace(width+'x'+height, widtha+'x'+heighta);
+ execcommand = execcommand.replace('-f', '-g ' + widtha+'x'+heighta);
+ width = widtha;
+ height = heighta;
+}
+
+ addedtest = '<OBJECT language="vbscript" ID="MsTsc" CLASSID="CLSID:7584c670-2274-4efb-b00b-d6aaba6d3850" CODEBASE="java/msrdp.cab#version=5,2,3790,0" WIDTH=' + width + ' HEIGHT=' + height + '>';
+
+ var server = "localhost";
+ var domain = "";
+ var username = "";
+ var password = "";
+ var port = 3389;
+ var depth = 15;
+ var map = true;
+ var sound = true;
+
+ var execsplit = execcommand.split(' ');
+ var execlen = execsplit.length;
+ var tempser = execsplit[execlen-1];
+ var tempserser = tempser.split(':');
+ port = tempserser[1];
+ server = tempserser[0];
+ var startprog = "";
+
+
+ for(var i=0; i < execlen; i++) {
+  if(execsplit[i] == "-o") { i++; depth = execsplit[i]; }
+  if(execsplit[i] == "-d") { i++; domain = execsplit[i]; }
+  if(execsplit[i] == "-z" && execsplit[i+1] == "off") { i++; map = false; }
+  if(execsplit[i] == "-a" && execsplit[i+1] == "off") { i++; sound = false; }
+  if(execsplit[i] == "-s") { i++; startprog = execsplit[i]; //.replace(/%20/g, " ");
+  }
+
+  if(execsplit[i] == "-u") { 
+     i++; 
+     username = execsplit[i];
+     if(username.indexOf('"') > -1 && execsplit[i+1].indexOf('"') > -1) {
+      i++;
+      username += " " + execsplit[i];
+     } else if(username.indexOf('"') > -1 && execsplit[i+1].indexOf('"') == -1) {
+       while(execsplit[i+1].indexOf('"') == -1 && i < execlen) {
+        i++;
+        username += " " + execsplit[i];
+       }
+     }
+    while(username.indexOf("%sep:") > -1) { username = username.replace("%sep:", " "); } 
+  }
+
+  if(execsplit[i] == "-p") { 
+     i++; 
+     password = execsplit[i];
+     if(password.indexOf('"') > -1 && execsplit[i+1].indexOf('"') > -1) {
+      i++;
+      password += " " + execsplit[i];
+     } else if(password.indexOf('"') > -1 && execsplit[i+1].indexOf('"') == -1) {
+       while(execsplit[i+1].indexOf('"') == -1 && i < execlen) {
+        i++;
+        password += " " + execsplit[i];
+       }
+     } 
+  }
+
+ }
+
+ document.getElementById("javaappdivtest").style.display = "block";
+ document.getElementById("MsTsc").width = width;
+ document.getElementById("MsTsc").height = height; 
+ self.focus(); 
+ window.moveTo(0,0); 
+ try {
+  loadactivex(server, domain, username, password, port, width, height, depth, map, sound, startprog);
+ } catch(ef) { alert(ef); }
+}
+
+function onownexit() {
+ if(doonexit == "close") { window.close(); }
+ else { unhidemybody(); }
+}
+
+function unhidemybody() {
+ document.location.replace(referrer);
+}
+
+</SCRIPT>
+</head>
+<body marginwidth="0" marginheight="0" leftmargin="0" topmargin="0" spacing="0" style="width:100%;height:100%;overflow:hidden;" onload="clickLink();">
+<div id="javaappdivtest" name="javasdivtest" style="position:absolute; height:100%; width:100%; display:none;">
+  <OBJECT language="vbscript" ID="MsTsc" CLASSID="CLSID:7584c670-2274-4efb-b00b-d6aaba6d3850" CODEBASE="java/msrdp.cab#version=5,2,3790,0" WIDTH=800 HEIGHT=600></OBJECT>
+</div>
+<center>
+<div id="hidbut" name="hidbutton" style="display:none;">Internet Inside browser started!
+<input type="button" value="clickme" id="myLink2" />
+</div>
+</center>
+</body>
+</html>

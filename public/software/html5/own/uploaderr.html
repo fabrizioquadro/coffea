@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style type="text/css">
+        body {
+            width: 100%;
+            height: 100%;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            font-family: Arial;
+            font-size: 13px;
+            color: #777777;
+        }
+    </style>
+    <script type="text/javascript">
+      (function() {
+        var WIND, DOC;
+        (function() { WIND = window; DOC = WIND.document; })();
+        WIND.loadme = function() {
+            var con = DOC.getElementById("content");
+            if(con && WIND.post_raw) {
+                con["inn"+"erH"+"TML"] = "<h1>" + WIND.post_raw + "</h1>";
+            }
+        }
+      })();
+    </script>
+</head>
+
+<body onload="window.loadme();">
+    <div id="content"></div>
+</body>
+
+</html>
