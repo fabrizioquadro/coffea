@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('cred_deb');
             $table->string('tipo_pagamento');
             $table->string('origem');
-            $table->string('descricao');
+            $table->text('descricao');
             $table->date('vencimento')->nullable();
             $table->double('valor',10,2);
             $table->string('doc')->nullable();

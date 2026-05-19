@@ -5,6 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Financeiro;
+use App\Models\Requisicao;
+use App\Models\Qrcode;
+use chillerlan\QRCode\QRCode AS QRCode_gerar;
+use chillerlan\QRCode\QROptions;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class LoginController extends Controller
 {
@@ -70,18 +77,44 @@ class LoginController extends Controller
     }
 
     public function testeapi(){
-        //die('teste api desabilitado');
-        /*
-        echo "Estamos no teste de api <br>";
+        $requisicao = Requisicao::where('id','13196')->first();
 
+        $link = $requisicao->id.$requisicao->fornecedor->id.date('YmdHis');
+        $link_view   = route('acesso_fornecedor', $link);
+
+        $code = Qrcode::where('requisicao_id', $requisicao->id)->first();
+
+        $qrcode = (new QRCode_gerar)->render($link_view);
+        $dados = [
+            'requisicao' => $requisicao,
+            'link' => $link_view,
+            'qrcode' => $qrcode,
+            'code' => $code,
+        ];
+        $html = view('imprimir/gerar_pdf', $dados)->render();
+
+        //vamos gerar o pdf
+        $options = new Options();
+        //$options->set('isRemoteEnabled', TRUE);
+        $options->set('isHtml5ParserEnabled', TRUE);
+        //dd($options->get('isHtml5ParserEnabled'));
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        $dompdf->stream("nome_do_arquivo.pdf", array("Attachment" => 0));
+        //$output = $dompdf->output();
+        //$caminho_arquivo = "public/impressoes/".$requisicao->id.".pdf";
+        //file_put_contents($caminho_arquivo, $output);
+
+
+        /*
         $parametros = [
-            'action' => 'get',
-            'entity' => 'movimento_financeiro',
-            'codigoReferencial' => '99998771',
+            'action' => 'list',
+            'entity' => 'operacao',
         ];
 
         $apiUrl = "https://sistema.sischef.com/service?".http_build_query($parametros);
-        $bearerToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBUEkuY29mZmVhLnJoIiwibmJmIjoxNzUwNTk3MzYwfQ.5ZYIqPUecwKib8B6T3hYPaaDtRoqFnI0vJQyMz3zWdPZ0ARlxXK-92eJepFJnxWYmY9lyYHQP0HOk9CJzj7hYA";
 
         $ch = curl_init();
 
@@ -92,7 +125,7 @@ class LoginController extends Controller
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
 
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "Authorization: Bearer $bearerToken",
+            "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBUEkuZmF6ZW5kYSIsIm5iZiI6MTc1NzI0NjY1NX0.S_2kfnLn7yHfaUjVgmWd9_R4LVOaJKD4SycMHbPMY4znC8oixJSBzZwZlzxCh4--uw0nHRfKPo8EgPPQOBLEcw",
             "Content-Type: application/json"
         ]);
 
@@ -101,75 +134,12 @@ class LoginController extends Controller
         if (curl_errno($ch)) {
             echo 'Erro na requisição: ' . curl_error($ch);
         } else {
-            $data = json_decode($response, true);
             echo "<pre>";
             print_r($response);
             echo "</pre>";
         }
-
         curl_close($ch);
-
         */
-        //echo "Estamos no teste de api <br>";
-/*
-        $conta = [
-            'idConta' => 21851,
-        ];
-
-        $pessoa = [
-            'codigoReferencial' => '782190',
-        ];
-
-        $dados = [
-            'codigoReferencial' => '99998771',
-            'idFormaPagamento' => '34536',
-            'descricao' => 'Teste com o rodrigo 10',
-            'idPessoa' => '782190',
-            'dataOcorrencia' => '24/06/2025',
-            'dataVencimento' => '02/07/2025',
-            'valor' => 1.85,
-            'sinalOperacao' => -1,
-            'pendente' => true,
-            'tipo' => 'CV',
-            'idConta' => 19148,
-        ];
-*/
-        $parametros = [
-            'j_username' => 'API.coffea.rh',
-            'j_password' => '01010101',
-        ];
-
-        $apiUrl = "https://sistema.sisagil.com/inicio.jsf";
-        //$bearerToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBUEkuY29mZmVhLnJoIiwibmJmIjoxNzUwNTk3MzYwfQ.5ZYIqPUecwKib8B6T3hYPaaDtRoqFnI0vJQyMz3zWdPZ0ARlxXK-92eJepFJnxWYmY9lyYHQP0HOk9CJzj7hYA";
-
-        $ch = curl_init($apiUrl);
-
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($parametros));
-
-        //curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        //    "Authorization: Bearer $bearerToken",
-        //]);
-
-        $response = curl_exec($ch);
-
-        echo "<pre>";
-        print_r($response);
-        echo "</pre>";
-
-        if (curl_errno($ch)) {
-            echo 'Erro na requisição: ' . curl_error($ch);
-        } else {
-            $data = json_decode($response, true);
-            echo "<pre>";
-            print_r($data);
-            echo "</pre>";
-        }
-
-        curl_close($ch);
-
-
     }
 
 }

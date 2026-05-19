@@ -40,7 +40,7 @@ function id( el ){
 //Retorno: Booleano
 //Autor: Gabriel FrÃ³es - www.codigofonte.com.br
 //-----------------------------------------------------
-function MascaraMoeda(objTextBox, SeparadorMilesimo, SeparadorDecimal, e){
+function MascaraMoedaOld(objTextBox, SeparadorMilesimo, SeparadorDecimal, e){
     var sep = 0;
     var key = '';
     var i = j = 0;
@@ -77,6 +77,51 @@ function MascaraMoeda(objTextBox, SeparadorMilesimo, SeparadorDecimal, e){
         for (i = len2 - 1; i >= 0; i--)
         objTextBox.value += aux2.charAt(i);
         objTextBox.value += SeparadorDecimal + aux.substr(len - 2, len);
+    }
+    return false;
+}
+
+function MascaraMoeda(objTextBox, SeparadorMilesimo, SeparadorDecimal, e){
+    var sep = 0;
+    var key = '';
+    var i = j = 0;
+    var len = len2 = 0;
+    var strCheck = '0123456789';
+    var aux = aux2 = '';
+    var whichCode = (window.Event) ? e.which : e.keyCode;
+    if (whichCode == 13) return true;
+    key = String.fromCharCode(whichCode); // Valor para o cÃ³digo da Chave
+    if (strCheck.indexOf(key) == -1) return false; // Chave invÃ¡lida
+    len = objTextBox.value.length;
+    for(i = 0; i < len; i++)
+        if ((objTextBox.value.charAt(i) != '0') && (objTextBox.value.charAt(i) != SeparadorDecimal)) break;
+    aux = '';
+    for(; i < len; i++)
+        if (strCheck.indexOf(objTextBox.value.charAt(i))!=-1) aux += objTextBox.value.charAt(i);
+    aux += key;
+    len = aux.length;
+
+    if (len == 0) objTextBox.value = '';
+    if (len == 1) objTextBox.value = '0'+ SeparadorDecimal + '000' + aux;
+    if (len == 2) objTextBox.value = '0'+ SeparadorDecimal + '00' + aux;
+    if (len == 3) objTextBox.value = '0'+ SeparadorDecimal + '0' + aux;
+    if (len == 4) objTextBox.value = '0'+ SeparadorDecimal + aux;
+
+    if (len > 4) {
+        aux2 = '';
+        for (j = 0, i = len - 5; i >= 0; i--) {
+            if (j == 3) {
+                aux2 += SeparadorMilesimo;
+                j = 0;
+            }
+            aux2 += aux.charAt(i);
+            j++;
+        }
+        objTextBox.value = '';
+        len2 = aux2.length;
+        for (i = len2 - 1; i >= 0; i--)
+        objTextBox.value += aux2.charAt(i);
+        objTextBox.value += SeparadorDecimal + aux.substr(len - 4, len);
     }
     return false;
 }

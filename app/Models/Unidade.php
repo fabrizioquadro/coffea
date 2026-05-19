@@ -17,6 +17,7 @@ class Unidade extends Model
         'senha_sisagil',
         'status',
         'logo',
+        'restrita',
     ];
 
     public function users(){

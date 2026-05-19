@@ -695,7 +695,7 @@
         <!-- add class left/right/center (if just "panel" -> left) -->
         <div class="panelcontainertop">
             <div class="paneltop">
-                <img src="/public/img/logo_supporto.png" class="logo">
+                <img src="/public/img/Supporto_Alta.png" class="logo">
                 <p class="title">Log on</p>
             </div>
             <div name="logonform" class="panelform" >
@@ -731,10 +731,21 @@
 
                     <span id="tr-password">
                         <input type="password" name="password" id="form_password" value="" placeholder="Password:">
-                        <span toggle="#password-field" id="password-visibility"
+                        <span onclick="mostra_esconde_senha()" toggle="#password-field" id="password-visibility"
                             class="fa fa-fw fa-eye field-icon toggle-password"
                             style="float: right; margin-top: -52px; margin-right: 10px; cursor: pointer; position: relative;"></span>
-                    </span>
+                        </span>
+                        <script type="text/javascript">
+                        function mostra_esconde_senha(){
+                            input = document.getElementById('form_password');
+                            if(input.type == "password"){
+                                input.type = 'text';
+                            }
+                            else{
+                                input.type = 'password';
+                            }
+                        }
+                        </script>
 
                     <span id="span-password-ok">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="float: right;margin-top:-52px;margin-right:-30px;padding-right:5px;">

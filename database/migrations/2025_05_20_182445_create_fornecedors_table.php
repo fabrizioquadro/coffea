@@ -27,6 +27,9 @@ return new class extends Migration
             $table->boolean('enviar_whatsapp')->nullable();
             $table->string('email')->nullable();
             $table->string('cep')->nullable();
+            $table->unsignedBigInteger('unidade_id')->nullable();
+            $table->string('status')->default('Ativo');
+            $table->foreign('unidade_id')->references('id')->on('unidades');
             $table->timestamps();
         });
     }

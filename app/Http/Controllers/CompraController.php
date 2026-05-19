@@ -8,7 +8,12 @@ use App\Models\EntregaDevolucao;
 use App\Models\Financeiro;
 use App\Models\Operacao;
 use App\Models\Alerta;
-use chillerlan\QRCode\{QRCode, QROptions};
+use App\Models\Token;
+use App\Models\Qrcode;
+use chillerlan\QRCode\QRCode AS QRCode_gerar;
+use chillerlan\QRCode\QROptions;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class CompraController extends Controller
 {
@@ -22,14 +27,27 @@ class CompraController extends Controller
             ->where('user_moderador_id', $user->id)
             ->get();
         }
+
+        //if($_GET && $_GET['controle'] == 'true'){
+        //    foreach($requisicoes as $requisicao){
+        //        if($requisicao->aceito_pelo_fornecedor){
+        //            $this->integrar_manual($requisicao);
+        //        }
+        //    }
+
+        //    die('Finalizado');
+        //}
+
+
         return view('compras/index', compact('requisicoes','user'));
     }
 
     public function acessar($id){
         $user= auth()->user();
         $requisicao = Requisicao::where('id', $id)->first();
+
         $link   = route('acesso_fornecedor', $requisicao->qrcode()->link);
-        $qrcode = (new QRCode)->render($link);
+        $qrcode = (new QRCode_gerar)->render($link);
 
         Alerta::where('user_id', $user->id)
         ->where('origem','compra')
@@ -85,11 +103,11 @@ class CompraController extends Controller
 
                     //vamos buscar os financeiros que são avista e a prazo
                     foreach($requisicao->financeiros as $financeiro){
-                        if(!$financeiro->sisagil_id_retorno && $financeiro->tipo_pagamento == "Pagamento Pós Entrega" || $financeiro->tipo_pagamento == "Pagamento Data Vencimento"){
-                            if($financeiro->tipo_pagamento == "Pagamento Pós Entrega"){
-                                $financeiro->vencimento = date('Y-m-d');
-                                $financeiro->save();
-                            }
+                        if(!$financeiro->sisagil_id_retorno && ($financeiro->tipo_pagamento == "Pagamento Pós Entrega" || $financeiro->tipo_pagamento == "Pagamento Data Vencimento")){
+                            //if($financeiro->tipo_pagamento == "Pagamento Pós Entrega"){
+                            //    $financeiro->vencimento = date('Y-m-d');
+                            //    $financeiro->save();
+                            //}
                             $api = new ApiSisAgilController($requisicao->unidade->token_sisagil);
                             $api->integra_financeiro($financeiro);
                         }
@@ -208,6 +226,25 @@ class CompraController extends Controller
         }
     }
 
+    public static function get_st_entrega($requisicao){
+        $controle = "Entrega Total";
+        $controle_1_entrega = false;
+        foreach($requisicao->itens as $item){
+            if($item->qtd_pedida > ($item->qtd_entregue + $item->qtd_devolucao)){
+                $controle = "Não Entregue";
+            }
+            elseif($item->qtd_pedida <= ($item->qtd_entregue + $item->qtd_devolucao) && $item->qtd_entregue > 0){
+                $controle_1_entrega = true;
+            }
+        }
+
+        if($controle != "Entrega Total" && $controle_1_entrega){
+            $controle = "Entrega Parcial";
+        }
+
+        return $controle;
+    }
+
     public function testaStatusRequisicao($requisicao){
         $controle = true;
         //vamos verificar todos os itens
@@ -218,11 +255,11 @@ class CompraController extends Controller
         }
 
         //vamos verificar se todos os financeiros foram integrados
-        foreach($requisicao->financeiros as $financeiro){
-            if(!$financeiro->sisagil_id_retorno){
-                $controle = false;
-            }
-        }
+        //foreach($requisicao->financeiros as $financeiro){
+        //    if(!$financeiro->sisagil_id_retorno){
+        //        $controle = false;
+        //    }
+        //}
 
         if($controle){
             $requisicao->status = "Compra Finalizada";
@@ -248,7 +285,12 @@ class CompraController extends Controller
             try {
                 $requisicao = Requisicao::where('id', $request->requisicao_id)->first();
                 $requisicao->status = 'Compra Cancelada';
+                $requisicao->justificativa_cancelamento = $request->justificativa_cancelamento;
                 $requisicao->save();
+
+                foreach ($requisicao->itens as $item) {
+                    EntregaDevolucao::where('requisicao_item_id', $item->id)->delete();
+                }
 
                 return redirect()->route('compras')->with('mensagem', 'Compra Cancelada');
             } catch (\Exception $e) {
@@ -259,9 +301,75 @@ class CompraController extends Controller
 
     public function imprimir($id){
         $requisicao = Requisicao::where('id', $id)->first();
-        $link   = route('acesso_fornecedor', $requisicao->qrcode()->link);
-        $qrcode = (new QRCode)->render($link);
+        $link = null;
+        $qrcode = null;
+        if($requisicao->qrcode()){
+            $link   = route('acesso_fornecedor', $requisicao->qrcode()->link);
+            $qrcode = (new QRCode_gerar)->render($link);
+        }
         return view('imprimir/index', compact('requisicao','link','qrcode'));
+    }
+
+    public function imprimir_simplificado($id){
+        $requisicao = Requisicao::where('id', $id)->first();
+        //$link   = route('acesso_fornecedor', $requisicao->qrcode()->link);
+        //$qrcode = (new QRCode)->render($link);
+        $link = null;
+        $link_view = null;
+        $code = null;
+        $qrcode = null;
+        if($requisicao->fornecedor){
+            $link = $requisicao->id.$requisicao->fornecedor->id.date('YmdHis');
+            $link_view   = route('acesso_fornecedor', $link);
+
+            $code = Qrcode::where('requisicao_id', $requisicao->id)->first();
+
+            $qrcode = (new QRCode_gerar)->render($link_view);
+        }
+        $dados = [
+            'requisicao' => $requisicao,
+            'link' => $link_view,
+            'qrcode' => $qrcode,
+            'code' => $code,
+        ];
+        $html = view('imprimir/gerar_pdf', $dados)->render();
+        //echo $html;
+        //die();
+        //vamos gerar o pdf
+        $options = new Options();
+        //$options->set('isRemoteEnabled', TRUE);
+        $options->set('isHtml5ParserEnabled', TRUE);
+        //dd($options->get('isHtml5ParserEnabled'));
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        $dompdf->stream("Relatório_simplificado.pdf", array("Attachment" => 0));
+    }
+
+    public function imprimir_fornecedor($id){
+        $requisicao = Requisicao::where('id', $id)->first();
+        //$link   = route('acesso_fornecedor', $requisicao->qrcode()->link);
+        //$qrcode = (new QRCode)->render($link);
+        $link = null;
+        $link_view = null;
+        $code = null;
+        $qrcode = null;
+        if($requisicao->fornecedor){
+            $link = $requisicao->id.$requisicao->fornecedor->id.date('YmdHis');
+            $link_view   = route('acesso_fornecedor', $link);
+
+            $code = Qrcode::where('requisicao_id', $requisicao->id)->first();
+
+            $qrcode = (new QRCode_gerar)->render($link_view);
+        }
+        $dados = [
+            'requisicao' => $requisicao,
+            'link' => $link_view,
+            'qrcode' => $qrcode,
+            'code' => $code,
+        ];
+        return view('imprimir/gerar_pdf', $dados)->render();
     }
 
     public function integrar($id){
@@ -277,6 +385,23 @@ class CompraController extends Controller
         }
         else{
             return redirect()->route('compras')->with('mensagem_erro','Você não possui este acesso');
+        }
+    }
+
+    public function integrar_manual($requisicao){
+        try {
+            $api = new ApiSisAgilController($requisicao->unidade->token_sisagil);
+            foreach($requisicao->financeiros as $financeiro){
+                if(!$financeiro->sisagil_id_retorno){
+                    $api->integra_financeiro($financeiro);
+                }
+            }
+
+            $this->testaStatusRequisicao($requisicao);
+
+            //return redirect()->route('compras.integrar', $request->requisicao_id)->with('mensagem','Integração Realizada');
+        } catch (\Exception $e) {
+            return redirect()->route('compras')->with('mensagem_erro',$e->getMessage());
         }
     }
 
@@ -300,6 +425,8 @@ class CompraController extends Controller
                 }
             }
 
+            $this->testaStatusRequisicao($requisicao);
+
             return redirect()->route('compras.integrar', $request->requisicao_id)->with('mensagem','Integração Realizada');
         } catch (\Exception $e) {
             return redirect()->route('compras')->with('mensagem_erro',$e->getMessage());
@@ -311,6 +438,92 @@ class CompraController extends Controller
         $requisicao = Requisicao::where('id', $financeiro->requisicao_id)->first();
         $api = new ApiSisAgilController($requisicao->unidade->token_sisagil);
         $api->get_parcela_sisagil($financeiro->id);
+    }
+
+    public function retornar($id){
+        $requisicao = Requisicao::where('id', $id)->first();
+        return view('compras/retornar', compact('requisicao'));
+    }
+
+    public function retornar_set(Request $request){
+        $requisicao = Requisicao::where('id', $request->requisicao_id)->first();
+        $requisicao->status = $request->retorno;
+        $requisicao->save();
+
+        foreach ($requisicao->itens as $item) {
+            EntregaDevolucao::where('requisicao_item_id', $item->id)->delete();
+        }
+
+
+        $ds_historico = "Pedido ".$request->retorno;
+        set_historico($requisicao->id, $ds_historico, $requisicao->status);
+
+        if($request->retorno == "Retornado para Validação"){
+            $user_notificacao = $requisicao->user_moderador_id;
+        }
+        else{
+            $user_notificacao = $requisicao->user_liberador_id;
+        }
+
+        $dados_alerta = [
+            'user_id' => $user_notificacao,
+            'requisicao_id' => $requisicao->id,
+            'origem' => 'compras',
+            'mensagem' => 'Pedido '.$request->retorno,
+        ];
+        cadastra_alerta($dados_alerta);
+
+        //vamos mandar o whats para o fornecedor
+        enviarWhatsapp($requisicao->fornecedor_whatsapp, 'O pedido solicitado voltou para análise, assim que ele for aprovado, você recebera uma nova mensagem');
+
+        Token::where('requisicao_id', $requisicao->id)->delete();
+
+        return redirect()->route('compras')->with('mensagem','Pedido retornado para análise');
+    }
+
+    public function enviar_requisicao_email(){
+        $requisicao = Requisicao::where('id',$_GET['requisicao_id'])->first();
+
+        $link = null;
+        $link_view = null;
+        $code = null;
+        $qrcode = null;
+        if($requisicao->fornecedor){
+            $link = $requisicao->id.$requisicao->fornecedor->id.date('YmdHis');
+            $link_view   = route('acesso_fornecedor', $link);
+
+            $code = Qrcode::where('requisicao_id', $requisicao->id)->first();
+
+            $qrcode = (new QRCode_gerar)->render($link_view);
+        }
+        $dados = [
+            'requisicao' => $requisicao,
+            'link' => $link_view,
+            'qrcode' => $qrcode,
+            'code' => $code,
+        ];
+        $html = view('imprimir/gerar_pdf', $dados)->render();
+
+        $options = new Options();
+        //$options->set('isRemoteEnabled', TRUE);
+        $options->set('isHtml5ParserEnabled', TRUE);
+        //dd($options->get('isHtml5ParserEnabled'));
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        $output = $dompdf->output();
+        $caminho_arquivo = "public/impressoes/".$requisicao->id.".pdf";
+        file_put_contents($caminho_arquivo, $output);
+
+        $mensagem = "
+        <h2>Solicitação de compra</h2>
+        <p>
+            Segue anexo o arquivo de solicitação de compra.
+        </p>
+        ";
+
+        enviarMail($_GET['email'], 'Solicitação de compra', $mensagem, $caminho_arquivo);
     }
 
 }

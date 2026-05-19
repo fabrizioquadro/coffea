@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 @php
 $user = auth()->user();
+
 if($user->imagem){
     $avatar = "<img src='/public/img/users/".$user->imagem."?".date("ymdhis")."' alt class='w-px-40 h-auto rounded-circle' />";
 }
@@ -16,7 +17,7 @@ $alertas = App\Models\Alerta::where('user_id', $user->id)->where('visualizacao',
         <title>Supporto Trading Company - Sistema de Pedido de Compras</title>
         <meta name="description" content="Supporto Trading Company - Sistema de Pedido de Compras" />
         <!-- Favicon -->
-        <link rel="icon" type="image/x-icon" href="{{ asset('/public/img/logo_supporto.png') }}" />
+        <link rel="icon" type="image/x-icon" href="{{ asset('/public/img/Supporto_Alta.png') }}" />
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -51,7 +52,14 @@ $alertas = App\Models\Alerta::where('user_id', $user->id)->where('visualizacao',
         <script src="{{ asset('/public/template/vendor/js/template-customizer.js') }}"></script>
         <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
         <script src="{{ asset('/public/template/js/config.js') }}"></script>
-
+        <style media="screen">
+            .table-responsive{
+                min-height: 350px !important;
+            }
+            *{
+                text-transform: uppercase !important;
+            }
+        </style>
     </head>
 
     <body>
@@ -62,7 +70,7 @@ $alertas = App\Models\Alerta::where('user_id', $user->id)->where('visualizacao',
                 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
                     <div class="app-brand demo">
                         <a href="{{ route('dashboard') }}" class="app-brand-link">
-                            <img src="{{ asset('/public/img/logo_supporto.png') }}" style='height: 50px'>
+                            <img src="{{ asset('/public/img/Supporto_Alta.png') }}" style='height: 80px'>
                         </a>
                         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
                             <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -73,53 +81,79 @@ $alertas = App\Models\Alerta::where('user_id', $user->id)->where('visualizacao',
                     </div>
                     <div class="menu-inner-shadow"></div>
                     <ul class="menu-inner py-1">
-                        <li class="menu-header fw-medium mt-4">
-                            <span class="menu-header-text">Administrativo</span>
-                        </li>
-                        <!-- Dashboards -->
-                        <li class="menu-item">
-                            <a href="{{ route('dashboard') }}" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-home-outline"></i>
-                                <div data-i18n="Dashboard">Dashboard</div>
-                            </a>
-                        </li>
-                        @if($user->perfil->administrador)
+                        @if($user->perfil->somente_solicitar_pedido)
+                            <li class="menu-item">
+                                <a href="{{ route('pedidos.adicionar') }}" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-receipt-text-edit-outline"></i>
+                                    <div data-i18n="Pedidos">Pedidos</div>
+                                </a>
+                            </li>
+                        @else
+                            <li class="menu-header fw-medium mt-4">
+                                <span class="menu-header-text">Administrativo</span>
+                            </li>
+                            <!-- Dashboards -->
+                            <li class="menu-item">
+                                <a href="{{ route('dashboard') }}" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-home-outline"></i>
+                                    <div data-i18n="Dashboard">Dashboard</div>
+                                </a>
+                            </li>
+
                             <li class="menu-item">
                                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                                     <i class="menu-icon tf-icons mdi mdi-folder-plus-outline"></i>
                                     <div data-i18n="Cadastros">Cadastros</div>
                                 </a>
                                 <ul class="menu-sub">
-                                    <li class="menu-item">
-                                        <a href="{{ route('unidades') }}" class="menu-link">
-                                            <i class="menu-icon tf-icons mdi mdi-home-city"></i>
-                                            <div data-i18n="Unidades">Unidades</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="{{ route('setores') }}" class="menu-link">
-                                            <i class="menu-icon tf-icons mdi mdi-sitemap"></i>
-                                            <div data-i18n="Setores">Setores</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="{{ route('perfis') }}" class="menu-link">
-                                            <i class="menu-icon tf-icons mdi mdi-format-list-bulleted-type"></i>
-                                            <div data-i18n="Perfis">Perfis</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="{{ route('usuarios') }}" class="menu-link">
-                                            <i class="menu-icon tf-icons mdi mdi-account-group"></i>
-                                            <div data-i18n="Usuários">Usuários</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="{{ route('operacoes') }}" class="menu-link">
-                                            <i class="menu-icon tf-icons mdi mdi-folder-open-outline"></i>
-                                            <div data-i18n="Operações">Operações</div>
-                                        </a>
-                                    </li>
+                                    @if($user->perfil->administrador || $user->perfil->unidades)
+                                        <li class="menu-item">
+                                            <a href="{{ route('unidades') }}" class="menu-link">
+                                                <i class="menu-icon tf-icons mdi mdi-home-city"></i>
+                                                <div data-i18n="Unidades">Unidades</div>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if($user->perfil->administrador || $user->perfil->setores)
+                                        <li class="menu-item">
+                                            <a href="{{ route('setores') }}" class="menu-link">
+                                                <i class="menu-icon tf-icons mdi mdi-sitemap"></i>
+                                                <div data-i18n="Setores">Setores</div>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if($user->perfil->administrador || $user->perfil->perfil)
+                                        <li class="menu-item">
+                                            <a href="{{ route('perfis') }}" class="menu-link">
+                                                <i class="menu-icon tf-icons mdi mdi-format-list-bulleted-type"></i>
+                                                <div data-i18n="Perfis">Perfis</div>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if($user->perfil->administrador || $user->perfil->usuarios)
+                                        <li class="menu-item">
+                                            <a href="{{ route('usuarios') }}" class="menu-link">
+                                                <i class="menu-icon tf-icons mdi mdi-account-group"></i>
+                                                <div data-i18n="Usuários">Usuários</div>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if($user->perfil->administrador || $user->perfil->operacoes)
+                                        <li class="menu-item">
+                                            <a href="{{ route('operacoes') }}" class="menu-link">
+                                                <i class="menu-icon tf-icons mdi mdi-folder-open-outline"></i>
+                                                <div data-i18n="Operações">Operações</div>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if($user->perfil->administrador || $user->perfil->contas)
+                                        <li class="menu-item">
+                                            <a href="{{ route('contas') }}" class="menu-link">
+                                                <i class="menu-icon tf-icons mdi mdi-cash"></i>
+                                                <div data-i18n="Contas">Contas</div>
+                                            </a>
+                                        </li>
+                                    @endif
                                     <li class="menu-item">
                                         <a href="{{ route('fornecedores') }}" class="menu-link">
                                             <i class="menu-icon tf-icons mdi mdi-bank"></i>
@@ -138,65 +172,87 @@ $alertas = App\Models\Alerta::where('user_id', $user->id)->where('visualizacao',
                                             <div data-i18n="Itens">Itens</div>
                                         </a>
                                     </li>
+                                </ul>
+                            </li>
+                            <li class="menu-item">
+                                <a href="{{ route('listagem') }}" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-database"></i>
+                                    <div data-i18n="Listagem">Listagem</div>
+                                </a>
+                            </li>
+                            @if($user->perfil->administrador || $user->perfil->criar || $user->perfil->preparar_compra)
+                                <li class="menu-item">
+                                    <a href="{{ route('pedidos') }}" class="menu-link">
+                                        <i class="menu-icon tf-icons mdi mdi-receipt-text-edit-outline"></i>
+                                        <div data-i18n="Pedidos">Pedidos</div>
+                                    </a>
+                                </li>
+                            @endif
+                            <li class="menu-item">
+                                <a href="{{ route('pedidos_cancelados') }}" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-cancel"></i>
+                                    <div data-i18n="Pedidos Cancelados">Pedidos Cancelados</div>
+                                </a>
+                            </li>
+                            @if($user->perfil->administrador || $user->perfil->moderar ||$user->perfil->aprovar || $user->perfil->preparar_compra)
+                                <li class="menu-item">
+                                    <a href="{{ route('requisicoes') }}" class="menu-link">
+                                        <i class="menu-icon tf-icons mdi mdi-receipt-text-check"></i>
+                                        <div data-i18n="Requisições">Requisições</div>
+                                    </a>
+                                </li>
+                            @endif
+                            @if($user->perfil->administrador || $user->perfil->moderar || $user->perfil->confirmar_recebimento)
+                                <li class="menu-item">
+                                    <a href="{{ route('compras') }}" class="menu-link">
+                                        <i class="menu-icon tf-icons mdi mdi-receipt-text-send-outline"></i>
+                                        <div data-i18n="Compras">Compras</div>
+                                    </a>
+                                </li>
+                            @endif
+                            @if($user->perfil->administrador || $user->perfil->finalizados)
+                                <li class="menu-item">
+                                    <a href="{{ route('finalizados') }}" class="menu-link">
+                                        <i class="menu-icon tf-icons mdi mdi-check-bold"></i>
+                                        <div data-i18n="Finalizados">Finalizados</div>
+                                    </a>
+                                </li>
+                            @endif
+                            <li class="menu-item">
+                                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                    <i class="menu-icon tf-icons mdi mdi-link-variant"></i>
+                                    <div data-i18n="Outros">Outros</div>
+                                </a>
+                                <ul class="menu-sub">
                                     <li class="menu-item">
-                                        <a href="{{ route('contas') }}" class="menu-link">
-                                            <i class="menu-icon tf-icons mdi mdi-cash"></i>
-                                            <div data-i18n="Contas">Contas</div>
+                                        <a target="_blank" href="https://sistema.sisagil.com" class="menu-link">
+                                            <div data-i18n="Sisagil">Sisagil</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a target="_blank" href="https://coffea.wobrasil.com.br" class="menu-link">
+                                            <div data-i18n="Estoque">Estoque</div>
                                         </a>
                                     </li>
                                 </ul>
                             </li>
-                        @endif
-                        @if($user->perfil->administrador || $user->perfil->criar || $user->perfil->preparar_compra)
-                            <li class="menu-item">
-                                <a href="{{ route('pedidos') }}" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-receipt-text-edit-outline"></i>
-                                    <div data-i18n="Pedidos">Pedidos</div>
-                                </a>
+                            <div class="menu-inner-shadow"></div>
+                            <li class="menu-header fw-medium mt-4">
+                                <span class="menu-header-text">Relatórios</span>
                             </li>
-                        @endif
-                        @if($user->perfil->administrador || $user->perfil->moderar ||$user->perfil->aprovar || $user->perfil->preparar_compra)
                             <li class="menu-item">
-                                <a href="{{ route('requisicoes') }}" class="menu-link">
+                                <a href="{{ route('rel_requisicao') }}" class="menu-link">
                                     <i class="menu-icon tf-icons mdi mdi-receipt-text-check"></i>
                                     <div data-i18n="Requisições">Requisições</div>
                                 </a>
                             </li>
-                        @endif
-                        @if($user->perfil->administrador || $user->perfil->moderar || $user->perfil->confirmar_recebimento)
                             <li class="menu-item">
-                                <a href="{{ route('compras') }}" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-receipt-text-send-outline"></i>
-                                    <div data-i18n="Compras">Compras</div>
+                                <a href="{{ route('rel_financeiro') }}" class="menu-link">
+                                    <i class="menu-icon tf-icons mdi mdi-cash"></i>
+                                    <div data-i18n="Financeiro">Financeiro</div>
                                 </a>
                             </li>
                         @endif
-                        @if($user->perfil->administrador || $user->perfil->moderar)
-                            <li class="menu-item">
-                                <a href="{{ route('finalizados') }}" class="menu-link">
-                                    <i class="menu-icon tf-icons mdi mdi-check-bold"></i>
-                                    <div data-i18n="Finalizados">Finalizados</div>
-                                </a>
-                            </li>
-                        @endif
-                        <li class="menu-item">
-                            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                                <i class="menu-icon tf-icons mdi mdi-link-variant"></i>
-                                <div data-i18n="Outros">Outros</div>
-                            </a>
-                            <ul class="menu-sub">
-                                <li class="menu-item">
-                                    <a target="_blank" href="https://sistema.sisagil.com" class="menu-link">
-                                        <div data-i18n="Sisagil">Sisagil</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item">
-                                    <a target="_blank" href="https://coffea.wobrasil.com.br" class="menu-link">
-                                        <div data-i18n="Estoque">Estoque</div>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
                     </ul>
                 </aside>
                 <!-- / Menu -->
@@ -258,11 +314,14 @@ $alertas = App\Models\Alerta::where('user_id', $user->id)->where('visualizacao',
                                                 if($alerta->origem == "pedidos"){
                                                     $link = route('pedidos.acessar', $alerta->requisicao_id);
                                                 }
+                                                elseif($alerta->origem == "compra"){
+                                                    $link = route('compras.acessar', $alerta->requisicao_id);
+                                                }
                                                 elseif($alerta->origem == "requisicao"){
                                                     $link = route('requisicoes.acessar', $alerta->requisicao_id);
                                                 }
-                                                elseif($alerta->origem == "compra"){
-                                                    $link = route('compras.acessar', $alerta->requisicao_id);
+                                                else{
+                                                    $link = route('requisicoes.acessar', $alerta->requisicao_id);
                                                 }
                                                 @endphp
                                                 <li class="list-group-item list-group-item-action dropdown-notifications-item">
@@ -380,6 +439,7 @@ $alertas = App\Models\Alerta::where('user_id', $user->id)->where('visualizacao',
         <script src="{{ asset('/public/template/vendor/libs/typeahead-js/typeahead.js') }}"></script>
         <script src="{{ asset('/public/template/vendor/js/menu.js') }}"></script>
         <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
         <!-- endbuild -->
 

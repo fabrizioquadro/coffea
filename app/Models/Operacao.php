@@ -14,7 +14,12 @@ class Operacao extends Model
         'descricao',
         'status',
         'operacao_padrao_cancelamento',
+        'unidade_id',
     ];
+
+    public function unidade(){
+        return $this->belongsTo(Unidade::class);
+    }
 
     public static function get_operacao_padrao_cancelamento(){
         return SELF::where('operacao_padrao_cancelamento','Sim')->first();

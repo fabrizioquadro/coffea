@@ -37,7 +37,8 @@ class userTableSeeder extends Seeder
             'perfil_id' => $perfil->id,
             'nome' => 'Administrador',
             'email' => 'fabrizio.quadro@gmail.com',
-            'password' => bcrypt('fabrizio'),
+            'login' => 'admin',
+            'password' => bcrypt('supporto@2025'),
         ];
         User::create($dados);
 

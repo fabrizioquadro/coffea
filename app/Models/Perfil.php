@@ -12,6 +12,12 @@ class Perfil extends Model
     protected $fillable = [
         'descricao',
         'administrador',
+        'unidades',
+        'setores',
+        'perfil',
+        'usuarios',
+        'operacoes',
+        'contas',
         'criar',
         'preparar_compra',
         'duplicar_pedido_compra',
@@ -26,6 +32,11 @@ class Perfil extends Model
         'status',
         'user_id_cadastro',
         'user_id_alteracao',
+        'moderar_todos',
+        'aprovar_todos',
+        'somente_solicitar_pedido',
+        'integrar_financeiro',
+        'finalizados',
     ];
 
     public function user_cad(){

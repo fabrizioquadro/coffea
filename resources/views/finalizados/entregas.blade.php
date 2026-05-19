@@ -4,7 +4,7 @@
 <div class="card card-border-shadow-primary mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between">
-            <h4 class="card-title">Entregas</h4>
+            <h4 class="card-title">Entregas - Cod: {{ $requisicao->id }}</h4>
         </div>
         @if($mensagem = Session::get('mensagem'))
             <div class="alert alert-success alert-dismissible mt-3" role="alert">

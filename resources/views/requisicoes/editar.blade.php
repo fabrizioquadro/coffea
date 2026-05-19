@@ -1,10 +1,38 @@
 @extends('layout.admin')
 
 @section('conteudo')
+<style media="screen">
+    .select2-selection__rendered{
+        line-height: 40px !important;
+        border-color: red !important;
+    }
+    .select2-selection{
+        height: 40px !important;
+    }
+
+    .form-select, .input-group-text{
+    height: 45px !important;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: none; /* Remove a seta */
+  }
+</style>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 <div class="card card-border-shadow-primary mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between">
-            <h4 class="card-title">{{ $controle == "preparar_compra" ? 'Preparar Compra' : 'Editar Requisição' }}</h4>
+            <h4 class="card-title">
+                @if($controle == "preparar_compra")
+                    Preparar Compra - Cod: {{ $requisicao->id }}
+
+                @elseif($retorno == 'compras')
+                    Editar Compra - Cod: {{ $requisicao->id }}
+                @else
+                    Editar Requisição - Cod: {{ $requisicao->id }}
+                @endif
+            </h4>
         </div>
         <hr>
         <form id="formulario" action="{{ route('requisicoes.update') }}" method="post" enctype="multipart/form-data">
@@ -15,14 +43,12 @@
             <input type="hidden" name="contador_financeiro" id="contador_financeiro" value="0">
             <input type="hidden" name="controle" value="{{ $controle == 'preparar_compra' ? 'preparar_compra' : '' }}">
             <input type="hidden" name="controle_enviar_moderacao" id="controle_enviar_moderacao">
+            <input type="hidden" name="retorno" value="{{ $retorno }}">
             <div class="row mt-2 gy-4 align-items-end">
                 <div class="col-md-4">
                     <div class="form-floating form-floating-outline">
-                        <select required id="fornecedor_id" name='fornecedor_id' class="select2 form-select">
-                            <option value="">Opções</option>
-                            @foreach($fornecedores as $fornecedor)
-                                <option @if($requisicao->fornecedor_id == $fornecedor->id) selected @endif value="{{ $fornecedor->id }}">{{ $fornecedor->nome }}</option>
-                            @endforeach
+                        <select id="fornecedor_id" name="fornecedor_id" class="select2 form-select">
+                            <option selected value="{{ $requisicao->fornecedor ? $requisicao->fornecedor->id : '' }}">{{ $requisicao->fornecedor ? $requisicao->fornecedor->nome : '' }}</option>
                         </select>
                         <label for="fornecedor_id">Fornecedor:</label>
                     </div>
@@ -40,7 +66,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="form-floating form-floating-outline">
-                        <select required id="unidade_id" name='unidade_id' class="select2 form-select">
+                        <select required id="unidade_id" name='unidade_id' disabled class="select2 form-select">
                             <option value="">Opções</option>
                             @foreach($unidades as $unidade)
                                 <option @if($requisicao->unidade_id == $unidade->id) selected @endif value="{{ $unidade->id }}">{{ $unidade->nome }}</option>
@@ -51,10 +77,22 @@
                 </div>
             </div>
             <div class="row mt-2 gy-4 align-items-end">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="form-floating form-floating-outline">
-                        <input required class="form-control" type="email" id="fornecedor_email" name="fornecedor_email" value="{{ $requisicao->fornecedor_email }}"/>
+                        <input class="form-control" type="email" id="fornecedor_email" name="fornecedor_email" value="{{ $requisicao->fornecedor_email }}"/>
                         <label for="fornecedor_email">Informe o Email atual do Fornecedor:</label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-floating form-floating-outline">
+                        <input class="form-control" type="text" id="fornecedor_whatsapp" name="fornecedor_whatsapp" value="{{ $requisicao->fornecedor_whatsapp }}" maxlength="15" onkeypress="mascara( this, mtel )"/>
+                        <label for="fornecedor_whatsapp">Informe o Whatsapp atual do Fornecedor:</label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-floating form-floating-outline">
+                        <input class="form-control" type="text" id="portador" name="portador" value="{{ $requisicao->portador }}"/>
+                        <label for="portador">Portador:</label>
                     </div>
                 </div>
             </div>
@@ -64,7 +102,7 @@
                         <select required name='user_moderador_id' id='user_moderador_id' class="select2 form-select">
                             <option value="">Opções</option>
                             @foreach($users as $user)
-                                @if($user->perfil->administrador || $user->perfil->moderar)
+                                @if($user->perfil->administrador || ($user->perfil->moderar && $user->setores()->where('setor_id', $requisicao->setor_id)->count() > 0))
                                     <option @if($requisicao->user_moderador_id == $user->id) selected @endif value="{{ $user->id }}">{{ $user->nome }}</option>
                                 @endif
                             @endforeach
@@ -77,7 +115,7 @@
                         <select required name='user_liberador_id' id='user_liberador_id' class="select2 form-select">
                             <option value="">Opções</option>
                             @foreach($users as $user)
-                                @if($user->perfil->administrador || $user->perfil->aprovar)
+                                @if($user->perfil->administrador || ($user->perfil->aprovar && $user->setores()->where('setor_id', $requisicao->setor_id)->count() > 0)))
                                     <option @if($requisicao->user_liberador_id == $user->id) selected @endif value="{{ $user->id }}">{{ $user->nome }}</option>
                                 @endif
                             @endforeach
@@ -100,11 +138,19 @@
                         </span>
                         <span class="switch-label">Simples Cotação</span>
                     </label>
+                    <label class="switch switch-lg switch-success">
+                        <input type="checkbox" name="sem_validacao" id="sem_validacao" value="Sim" class="switch-input" @if($requisicao->sem_validacao) checked @endif>
+                        <span class="switch-toggle-slider">
+                            <span class="switch-on"></span>
+                            <span class="switch-off"></span>
+                        </span>
+                        <span class="switch-label">Sem Validação</span>
+                    </label>
                 </div>
                 <div class="col-md-12">
                     <div class="form-floating form-floating-outline">
-                        <textarea class="form-control h-px-100" id="motivo_pedido_compra" name="motivo_pedido_compra">{{ $requisicao->motivo_pedido_compra }}</textarea>
-                        <label for="motivo_pedido_compra">Motivo de Uso:</label>
+                        <textarea readonly class="form-control h-px-100" id="motivo_pedido_compra" name="motivo_pedido_compra">{{ $requisicao->motivo_pedido_compra }}</textarea>
+                        <label for="motivo_pedido_compra">Item / Motivo:</label>
                       </div>
                 </div>
                 <div class="col-md-12">
@@ -124,10 +170,11 @@
                     <thead class="table-light">
                         <tr>
                             <th>Item</th>
+                            <th>Unidade</th>
                             <th>Qtd</th>
                             <th>Unitário</th>
                             <th>Total</th>
-                            <th>Entrega</th>
+                            <th style='display:none'>Entrega</th>
                             <th>Obs</th>
                             <th>Patrimonio</th>
                             <th></th>
@@ -137,6 +184,7 @@
                         @foreach($requisicao->itens as $item)
                             <tr id="linha_item_cadastrada_{{ $item->id }}">
                                 <td>{{ $item->item->nome }}</td>
+                                <td>{{ $item->ds_unidade }}</td>
                                 <td>
                                     <input onblur="calcula_total_item_cad({{ $item->id }})" class="form-control quantidade" type="number" name="item_cad_qtd_pedida_{{ $item->id }}" id="item_cad_qtd_pedida_{{ $item->id }}" pattern="[0-9]+([,\.][0-9]+)?" min="0" step="any" value="{{ $item->qtd_pedida }}"/>
                                 </td>
@@ -146,7 +194,7 @@
                                 <td>
                                     <input onblur="calcula_total_item_cad({{ $item->id }})" class="form-control total" type="text" id="item_cad_valor_total_{{ $item->id }}" name="item_cad_valor_total_{{ $item->id }}" onkeypress="return(MascaraMoeda(this,'.',',',event))" value="{{ valorDbForm($item->valor_total_pedido) }}"/>
                                 </td>
-                                <td>
+                                <td style='display:none'>
                                     <input class="form-control" type="date" id="item_cad_data_previsao_entrega_{{ $item->id }}" name="item_cad_data_previsao_entrega_{{ $item->id }}" value="{{ $item->data_previsao_entrega }}"/>
                                 </td>
                                 <td>
@@ -247,13 +295,10 @@
                 <div class="row mt-2 gy-4 align-items-end" id="linha_anexo_1">
                     <div class="col-md-6">
                         <div class="form-floating form-floating-outline">
-                            <select required id="type" name='anexo_fornecedor_1' class="select2 form-select">
-                                <option value="">Opções</option>
-                                @foreach($fornecedores as $fornecedor)
-                                    <option value="{{ $fornecedor->id }}">{{ $fornecedor->nome }}</option>
-                                @endforeach
+                            <select id="anexo_fornecedor_1" name="anexo_fornecedor_1" class="select2 form-select fornecedor_anexos">
+
                             </select>
-                            <label for="axexo_fornecedor_1">Fornecedor 1:</label>
+                            <label for="anexo_fornecedor_1">Fornecedor 1:</label>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -377,26 +422,87 @@
             </div>
             <div class="modal-body">
                 <div class="row mt-2 gy-4 align-items-end">
-                    <div class="col-md-4">
-                        <div class="form-floating form-floating-outline">
-                            <select required id="grupo_id" class="select2 form-select">
-                                <option value="">Opções</option>
-                                @foreach($grupos as $grupo)
-                                    <option value="{{ $grupo->id }}">{{ $grupo->descricao }}</option>
-                                @endforeach
-                            </select>
-                            <label for="grupo_id">Grupo:</label>
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge">
+                            <div class="form-floating form-floating-outline">
+                                <select required id="grupo_id" class="select2 form-select">
+                                    <option value="">Opções</option>
+                                    @foreach($grupos as $grupo)
+                                        <option value="{{ $grupo->id }}">{{ $grupo->descricao }}</option>
+                                    @endforeach
+                                </select>
+                                <label for="grupo_id">Grupo:</label>
+                            </div>
+                            <span title="Adicionar Outro Grupo" onclick="adicionar_novo_grupo()" class="input-group-text cursor-pointer">
+                                <i class="mdi mdi-plus-circle-outline"></i>
+                            </span>
                         </div>
                     </div>
-                    <div class="col-md-8">
-                        <div class="form-floating form-floating-outline">
-                            <select required id="item_id" class="select2 form-select">
-                                <option value="">Opções</option>
-                            </select>
-                            <label for="item_id">Item/Produto:</label>
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge">
+                            <div class="form-floating form-floating-outline">
+                                <select required id="item_id" class="select2 form-select">
+                                    <option value="">Opções</option>
+                                </select>
+                                <label for="item_id">Item/Produto:</label>
+                            </div>
+                            <span title="Adicionar Outro Item" onclick="adicionar_novo_item()" class="input-group-text cursor-pointer">
+                                <i class="mdi mdi-plus-circle-outline"></i>
+                            </span>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            <select required id="ds_unidade" class="select2 form-select">
+                                <option value="">Opções</option>
+                                <option value="CÁPSULA">CÁPSULA</option>
+                                <option value="CARTELA">CARTELA</option>
+                                <option value="CENTO">CENTO</option>
+                                <option value="CONJUNTO">CONJUNTO</option>
+                                <option value="CENTÍMETRO">CENTÍMETRO</option>
+                                <option value="CENTIMETRO QUADRADO">CENTIMETRO QUADRADO</option>
+                                <option value="CAIXA">CAIXA</option>
+                                <option value="DUZIA">DUZIA</option>
+                                <option value="EMBALAGEM">EMBALAGEM</option>
+                                <option value="FARDO">FARDO</option>
+                                <option value="FOLHA">FOLHA</option>
+                                <option value="FRASCO">FRASCO</option>
+                                <option value="GALÃO">GALÃO</option>
+                                <option value="GARRAFA">GARRAFA</option>
+                                <option value="GRAMAS">GRAMAS</option>
+                                <option value="JOGO">JOGO</option>
+                                <option value="QUILOGRAMA">QUILOGRAMA</option>
+                                <option value="KIT">KIT</option>
+                                <option value="LATA">LATA</option>
+                                <option value="LITRO">LITRO</option>
+                                <option value="METRO">METRO</option>
+                                <option value="METRO QUADRADO">METRO QUADRADO</option>
+                                <option value="METRO CÚBICO">METRO CÚBICO</option>
+                                <option value="MILHEIRO">MILHEIRO</option>
+                                <option value="MILILITRO">MILILITRO</option>
+                                <option value="MEGAWATT HORA">MEGAWATT HORA</option>
+                                <option value="PACOTE">PACOTE</option>
+                                <option value="PALETE">PALETE</option>
+                                <option value="PARES">PARES</option>
+                                <option value="PEÇA">PEÇA</option>
+                                <option value="POTE">POTE</option>
+                                <option value="QUILATE">QUILATE</option>
+                                <option value="RESMA">RESMA</option>
+                                <option value="ROLO">ROLO</option>
+                                <option value="SACO">SACO</option>
+                                <option value="SACOLA">SACOLA</option>
+                                <option value="TAMBOR">TAMBOR</option>
+                                <option value="TANQUE">TANQUE</option>
+                                <option value="TONELADA">TONELADA</option>
+                                <option value="TUBO">TUBO</option>
+                                <option value="UNIDADE">UNIDADE</option>
+                                <option value="VASILHAME">VASILHAME</option>
+                                <option value="VIDRO">VIDRO</option>
+                            </select>
+                            <label for="ds_unidade">Unidade:</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
                         <div class="form-floating form-floating-outline">
                             <input onblur="calcula_total_item()" class="form-control" type="number" id="qtd_pedida" pattern="[0-9]+([,\.][0-9]+)?" min="0" step="any"/>
                             <label for="qtd_pedida">Qta Pedida:</label>
@@ -414,13 +520,13 @@
                             <label for="valor_total">Valor Total:</label>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div style="display:none" class="col-md-6">
                         <div class="form-floating form-floating-outline">
                             <input class="form-control" type="date" id="data_previsao_entrega" onkeypress="return(MascaraMoeda(this,'.',',',event))"/>
                             <label for="data_previsao_entrega">Data Previsão Entrega:</label>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="switch switch-lg switch-success">
                             <input type="checkbox" id="lancar_patrimonio" value="Sim" class="switch-input">
                             <span class="switch-toggle-slider">
@@ -456,7 +562,7 @@
                 <div class="row mt-2 gy-4 align-items-end">
                     <div class="col-md-6">
                         <div class="form-floating form-floating-outline">
-                            <select required id="financeiro_operacao_id" class="select2 form-select">
+                            <select required id="financeiro_operacao_id" class="form-select combobox">
                                 <option value="">Opções</option>
                                 @foreach($operacoes as $operacao)
                                     <option value="{{ $operacao->id }}">{{ $operacao->descricao }}</option>
@@ -478,7 +584,7 @@
                     </div>
                     <div class="col-md-12">
                         <div class="form-floating form-floating-outline">
-                            <input class="form-control" type="text" id="financeiro_descricao"/>
+                            <input onblur="verifica_descricao_financeiro(this)" class="form-control" type="text" id="financeiro_descricao"/>
                             <label for="financeiro_descricao">Descrição:</label>
                         </div>
                     </div>
@@ -530,15 +636,50 @@
 var modalItem;
 var modalFinanceiro;
 
+//window.addEventListener('load',()=>{
+//    $('.combobox').combobox();
+//});
+
 document.getElementById('botao_adicionar_item').addEventListener('click', ()=>{
     modalItem = new bootstrap.Modal(document.getElementById('modal_item'));
     modalItem.show();
 });
 
 document.getElementById('botao_adicionar_financeiro').addEventListener('click', ()=>{
+    total_pedido = document.getElementById('total_pedido').value;
+    total_financeiro = document.getElementById('total_financeiro').value;
+
+    total_pedido = total_pedido.replaceAll('.','');
+    total_pedido = parseFloat(total_pedido.replace(',','.'));
+
+    total_financeiro = total_financeiro.replaceAll('.','');
+    total_financeiro = parseFloat(total_financeiro.replace(',','.'));
+
+    valor = total_pedido - total_financeiro;
+    valor = valor.toFixed(4);
+    valor = valor.replace('.',',');
+
+    document.getElementById('financeiro_valor').value = valor;
+
     modalFinanceiro = new bootstrap.Modal(document.getElementById('modal_financeiro'));
     modalFinanceiro.show();
 });
+
+function verifica_descricao_financeiro(e){
+    if(e.value){
+        $.getJSON(
+            "{{ route('requisicoes.verifica_descricao_financeiro') }}",
+            {
+                descricao : e.value
+            },
+            function(json){
+                if(json.controle == 'true'){
+                    alert('AVISO: Esta descrição de financeiro já foi utilizado no sistema.');
+                }
+            }
+        );
+    }
+}
 
 document.getElementById('grupo_id').addEventListener('change', (e)=>{
     if(e.target.value){
@@ -561,11 +702,11 @@ document.getElementById('grupo_id').addEventListener('change', (e)=>{
 function calcula_total_item(){
     qtd = parseFloat(document.getElementById('qtd_pedida').value);
     valor = document.getElementById('valor_unid').value;
-    valor = valor.replace('.','');
+    valor = valor.replaceAll('.','');
     valor = parseFloat(valor.replace(',','.'));
     if(qtd > 0 && valor > 0){
         total = qtd * valor;
-        total = total.toFixed(2);
+        total = total.toFixed(4);
         total = total.replace('.',',');
         document.getElementById('valor_total').value = total;
     }
@@ -578,16 +719,16 @@ function calcula_total_item_cad(item_id){
     qtd = document.getElementById('item_cad_qtd_pedida_' + item_id).value;
     qtd = parseFloat(qtd.replace(',','.'));
     valor = document.getElementById('item_cad_valor_unid_' + item_id).value;
-    valor = valor.replace('.','');
+    valor = valor.replaceAll('.','');
     valor = parseFloat(valor.replace(',','.'));
     if(qtd > 0 && valor > 0){
         total = qtd * valor;
-        total = total.toFixed(2);
+        total = total.toFixed(4);
         total = total.replace('.',',');
         document.getElementById('item_cad_valor_total_' + item_id).value = total;
     }
     else{
-        document.getElementById('item_cad_valor_total_' + item_id).value = '0,00';
+        document.getElementById('item_cad_valor_total_' + item_id).value = '0,0000';
     }
     calcula_total_somatorio();
 }
@@ -601,8 +742,9 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
     data_previsao_entrega = document.getElementById('data_previsao_entrega').value;
     lancar_patrimonio = document.getElementById('lancar_patrimonio').checked == true ? 'Sim' : 'Não';
     obs = document.getElementById('obs').value;
+    ds_unidade = document.getElementById('ds_unidade').value;
 
-    if(item_id && qtd && unitario && total && data_previsao_entrega){
+    if(item_id && qtd && unitario && total){
         contador = parseInt(document.getElementById('contador_items').value);
         contador++;
         document.getElementById('contador_items').value = contador;
@@ -613,9 +755,11 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
         td3 = document.createElement('td');
         td4 = document.createElement('td');
         td5 = document.createElement('td');
+        td5.setAttribute('style', 'display:none');
         td6 = document.createElement('td');
         td7 = document.createElement('td');
         td8 = document.createElement('td');
+        td_unidade = document.createElement('td');
         button = document.createElement('button');
         input1 = document.createElement('input');
         input2 = document.createElement('input');
@@ -624,6 +768,7 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
         input5 = document.createElement('input');
         input6 = document.createElement('input');
         input7 = document.createElement('input');
+        input_unidade = document.createElement('input');
 
         variavel = data_previsao_entrega.split('-');
         dt_entrega = variavel[2] + '/' + variavel[1] + '/' + variavel[0];
@@ -637,6 +782,7 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
         td5.innerHTML = dt_entrega;
         td6.innerHTML = obs;
         td7.innerHTML = lancar_patrimonio;
+        td_unidade.innerHTML = ds_unidade;
 
         button.setAttribute('type', 'button');
         button.setAttribute('onclick', 'excluir_item(' + contador + ')');
@@ -646,6 +792,7 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
         td8.appendChild(button);
 
         tr.appendChild(td1);
+        tr.appendChild(td_unidade);
         tr.appendChild(td2);
         tr.appendChild(td3);
         tr.appendChild(td4);
@@ -685,6 +832,10 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
         input7.setAttribute('name','lancar_patrimonio' + contador);
         input7.setAttribute('value', lancar_patrimonio);
 
+        input_unidade.setAttribute('type','hidden');
+        input_unidade.setAttribute('name','ds_unidade_' + contador);
+        input_unidade.setAttribute('value', ds_unidade);
+
         tr.appendChild(input1);
         tr.appendChild(input2);
         tr.appendChild(input3);
@@ -692,6 +843,7 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
         tr.appendChild(input5);
         tr.appendChild(input6);
         tr.appendChild(input7);
+        tr.appendChild(input_unidade);
 
         document.getElementById('tabela_items').appendChild(tr);
         modalItem.hide();
@@ -721,7 +873,7 @@ function calcula_total_somatorio(){
     inputs = document.querySelectorAll('input.total');
     [].forEach.call(inputs, function(input) {
         variavel = input.value;
-        variavel = variavel.replace('.','');
+        variavel = variavel.replaceAll('.','');
         variavel = variavel.replace(',','.');
         variavel = parseFloat(variavel);
         if(variavel > 0){
@@ -729,32 +881,32 @@ function calcula_total_somatorio(){
         }
     });
     total_itens = somatorio;
-    somatorio = somatorio.toFixed(2);
+    somatorio = somatorio.toFixed(4);
     somatorio = somatorio.replace('.',",");
     document.getElementById('subtotal_pedido').value = somatorio;
 
     frete = document.getElementById('frete').value;
-    frete = frete.replace('.','');
+    frete = frete.replaceAll('.','');
     frete = frete.replace(',','.');
     frete = parseFloat(frete);
 
     outras_despesas = document.getElementById('outras_despesas').value;
-    outras_despesas = outras_despesas.replace('.','');
+    outras_despesas = outras_despesas.replaceAll('.','');
     outras_despesas = outras_despesas.replace(',','.');
     outras_despesas = parseFloat(outras_despesas);
 
     desconto = document.getElementById('desconto').value;
-    desconto = desconto.replace('.','');
+    desconto = desconto.replaceAll('.','');
     desconto = desconto.replace(',','.');
     desconto = parseFloat(desconto);
 
     acrescimo = document.getElementById('acrescimo').value;
-    acrescimo = acrescimo.replace('.','');
+    acrescimo = acrescimo.replaceAll('.','');
     acrescimo = acrescimo.replace(',','.');
     acrescimo = parseFloat(acrescimo);
 
     total_despesas = total_itens + frete + outras_despesas + acrescimo - desconto;
-    total_despesas = total_despesas.toFixed(2);
+    total_despesas = total_despesas.toFixed(4);
     total_despesas = total_despesas.replace('.',",");
     document.getElementById('total_pedido').value = total_despesas;
 }
@@ -776,14 +928,11 @@ document.getElementById('botao_adicionar_anexo').addEventListener('click', ()=>{
 
     row.innerHTML = `
     <div class='col-md-6'>
-        <div class='form-floating form-floating-outline'>
-            <select required id='type' name='anexo_fornecedor_${contador}' class='select2 form-select'>
-                <option value=''>Opções</option>
-                @foreach($fornecedores as $fornecedor)
-                    <option value='{{ $fornecedor->id }}'>{{ $fornecedor->nome }}</option>
-                @endforeach
+        <div class="form-floating form-floating-outline">
+            <select id="anexo_fornecedor_${contador}" name="anexo_fornecedor_${contador}" class="select2 form-select fornecedor_anexos">
+
             </select>
-            <label for='axexo_fornecedor_${contador}'>Fornecedor ${contador}:</label>
+            <label for="anexo_fornecedor_${contador}">Fornecedor:</label>
         </div>
     </div>
     <div class='col-md-6'>
@@ -795,6 +944,30 @@ document.getElementById('botao_adicionar_anexo').addEventListener('click', ()=>{
     `;
 
     document.getElementById('div_anexos').appendChild(row);
+
+    $('#anexo_fornecedor_' + contador).select2({
+        placeholder: "Escolha o Fornecedor.",
+        allowClear: true,
+        minimumInputLength: 2,
+        ajax:{
+            url:"{{ route('fornecedores.get_fornecedor_select') }}",
+            dataType: "json",
+            type: 'GET',
+            delay: 250,
+            data:function(params){
+                return {
+                    q: params.term,
+                };
+            },
+            processResults: function(data){
+                return {
+                    results:data
+                };
+            },
+        cache: true
+        }
+    });
+
 })
 
 document.getElementById('botao_adicionar_requisicao').addEventListener('click', ()=>{
@@ -834,18 +1007,20 @@ document.getElementById('botao_adicionar_requisicao').addEventListener('click', 
         return;
     }
 
-    if(document.getElementById('fornecedor_email').value == ""){
-        alert('É necessário preencher o email atual do fornecedor');
-        document.getElementById('data_previa_conclusao').focus();
-        return;
-    }
+    //if(document.getElementById('fornecedor_email').value == "" && document.getElementById('fornecedor_whatsapp').value == ""){
+    //    alert('É necessário preencher o email ou whatsapp atual do fornecedor');
+    //    document.getElementById('data_previa_conclusao').focus();
+    //    return;
+    //}
 
     //vamos verificar se o financeiro esta correto ou não
     total_financeiro = document.getElementById('total_financeiro').value;
+    total_financeiro = total_financeiro.replaceAll('.','');
     total_financeiro = parseFloat(total_financeiro.replace(',','.'));
     total_financeiro.toFixed(2);
 
     total_pedido = document.getElementById('total_pedido').value;
+    total_pedido = total_pedido.replaceAll('.','');
     total_pedido = parseFloat(total_pedido.replace(',','.'));
     total_pedido.toFixed(2);
 
@@ -898,20 +1073,22 @@ document.getElementById('botao_adicionar_requisicao').addEventListener('click', 
         return;
     }
 
-    if(document.getElementById('fornecedor_email').value == ""){
-        alert('É necessário preencher o email atual do fornecedor');
-        document.getElementById('data_previa_conclusao').focus();
-        return;
-    }
+    //if(document.getElementById('fornecedor_email').value == ""){
+    //    alert('É necessário preencher o email atual do fornecedor');
+    //    document.getElementById('data_previa_conclusao').focus();
+    //    return;
+    //}
 
     //vamos verificar se o financeiro esta correto ou não
     total_financeiro = document.getElementById('total_financeiro').value;
+    total_financeiro = total_financeiro.replaceAll('.','');
     total_financeiro = parseFloat(total_financeiro.replace(',','.'));
-    total_financeiro.toFixed(2);
+    total_financeiro.toFixed(4);
 
     total_pedido = document.getElementById('total_pedido').value;
+    total_pedido = total_pedido.replaceAll('.','');
     total_pedido = parseFloat(total_pedido.replace(',','.'));
-    total_pedido.toFixed(2);
+    total_pedido.toFixed(4);
 
     if(total_financeiro == total_pedido){
         document.getElementById('controle_enviar_moderacao').value = 'sim';
@@ -1136,14 +1313,14 @@ function calcula_total_financeiro(){
     inputs = document.querySelectorAll('input.financeiro');
     [].forEach.call(inputs, function(input) {
         variavel = input.value;
-        variavel = variavel.replace('.','');
+        variavel = variavel.replaceAll('.','');
         variavel = variavel.replace(',','.');
         variavel = parseFloat(variavel);
         if(variavel > 0){
             somatorio = somatorio + variavel;
         }
     });
-    somatorio = somatorio.toFixed(2);
+    somatorio = somatorio.toFixed(4);
     somatorio = somatorio.replace('.',",");
     document.getElementById('total_financeiro').value = somatorio;
 }
@@ -1155,7 +1332,92 @@ function muda_cred_deb_financeiro(e, financeiro_id){
 
 window.addEventListener('load', ()=>{
     calcula_total_financeiro();
+    $('.combobox').combobox();
+
+    $('#fornecedor_id').select2({
+        placeholder: "Escolha o Fornecedor.",
+        allowClear: true,
+        minimumInputLength: 2,
+        ajax:{
+            url:"{{ route('fornecedores.get_fornecedor_select') }}",
+            dataType: "json",
+            type: 'GET',
+            delay: 250,
+            data:function(params){
+                return {
+                    q: params.term,
+                };
+            },
+            processResults: function(data){
+                return {
+                    results:data
+                };
+            },
+        cache: true
+        }
+    });
+
+    $('.fornecedor_anexos').select2({
+        placeholder: "Escolha o Fornecedor.",
+        allowClear: true,
+        minimumInputLength: 2,
+        ajax:{
+            url:"{{ route('fornecedores.get_fornecedor_select') }}",
+            dataType: "json",
+            type: 'GET',
+            delay: 250,
+            data:function(params){
+                return {
+                    q: params.term,
+                };
+            },
+            processResults: function(data){
+                return {
+                    results:data
+                };
+            },
+        cache: true
+        }
+    });
+
 })
 
+function adicionar_novo_item(){
+    if(document.getElementById('grupo_id').value != ""){
+        nm_item = prompt('Informe o nome do novo item.');
+        if(nm_item){
+            $.getJSON(
+                '{{ route("pedidos.itens.insert") }}',
+                {
+                    nm_item : nm_item,
+                    grupo_id : document.getElementById('grupo_id').value
+                },
+                function(json){
+                    document.getElementById('item_id').innerHTML = json.html;
+                }
+            );
+        }
+    }
+    else{
+        alert('É necessário escolher o grupo do item.');
+    }
+}
+
+function adicionar_novo_grupo(){
+
+    nm_grupo = prompt('Informe o nome do novo grupo.');
+    if(nm_grupo){
+        $.getJSON(
+            '{{ route("pedidos.grupos.insert") }}',
+            {
+                nm_grupo : nm_grupo,
+            },
+            function(json){
+                document.getElementById('grupo_id').innerHTML = json.html;
+            }
+        );
+    }
+
+}
 </script>
 @endsection

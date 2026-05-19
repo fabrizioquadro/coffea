@@ -24,5 +24,7 @@ class Fornecedor extends Model
         'enviar_whatsapp',
         'email',
         'cep',
+        'unidade_id',
+        'status',
     ];
 }

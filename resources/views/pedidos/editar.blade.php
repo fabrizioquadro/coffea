@@ -4,7 +4,7 @@
 <div class="card card-border-shadow-primary mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between">
-            <h4 class="card-title">Editar Pedido</h4>
+            <h4 class="card-title">Editar Pedido - Cod: {{ $requisicao->id }}</h4>
         </div>
         <hr>
         <form id="formulario" action="{{ route('pedidos.update') }}" method="post" enctype="multipart/form-data">
@@ -67,6 +67,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>Item</th>
+                            <th>Unidade</th>
                             <th>Qtd</th>
                             <th>Obs</th>
                             <th></th>
@@ -76,6 +77,7 @@
                         @foreach($requisicao->itens as $item)
                             <tr id="linha_item_cadastrada_{{ $item->id }}">
                                 <td>{{ $item->item->nome }}</td>
+                                <td>{{ $item->ds_unidade }}</td>
                                 <td>{{ $item->qtd_pedida }}</td>
                                 <td>{{ $item->obs }}</td>
                                 <td>
@@ -141,7 +143,58 @@
                             </span>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            <select required id="ds_unidade" class="select2 form-select">
+                                <option value="">Opções</option>
+                                <option value="CÁPSULA">CÁPSULA</option>
+                                <option value="CARTELA">CARTELA</option>
+                                <option value="CENTO">CENTO</option>
+                                <option value="CONJUNTO">CONJUNTO</option>
+                                <option value="CENTÍMETRO">CENTÍMETRO</option>
+                                <option value="CENTIMETRO QUADRADO">CENTIMETRO QUADRADO</option>
+                                <option value="CAIXA">CAIXA</option>
+                                <option value="DUZIA">DUZIA</option>
+                                <option value="EMBALAGEM">EMBALAGEM</option>
+                                <option value="FARDO">FARDO</option>
+                                <option value="FOLHA">FOLHA</option>
+                                <option value="FRASCO">FRASCO</option>
+                                <option value="GALÃO">GALÃO</option>
+                                <option value="GARRAFA">GARRAFA</option>
+                                <option value="GRAMAS">GRAMAS</option>
+                                <option value="JOGO">JOGO</option>
+                                <option value="QUILOGRAMA">QUILOGRAMA</option>
+                                <option value="KIT">KIT</option>
+                                <option value="LATA">LATA</option>
+                                <option value="LITRO">LITRO</option>
+                                <option value="METRO">METRO</option>
+                                <option value="METRO QUADRADO">METRO QUADRADO</option>
+                                <option value="METRO CÚBICO">METRO CÚBICO</option>
+                                <option value="MILHEIRO">MILHEIRO</option>
+                                <option value="MILILITRO">MILILITRO</option>
+                                <option value="MEGAWATT HORA">MEGAWATT HORA</option>
+                                <option value="PACOTE">PACOTE</option>
+                                <option value="PALETE">PALETE</option>
+                                <option value="PARES">PARES</option>
+                                <option value="PEÇA">PEÇA</option>
+                                <option value="POTE">POTE</option>
+                                <option value="QUILATE">QUILATE</option>
+                                <option value="RESMA">RESMA</option>
+                                <option value="ROLO">ROLO</option>
+                                <option value="SACO">SACO</option>
+                                <option value="SACOLA">SACOLA</option>
+                                <option value="TAMBOR">TAMBOR</option>
+                                <option value="TANQUE">TANQUE</option>
+                                <option value="TONELADA">TONELADA</option>
+                                <option value="TUBO">TUBO</option>
+                                <option value="UNIDADE">UNIDADE</option>
+                                <option value="VASILHAME">VASILHAME</option>
+                                <option value="VIDRO">VIDRO</option>
+                            </select>
+                            <label for="ds_unidade">Unidade:</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
                         <div class="form-floating form-floating-outline">
                             <input onblur="calcula_total_item()" class="form-control" type="number" id="qtd_pedida" pattern="[0-9]+([,\.][0-9]+)?" min="0" step="any"/>
                             <label for="qtd_pedida">Qta Pedida:</label>
@@ -213,6 +266,7 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
     nm_item = $('#item_id').find(":selected").text();
     qtd = document.getElementById('qtd_pedida').value;
     obs = document.getElementById('obs').value;
+    ds_unidade = document.getElementById('ds_unidade').value;
 
     if(item_id && qtd){
         contador = parseInt(document.getElementById('contador_items').value);
@@ -224,17 +278,20 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
         td2 = document.createElement('td');
         td3 = document.createElement('td');
         td4 = document.createElement('td');
+        td_unidade = document.createElement('td');
 
         button = document.createElement('button');
         input1 = document.createElement('input');
         input2 = document.createElement('input');
         input3 = document.createElement('input');
+        input_unidade = document.createElement('input');
 
         tr.setAttribute('id', 'linha_item_' + contador);
 
         td1.innerHTML = nm_item;
         td2.innerHTML = qtd;
         td3.innerHTML = obs;
+        td_unidade.innerHTML = ds_unidade;
 
         button.setAttribute('type', 'button');
         button.setAttribute('onclick', 'excluir_item(' + contador + ')');
@@ -244,6 +301,7 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
         td4.appendChild(button);
 
         tr.appendChild(td1);
+        tr.appendChild(td_unidade);
         tr.appendChild(td2);
         tr.appendChild(td3);
         tr.appendChild(td4);
@@ -261,10 +319,15 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
         input3.setAttribute('name','obs_' + contador);
         input3.setAttribute('value', obs);
 
+        input_unidade.setAttribute('type','hidden');
+        input_unidade.setAttribute('name','ds_unidade_' + contador);
+        input_unidade.setAttribute('value', ds_unidade);
+
 
         tr.appendChild(input1);
         tr.appendChild(input2);
         tr.appendChild(input3);
+        tr.appendChild(input_unidade);
 
         document.getElementById('tabela_items').appendChild(tr);
         modalItem.hide();
@@ -273,6 +336,7 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
         document.getElementById('item_id').innerHTML = '<option value="">Opções</option>';
         document.getElementById('qtd_pedida').value = '';
         document.getElementById('obs').value = '';
+        document.getElementById('ds_unidade').value = '';
     }
     else{
         alert('Preencha todos os campos');

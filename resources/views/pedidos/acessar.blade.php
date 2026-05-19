@@ -1,3 +1,8 @@
+@php
+$var = explode(' ', $requisicao->created_at);
+$dt_criacao = dataDbForm($var[0])." ".$var[1];
+@endphp
+
 @extends('layout.admin')
 
 @section('conteudo')
@@ -10,8 +15,10 @@
 <div class="card card-border-shadow-primary mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between">
-            <h4 class="card-title">Acessar Pedido</h4>
+            <h4 class="card-title">Acessar Pedido - Cod: {{ $requisicao->id }}</h4>
         </div>
+        <a href="{{ route('compras.imprimir', $requisicao->id) }}" target='_blank' class="btn btn-success btn-sm">Imprimir Detalhado</a>
+        <a href="{{ route('compras.imprimir_simplificado', $requisicao->id) }}" target='_blank' class="btn btn-warning btn-sm">Imprimir Simplificado</a>
         <hr>
         @if($requisicao->status == "Pedido")
             @if($user->perfil->administrador || $user->perfil->preparar_compra || $user->perfil->cancelar)
@@ -24,11 +31,26 @@
                                 <button class="btn btn-primary" name="preparar_compra" type="submit" value='true'>Prepara Compra</button>
                             @endif
                             @if($user->perfil->administrador || $user->perfil->cancelar)
-                                <button class="btn btn-danger" name="cancelar_compra" type="submit" value='true'>Cancelar Pedido</button>
+                                <button class="btn btn-danger" id="cancelar_compra" type="button" value='true'>Cancelar Pedido</button>
                             @endif
                         </div>
                     </div>
                 </form>
+                @if($user->perfil->administrador || $user->perfil->cancelar)
+                    <form id='form_cancelamento' action="{{ route('requisicoes.cancelar') }}" method="post">
+                        @csrf
+                        <input type="hidden" name="requisicao_id" value="{{ $requisicao->id }}">
+                        <input type="hidden" name="retorno" value="pedido">
+                        <input type="hidden" name="justificativa_cancelamento" id="justificativa_cancelamento">
+                    </form>
+                    <script type="text/javascript">
+                    document.getElementById('cancelar_compra').addEventListener('click', ()=>{
+                        let justificativa = prompt('Jusquifique o cancelamento.');
+                        document.getElementById('justificativa_cancelamento').value = justificativa;
+                        document.getElementById('form_cancelamento').submit();
+                    })
+                    </script>
+                @endif
                 <hr>
             @endif
         @endif
@@ -45,7 +67,7 @@
         <div class="row mt-2 gy-2">
             <div class="col-md-4 form-group borda_de_linha">
                 <label for="user_moderador_id">Solicitante:</label><br>
-                <b>{{ $requisicao->criador->nome }}</b>
+                <b>{{ $requisicao->criador->nome. " ".$dt_criacao }}</b>
             </div>
             <div class="col-md-4 form-group borda_de_linha">
                 <label for="setor_id">Setor:</label><br>
@@ -77,6 +99,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>Item</th>
+                        <th>Unidade</th>
                         <th>Qtd</th>
                         <th>Obs</th>
                         <th>Patrimonio</th>
@@ -86,6 +109,7 @@
                     @foreach($requisicao->itens as $item)
                         <tr id="linha_item_cadastrada_{{ $item->id }}">
                             <td>{{ $item->item->nome }}</td>
+                            <td>{{ $item->ds_unidade }}</td>
                             <td>{{ $item->qtd_pedida }}</td>
                             <td>{{ $item->obs }}</td>
                             <td>{{ $item->lancar_patrimonio ? 'Sim' : 'Não' }}</td>
@@ -101,7 +125,9 @@
                 <b>{{ $requisicao->qtd_itens_pedido }}</b>
             </div>
         </div>
-        <a href="{{ route('pedidos.editar', $requisicao->id) }}" class="btn btn-warning btn-sm mt-3">Editar</a>
+        @if($requisicao->status != 'Compra Cancelada' && $requisicao->status != 'Pedido Cancelado')
+            <a href="{{ route('pedidos.editar', $requisicao->id) }}" class="btn btn-warning btn-sm mt-3">Editar</a>
+        @endif
     </div>
 </div>
 

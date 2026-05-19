@@ -34,40 +34,57 @@
                         <th>Entregas</th>
                         <th>Data Requisição</th>
                         <th>Fornecedor</th>
-                        <th>Aceite Fornecedor</th>
+                        <th>Justificativa</th>
+                        <th>Utilizada</th>
                         <th>Data Aceite</th>
                         <th>Integrado</th>
                         <th>Valor Total</th>
+                        <th style='display:none'></th>
                     </tr>
                 </thead>
                 @foreach($requisicoes as $requisicao)
-                    @php
-                    $var = explode(' ', $requisicao->created_at);
-                    $dt_criacao = dataDbForm($var[0]);
-                    @endphp
-                    <tr>
-                        <td>
-                            <div class="dropdown">
-                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow show" data-bs-toggle="dropdown" aria-expanded="true">
-                                    <i class="mdi mdi-dots-vertical"></i>
-                                </button>
-                                <div class="dropdown-menu" data-popper-placement="bottom-end">
-                                    <a class="dropdown-item waves-effect" href="{{ route('finalizados.acessar', $requisicao->id) }}"><i class="mdi mdi-eye me-1"></i> Acessar</a>
-                                    <a class="dropdown-item waves-effect" href="{{ route('finalizados.integrar', $requisicao->id) }}"><i class="mdi mdi-link me-1"></i> Integrar</a>
-                                    <a class="dropdown-item waves-effect" href="{{ route('finalizados.entregas', $requisicao->id) }}"><i class="mdi mdi-truck-delivery-outline me-1"></i> Entregas</a>
+                    @if($user->unidades()->where('unidade_id', $requisicao->unidade_id)->count() > 0 && $user->setores()->where('setor_id', $requisicao->setor_id)->count() > 0)
+                        @php
+                        $var = explode(' ', $requisicao->created_at);
+                        $dt_criacao = dataDbForm($var[0]);
+                        $dt_manifestacao = '';
+                        if($requisicao->data_manifestacao_fornecedor){
+                            $var = explode(' ', $requisicao->data_manifestacao_fornecedor);
+                            $dt_manifestacao = dataDbForm($var[0])." ".$var[1];
+                        }
+                        @endphp
+                        <tr>
+                            <td>
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow show" data-bs-toggle="dropdown" aria-expanded="true">
+                                        <i class="mdi mdi-dots-vertical"></i>
+                                    </button>
+                                    <div class="dropdown-menu" data-popper-placement="bottom-end">
+                                        <a class="dropdown-item waves-effect" href="{{ route('finalizados.acessar', $requisicao->id) }}"><i class="mdi mdi-eye me-1"></i> Acessar</a>
+                                        @if($user->perfil->administrador || $user->perfil->integrar_financeiro)
+                                            <a class="dropdown-item waves-effect" href="{{ route('finalizados.integrar', $requisicao->id) }}"><i class="mdi mdi-link me-1"></i> Integrar</a>
+                                        @endif
+                                        <a class="dropdown-item waves-effect" href="{{ route('finalizados.entregas', $requisicao->id) }}"><i class="mdi mdi-truck-delivery-outline me-1"></i> Entregas</a>
+                                        @if($user->perfil->administrador || $user->perfil->cancelar)
+                                            <a class="dropdown-item waves-effect" href="{{ route('compras.cancelar', $requisicao->id) }}"><i class="mdi mdi-delete me-1"></i> Cancelar</a>
+                                            <a class="dropdown-item waves-effect" href="{{ route('compras.retornar', $requisicao->id) }}"><i class="mdi mdi-reload me-1"></i> Retornar</a>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td>{{ $requisicao->id }}</td>
-                        <td>{{ $requisicao->status }}</td>
-                        <td>{{ !$requisicao->status_canc_devol ? 'Não Entregue' : $requisicao->status_canc_devol }}</td>
-                        <td>{{ $dt_criacao }}</td>
-                        <td>{{ $requisicao->fornecedor->nome }}</td>
-                        <td>{{ $requisicao->aceito_pelo_fornecedor ? 'Sim' : 'Não' }}</td>
-                        <td>{{ $requisicao->aceito_pelo_fornecedor ? dataDbForm($requisicao->data_manifestacao_fornecedor) : '' }}</td>
-                        <td>{{ $requisicao->integrado ? 'Integrado' : '' }}</td>
-                        <td>R$ {{ valorDbForm($requisicao->total_pedido) }}</td>
-                    </tr>
+                            </td>
+                            <td>{{ $requisicao->id }}</td>
+                            <td>{{ $requisicao->status }}</td>
+                            <td>{{ \App\Http\Controllers\CompraController::get_st_entrega($requisicao) }}</td>
+                            <td>{{ $dt_criacao }}</td>
+                            <td>{{ $requisicao->fornecedor->nome }}</td>
+                            <td>{{ $requisicao->justificativa }}</td>
+                            <td>{{ $requisicao->aceito_pelo_fornecedor ? 'Sim' : 'Não' }}</td>
+                            <td>{{ $dt_manifestacao }}</td>
+                            <td>{{ $requisicao->integrado ? 'Integrado' : '' }}</td>
+                            <td>R$ {{ valorDbForm($requisicao->total_pedido) }}</td>
+                            <td style="display:none">{{ $requisicao->motivo_pedido_compra." ".$requisicao->justificativa }}</td>
+                        </tr>
+                    @endif
                 @endforeach
             </table>
         </div>

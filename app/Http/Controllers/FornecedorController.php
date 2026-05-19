@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Fornecedor;
 use App\Models\Unidade;
+use App\Models\Configuracao;
 
 class FornecedorController extends Controller
 {
@@ -63,44 +64,106 @@ class FornecedorController extends Controller
     }
 
     public function sincronizar_sisagil(){
-        $unidade = Unidade::where('id','3')->first();
-        $api_sisagil = new ApiSisAgilController($unidade->token_sisagil);
+        $unidade_geral = Unidade::where('restrita','Não')->first();
+        $unidades_restritas = Unidade::where('restrita','Sim')->get();
 
+        //vamos começar pelas unidades gerais
+        $api_sisagil = new ApiSisAgilController($unidade_geral->token_sisagil);
         $fornecs = $api_sisagil->get_fornec_sisagil();
 
         foreach($fornecs as $fornec){
             $fantasia = isset($fornec['nomeFantasia']) ? $fornec['nomeFantasia'] : $fornec['nome'];
-            if($fornec['tipoFornecedor']){
+            $cidade = $fornec['municipio'] ? $fornec['municipio'] : array();
+            $uf = $fornec['estado'] ? $fornec['estado'] : array();
+            $dados = [
+                'sisagil_id' => $fornec['id'] ? $fornec['id'] : null,
+                'nome' => @$fornec['nome'] ? $fornec['nome'] : null,
+                'fantasia' => $fantasia,
+                'cpf_cnpj' => @$fornec['cpfCnpj'] ? $fornec['cpfCnpj'] : null,
+                'endereco' => @$fornec['endereco'] ? $fornec['endereco'] : null,
+                'numero' => @$fornec['numero'] ? $fornec['numero'] : null,
+                'bairro' => @$fornec['bairro'] ? $fornec['bairro'] : null,
+                'complemento' => @$fornec['complemento'] ? $fornec['complemento'] : null,
+                'cidade' => @$cidade['nome'] ? $cidade['nome'] : null,
+                'uf' => @$uf['sigla'] ? $uf['sigla'] : null,
+                'celular' => @$fornec['celular'] ? $fornec['celular'] : null,
+                'celular' => @$fornec['celular'] ? $fornec['celular'] : null,
+                'email' => @$fornec['email'] ? $fornec['email'] : null,
+                'cep' => @$fornec['cep'] ? $fornec['cep'] : null,
+                'status' => @$fornec['ativo'] ? 'Ativo' : 'Inativo',
+            ];
+
+            $fornecedor = Fornecedor::where('sisagil_id', $fornec['id'])->first();
+            if(!$fornecedor){
+                Fornecedor::create($dados);
+            }
+            else{
+                Fornecedor::where('id', $fornecedor->id)->update($dados);
+            }
+        }
+
+        foreach($unidades_restritas as $unidade){
+            $api_sisagil = new ApiSisAgilController($unidade->token_sisagil);
+            $fornecs = $api_sisagil->get_fornec_sisagil();
+
+            foreach($fornecs as $fornec){
+                $fantasia = isset($fornec['nomeFantasia']) ? $fornec['nomeFantasia'] : $fornec['nome'];
                 $cidade = $fornec['municipio'] ? $fornec['municipio'] : array();
                 $uf = $fornec['estado'] ? $fornec['estado'] : array();
                 $dados = [
                     'sisagil_id' => $fornec['id'] ? $fornec['id'] : null,
-                    'nome' => $fornec['nome'] ? $fornec['nome'] : null,
+                    'nome' => @$fornec['nome'] ? $fornec['nome'] : null,
                     'fantasia' => $fantasia,
-                    'cpf_cnpj' => $fornec['cpfCnpj'] ? $fornec['cpfCnpj'] : null,
-                    'endereco' => $fornec['endereco'] ? $fornec['endereco'] : null,
-                    'numero' => $fornec['numero'] ? $fornec['numero'] : null,
-                    'bairro' => $fornec['bairro'] ? $fornec['bairro'] : null,
-                    'complemento' => $fornec['complemento'] ? $fornec['complemento'] : null,
-                    'cidade' => $cidade['nome'] ? $cidade['nome'] : null,
-                    'uf' => $uf['sigla'] ? $uf['sigla'] : null,
-                    'celular' => $fornec['celular'] ? $fornec['celular'] : null,
-                    'celular' => $fornec['celular'] ? $fornec['celular'] : null,
-                    'email' => $fornec['email'] ? $fornec['email'] : null,
-                    'cep' => $fornec['cep'] ? $fornec['cep'] : null,
+                    'cpf_cnpj' => @$fornec['cpfCnpj'] ? $fornec['cpfCnpj'] : null,
+                    'endereco' => @$fornec['endereco'] ? $fornec['endereco'] : null,
+                    'numero' => @$fornec['numero'] ? $fornec['numero'] : null,
+                    'bairro' => @$fornec['bairro'] ? $fornec['bairro'] : null,
+                    'complemento' => @$fornec['complemento'] ? $fornec['complemento'] : null,
+                    'cidade' => @$cidade['nome'] ? $cidade['nome'] : null,
+                    'uf' => @$uf['sigla'] ? $uf['sigla'] : null,
+                    'celular' => @$fornec['celular'] ? $fornec['celular'] : null,
+                    'celular' => @$fornec['celular'] ? $fornec['celular'] : null,
+                    'email' => @$fornec['email'] ? $fornec['email'] : null,
+                    'cep' => @$fornec['cep'] ? $fornec['cep'] : null,
+                    'unidade_id' => $unidade->id,
+                    'status' => @$fornec['ativo'] ? 'Ativo' : 'Inativo',
                 ];
 
-                //vamos verificar se há este Fornecedor
                 $fornecedor = Fornecedor::where('sisagil_id', $fornec['id'])->first();
-                if($fornecedor){
-                    Fornecedor::where('id', $fornecedor->id)->update($dados);
+                if(!$fornecedor){
+                    Fornecedor::create($dados);
                 }
                 else{
-                    Fornecedor::create($dados);
+                    Fornecedor::where('id', $fornecedor->id)->update($dados);
                 }
             }
         }
+
+        $dados = [
+            'dt_ultima_sinc_fornec_sisagil' => date('Y-m-d H:i:s')
+        ];
+
+        Configuracao::where('id','1')->update($dados);
+
         return redirect()->route('fornecedores')->with('mensagem', 'Sincronização efetuada!');
+    }
+
+    public function get_fornecedor_select(){
+        if(isset($_GET['q'])){
+            $procurar = $_GET['q'];
+            $fornecedores = Fornecedor::where('nome','LIKE','%'.$procurar.'%')->get();
+            $array_retorno = array();
+            foreach($fornecedores as $fornec){
+                $array = [
+                    'id' => $fornec->id,
+                    'text' => $fornec->nome,
+                ];
+                $array_retorno[] = $array;
+            }
+
+            echo json_encode($array_retorno);
+
+        }
     }
 
 }

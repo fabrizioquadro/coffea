@@ -7,7 +7,7 @@
         <title>Supporto Trading Company - Sistema de Pedido de Compras</title>
         <meta name="description" content="Supporto Trading Company - Sistema de Pedido de Compras" />
         <!-- Favicon -->
-        <link rel="icon" type="image/x-icon" href="{{ asset('/public/img/logo_supporto.png') }}" />
+        <link rel="icon" type="image/x-icon" href="{{ asset('/public/img/Supporto_Alta.png') }}" />
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -53,7 +53,7 @@
         <!-- Sections:Start -->
         <section class="section-py bg-body first-section-pt">
             <div class="container">
-                @yield('conteudo');
+                @yield('conteudo')
             </div>
         </section>
         <!-- build:js assets/vendor/js/core.js -->

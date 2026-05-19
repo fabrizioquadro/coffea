@@ -20,20 +20,43 @@ class PedidoController extends Controller
 {
     public function index(){
         $user = auth()->user();
-        if($user->perfil->administrador || $user->perfil->preparar_compra){
-            $requisicoes = Requisicao::whereIn('status', ['Pedido','Pedido Cancelado'])->get();
+
+        if($user->perfil->administrador){
+            $requisicoes = Requisicao::whereIn('status', ['Pedido'])->get();
+        }
+        elseif($user->perfil->preparar_compra){
+            $in = array();
+            foreach($user->unidades as $unidade){
+                $in[] = $unidade->id;
+            }
+            $requisicoes = Requisicao::where('status', 'Pedido')
+            ->whereIn('unidade_id', $in)
+            ->get();
         }
         else{
-            $requisicoes = Requisicao::whereIn('status', ['Pedido','Pedido Cancelado'])
+            $requisicoes = Requisicao::whereIn('status', ['Pedido'])
             ->where('user_criacao_id', $user->id)
             ->get();
         }
-        return view('pedidos/index', compact('requisicoes','user'));
+
+        $controle = 'index';
+        return view('pedidos/index', compact('requisicoes','user','controle'));
+    }
+
+    public function cancelados(){
+        $user = auth()->user();
+
+        $requisicoes = Requisicao::whereIn('status', ['Pedido Cancelado','Compra Cancelada'])
+        ->get();
+
+        $controle = 'cancelados';
+
+        return view('pedidos/index', compact('requisicoes','user','controle'));
     }
 
     public function adicionar(){
         $user = auth()->user();
-        if($user->perfil->administrador || $user->perfil->criar){
+        if($user->perfil->administrador || $user->perfil->criar || $user->perfil->somente_solicitar_pedido){
             if($user->perfil->administrador){
                 $setores = Setor::where('status','Ativo')->orderBy('nome')->get();
                 $unidades = Unidade::where('status','Ativo')->orderBy('nome')->get();
@@ -71,6 +94,27 @@ class PedidoController extends Controller
         echo json_encode($retorno);
     }
 
+    public function grupos_insert(){
+        $dados = [
+            'descricao' => $_GET['nm_grupo'],
+        ];
+        $grupo_set = Grupo::create($dados);
+
+        $grupos = Grupo::all()->sortBy('descricao');
+        $html = "<option value=''>Opções</option>";
+        foreach($grupos as $grupo){
+            $selected = "";
+            if($grupo->id == $grupo_set->id){
+                $selected = "selected";
+            }
+            $html .= "<option value='$grupo->id' $selected>$grupo->descricao</option>";
+        }
+
+
+        $retorno['html'] = $html;
+        echo json_encode($retorno);
+    }
+
     public function insert(Request $request){
         $user = auth()->user();
         try {
@@ -81,7 +125,7 @@ class PedidoController extends Controller
                 'simples_cotacao' => $request->simples_cotacao == 'Sim' ? true : false,
                 'motivo_pedido_compra' => $request->motivo_pedido_compra,
                 'justificativa' => $request->justificativa,
-                'qtd_itens_pedido' => $request->qtd_itens_pedido,
+                'qtd_itens_pedido' => $request->qtd_itens_pedido ? $request->qtd_itens_pedido : '0',
                 'status' => 'Pedido',
             ];
 
@@ -98,6 +142,9 @@ class PedidoController extends Controller
                     $var = "obs_".$i;
                     $obs = $request->$var;
 
+                    $var = "ds_unidade_".$i;
+                    $ds_unidade = $request->$var;
+
                     $var = "lancar_patrimonio".$i;
                     $lancar_patrimonio = $request->$var;
 
@@ -106,6 +153,7 @@ class PedidoController extends Controller
                         'item_id' => $item_id,
                         'user_criacao_id' => $user->id,
                         'obs' => $obs,
+                        'ds_unidade' => $ds_unidade,
                         'qtd_pedida' => $qtd_pedida,
                         'qtd_total' => $qtd_pedida,
                         'status' => 'Pedido',
@@ -139,13 +187,15 @@ class PedidoController extends Controller
                 cadastra_alerta($dados_alerta);
             }
 
+            $user = auth()->user();
 
-            return redirect()->route('pedidos')->with('mensagem', "Pedido Cadastrado!");
-        } catch (\Exception $e) {
-            if($requisicao){
-                RequisicaoItem::where('requisicao_id', $requisicao->id)->delete();
-                $requisicao->delete();
+            if($user->perfil->somente_solicitar_pedido){
+                return redirect()->route('pedidos.adicionar')->with('mensagem', "Pedido Cadastrado!");
             }
+            else{
+                return redirect()->route('pedidos')->with('mensagem', "Pedido Cadastrado!");
+            }
+        } catch (\Exception $e) {
             return redirect()->route('pedidos')->with('mensagem_erro', $e->getMessage());
         }
     }
@@ -175,16 +225,24 @@ class PedidoController extends Controller
                     $unidades = $user->unidades;
                 }
 
-                $fornecedores = Fornecedor::all()->sortBy('nome');
+                if($requisicao->unidade->restrita == "Não"){
+                    $fornecedores = Fornecedor::whereNull('unidade_id')->orderBy('nome')->get();
+                    $operacoes = Operacao::where('status','Ativo')->whereNull('unidade_id')->orderBy('descricao')->get();
+                }
+                elseif($requisicao->unidade->restrita == "Sim"){
+                    $fornecedores = Fornecedor::where('unidade_id',$requisicao->unidade_id)->orderBy('nome')->get();
+                    $operacoes = Operacao::where('status','Ativo')->where('unidade_id', $requisicao->unidade_id)->orderBy('descricao')->get();
+                }
+
                 $users = User::all()->sortBy('nome');
                 $grupos = Grupo::all()->sortBy('descricao');
                 $controle = 'preparar_compra';
 
                 $contas = Conta::where(['unidade_id' => $requisicao->unidade_id, 'cred_deb' => 'D'])->orderBy('descricao')->get();;
-                $operacoes = Operacao::where('status','Ativo')->orderBy('descricao')->get();
-
+                //$operacoes = Operacao::where('status','Ativo')->orderBy('descricao')->get();
+                $retorno = null;
                 return view('requisicoes/editar', compact('requisicao','setores','unidades',
-                'fornecedores','users','grupos','controle','contas','operacoes'));
+                'fornecedores','users','grupos','controle','contas','operacoes','retorno'));
             }
             elseif($request->cancelar_compra == 'true'){
                 $requisicao->status = 'Pedido Cancelado';
@@ -240,6 +298,9 @@ class PedidoController extends Controller
                     $var = "obs_".$i;
                     $obs = $request->$var;
 
+                    $var = "ds_unidade_".$i;
+                    $ds_unidade = $request->$var;
+
                     $var = "lancar_patrimonio".$i;
                     $lancar_patrimonio = $request->$var;
 
@@ -248,6 +309,7 @@ class PedidoController extends Controller
                         'item_id' => $item_id,
                         'user_criacao_id' => $user->id,
                         'obs' => $obs,
+                        'ds_unidade' => $ds_unidade,
                         'qtd_pedida' => $qtd_pedida,
                         'qtd_total' => $qtd_pedida,
                         'status' => 'Pedido',
@@ -273,6 +335,91 @@ class PedidoController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('pedidos')->with('mensagem_erro', $e->getMessage());
         }
+    }
+
+    public function verifica_motivo_compra(){
+        $requisicao = Requisicao::where('motivo_pedido_compra', $_GET['motivo'])->first();
+        $controle = 'false';
+        if($requisicao){
+            $controle = 'true';
+        }
+        $retorno['controle'] = $controle;
+        echo json_encode($retorno);
+    }
+
+    public function listagem(){
+        $user = auth()->user();
+        $array_requisicoes = array();
+        if($user->perfil->administrador || $user->perfil->preparar_compra){
+            $requisicoes = Requisicao::whereIn('status', ['Pedido'])->get();
+        }
+        else{
+            $requisicoes = Requisicao::whereIn('status', ['Pedido'])
+            ->where('user_criacao_id', $user->id)
+            ->get();
+        }
+
+        foreach($requisicoes as $requisicao){
+            $array_requisicoes[] = $requisicao;
+        }
+
+        $requisicoes = Requisicao::whereIn('status', ['Pedido Cancelado','Compra Cancelada'])
+        ->get();
+
+        foreach($requisicoes as $requisicao){
+            $array_requisicoes[] = $requisicao;
+        }
+
+        $in = ['Compra Aprovada','Compra Finalizada'];
+        $user = auth()->user();
+        if($user->perfil->administrador){
+            $requisicoes = Requisicao::whereNotIn('status',$in)->get();
+        }
+        elseif($user->perfil->preparar_compra){
+            $requisicoes = Requisicao::whereIn('status',['Pedido Compra','Retornado para Compra'])->get();
+        }
+        elseif($user->perfil->moderar){
+            $requisicoes = Requisicao::whereIn('status',['Em Validação','Retornado para Validação'])
+            ->where('user_moderador_id', $user->id)
+            ->get();
+        }
+        elseif($user->perfil->aprovar){
+            $requisicoes = Requisicao::whereIn('status',['Em Autorização','Aguardando Token de Aprovação'])
+            ->where('user_liberador_id', $user->id)
+            ->get();
+        }
+
+        foreach($requisicoes as $requisicao){
+            $array_requisicoes[] = $requisicao;
+        }
+
+        if($user->perfil->administrador || $user->perfil->confirmar_recebimento){
+            $requisicoes = Requisicao::whereIn('status', ['Compra Aprovada'])->get();
+        }
+        elseif($user->perfil->moderar){
+            $requisicoes = Requisicao::whereIn('status', ['Compra Aprovada'])
+            ->where('user_moderador_id', $user->id)
+            ->get();
+        }
+
+        foreach($requisicoes as $requisicao){
+            $array_requisicoes[] = $requisicao;
+        }
+
+        if($user->perfil->administrador || $user->perfil->confirmar_recebimento){
+            $requisicoes = Requisicao::whereIn('status', ['Compra Finalizada'])->get();
+        }
+        elseif($user->perfil->moderar){
+            $requisicoes = Requisicao::whereIn('status', ['Compra Finalizada'])
+            ->where('user_moderador_id', $user->id)
+            ->get();
+        }
+
+        foreach($requisicoes as $requisicao){
+            $array_requisicoes[] = $requisicao;
+        }
+
+        return view('pedidos/listagem', compact('array_requisicoes','user'));
     }
 
 }

@@ -42,7 +42,11 @@ return new class extends Migration
             $table->string('status_canc_devol')->nullable();
             $table->text('mensagem')->nullable();
             $table->string('fornecedor_email')->nullable();
+            $table->string('fornecedor_whatsapp')->nullable();
             $table->dateTime('dt_hr_envio_email_fornecedor')->nullable();
+            $table->text('justificativa_cancelamento')->nullable();
+            $table->boolean('sem_validacao')->nullable();
+            $table->string('portador')->nullable();
             $table->foreign('fornecedor_id')->references('id')->on('fornecedors');
             $table->foreign('setor_id')->references('id')->on('setors');
             $table->foreign('unidade_id')->references('id')->on('unidades');

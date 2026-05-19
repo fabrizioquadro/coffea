@@ -4,7 +4,7 @@
 <div class="card card-border-shadow-primary mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between">
-            <h4 class="card-title">Pedidos</h4>
+            <h4 class="card-title">{{ $controle == 'cancelados' ? 'Pedidos Cancelados' : 'Pedidos' }}</h4>
             @if($user->perfil->criar)
                 <a href="{{ route('pedidos.adicionar') }}" class="btn btn-primary">Adicionar</a>
             @endif
@@ -32,35 +32,37 @@
                         <th>Solicitante</th>
                         <th>Unidade</th>
                         <th>Setor</th>
-                        <th>Status</th>
+                        <th>Motivo</th>
                     </tr>
                 </thead>
                 @foreach($requisicoes as $requisicao)
-                    @php
-                    $var = explode(' ', $requisicao->created_at);
-                    $dt_criacao = dataDbForm($var[0]);
-                    @endphp
-                    <tr>
-                        <td>
-                            <div class="dropdown">
-                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow show" data-bs-toggle="dropdown" aria-expanded="true">
-                                    <i class="mdi mdi-dots-vertical"></i>
-                                </button>
-                                <div class="dropdown-menu" data-popper-placement="bottom-end">
-                                    <a class="dropdown-item waves-effect" href="{{ route('pedidos.acessar', $requisicao->id) }}"><i class="mdi mdi-eye me-1"></i> Acessar</a>
-                                    @if($requisicao->status == "Pedido" && ($user->perfil->editar || $user->perfil->administrador))
-                                    <a class="dropdown-item waves-effect" href="{{ route('pedidos.editar', $requisicao->id) }}"><i class="mdi mdi-pencil-outline me-1"></i> Editar</a>
-                                    @endif
+                    @if(($user->unidades()->where('unidade_id', $requisicao->unidade_id)->count() > 0 && $user->setores()->where('setor_id', $requisicao->setor_id)->count() > 0) OR $user->perfil->administrador)
+                        @php
+                        $var = explode(' ', $requisicao->created_at);
+                        $dt_criacao = dataDbForm($var[0]);
+                        @endphp
+                        <tr>
+                            <td>
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow show" data-bs-toggle="dropdown" aria-expanded="true">
+                                        <i class="mdi mdi-dots-vertical"></i>
+                                    </button>
+                                    <div class="dropdown-menu" data-popper-placement="bottom-end">
+                                        <a class="dropdown-item waves-effect" href="{{ route('pedidos.acessar', $requisicao->id) }}"><i class="mdi mdi-eye me-1"></i> Acessar</a>
+                                        @if($requisicao->status == "Pedido" && ($user->perfil->editar || $user->perfil->administrador))
+                                        <a class="dropdown-item waves-effect" href="{{ route('pedidos.editar', $requisicao->id) }}"><i class="mdi mdi-pencil-outline me-1"></i> Editar</a>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td>{{ $requisicao->id }}</td>
-                        <td>{{ $dt_criacao }}</td>
-                        <td>{{ $requisicao->criador->nome }}</td>
-                        <td>{{ $requisicao->unidade->nome }}</td>
-                        <td>{{ $requisicao->setor->nome }}</td>
-                        <td>{{ $requisicao->status }}</td>
-                    </tr>
+                            </td>
+                            <td>{{ $requisicao->id }}</td>
+                            <td>{{ $dt_criacao }}</td>
+                            <td>{{ $requisicao->criador->nome }}</td>
+                            <td>{{ $requisicao->unidade->nome }}</td>
+                            <td>{{ $requisicao->setor->nome }}</td>
+                            <td>{{ $controle == 'cancelados' ? $requisicao->justificativa_cancelamento : $requisicao->motivo_pedido_compra }}</td>
+                        </tr>
+                    @endif
                 @endforeach
             </table>
         </div>

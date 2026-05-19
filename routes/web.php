@@ -17,6 +17,7 @@ use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\CompraController;
 use App\Http\Controllers\AcessoFornecedorController;
 use App\Http\Controllers\FinalizadoController;
+use App\Http\Controllers\RelatorioController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,18 +38,21 @@ Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/acesso_pedido/{link}', [AcessoFornecedorController::class, 'index'])->name('acesso_fornecedor');
 Route::post('/manifestacao_fornecedor', [AcessoFornecedorController::class, 'manifestacao_fornecedor'])->name('manifestacao_fornecedor');
 Route::get('/compras/imprimir/{id}', [CompraController::class, 'imprimir'])->name('compras.imprimir');
+Route::get('/compras/imprimir_simplificado/{id}', [CompraController::class, 'imprimir_simplificado'])->name('compras.imprimir_simplificado');
+Route::get('/compras/imprimir_fornecedor/{id}', [CompraController::class, 'imprimir_fornecedor'])->name('compras.imprimir_fornecedor');
 
 Route::get('/testeapi', [loginController::class, 'testeapi']);
 
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/{controle?}', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/perfil', [DashboardController::class, 'perfil'])->name('perfil');
     Route::get('/alterar_senha', [DashboardController::class, 'alterar_senha'])->name('alterar_senha');
     Route::post('/perfil/atualizar_foto', [DashboardController::class, 'atualizar_foto'])->name('perfil.atualizar_foto');
     Route::post('/perfil/update', [DashboardController::class, 'perfil_update'])->name('perfil.update');
     Route::get('/perfil/resetar_foto_perfil', [DashboardController::class, 'resetar_foto_perfil'])->name('perfil.resetar_foto_perfil');
     Route::post('/alterar_senha/update', [DashboardController::class, 'alterar_senha_update'])->name('alterar_senha.update');
+    Route::post('/pesquisar', [DashboardController::class, 'pesquisar'])->name('pesquisar');
 
     Route::get('/perfis', [PerfilController::class, 'index'])->name('perfis');
     Route::get('/perfis/adicionar', [PerfilController::class, 'adicionar'])->name('perfis.adicionar');
@@ -93,6 +97,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/operacoes/insert', [OperacaoController::class, 'insert'])->name('operacoes.insert');
     Route::post('/operacoes/update', [OperacaoController::class, 'update'])->name('operacoes.update');
     Route::post('/operacoes/delete', [OperacaoController::class, 'delete'])->name('operacoes.delete');
+    Route::get('/operacoes/sincronizar_sisagil', [OperacaoController::class, 'sincronizar_sisagil'])->name('operacoes.sincronizar_sisagil');
 
     Route::get('/fornecedores', [FornecedorController::class, 'index'])->name('fornecedores');
     Route::get('/fornecedores/adicionar', [FornecedorController::class, 'adicionar'])->name('fornecedores.adicionar');
@@ -103,6 +108,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/fornecedores/insert', [FornecedorController::class, 'insert'])->name('fornecedores.insert');
     Route::post('/fornecedores/update', [FornecedorController::class, 'update'])->name('fornecedores.update');
     Route::post('/fornecedores/delete', [FornecedorController::class, 'delete'])->name('fornecedores.delete');
+    Route::get('/fornecedores/get_fornecedor_select', [FornecedorController::class, 'get_fornecedor_select'])->name('fornecedores.get_fornecedor_select');
 
     Route::get('/grupos', [GrupoController::class, 'index'])->name('grupos');
     Route::get('/grupos/adicionar', [GrupoController::class, 'adicionar'])->name('grupos.adicionar');
@@ -129,6 +135,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/itens/delete', [ItemController::class, 'delete'])->name('itens.delete');
     Route::get('/itens/busca_por_grupo', [ItemController::class, 'busca_por_grupo'])->name('itens.buscarItemsGrupo');
 
+    Route::get('/listagem', [PedidoController::class, 'listagem'])->name('listagem');
+
     Route::get('/pedidos', [PedidoController::class, 'index'])->name('pedidos');
     Route::get('/pedidos/adicionar', [PedidoController::class, 'adicionar'])->name('pedidos.adicionar');
     Route::get('/pedidos/editar/{id}', [PedidoController::class, 'editar'])->name('pedidos.editar');
@@ -137,11 +145,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/pedidos/insert', [PedidoController::class, 'insert'])->name('pedidos.insert');
     Route::post('/pedidos/update', [PedidoController::class, 'update'])->name('pedidos.update');
     Route::get('/pedidos/itens/insert', [PedidoController::class, 'itens_insert'])->name('pedidos.itens.insert');
+    Route::get('/pedidos/grupos/insert', [PedidoController::class, 'grupos_insert'])->name('pedidos.grupos.insert');
     Route::post('/pedidos/preparar_compra', [PedidoController::class, 'preparar_compra'])->name('pedidos.preparar_compra');
+    Route::get('/pedidos/verifica_motivo_compra', [PedidoController::class, 'verifica_motivo_compra'])->name('pedidos.verifica_motivo_compra');
+
+    Route::get('/pedidos_cancelados', [PedidoController::class, 'cancelados'])->name('pedidos_cancelados');
 
     Route::get('/requisicoes', [RequisicaoController::class, 'index'])->name('requisicoes');
     Route::get('/requisicoes/adicionar', [RequisicaoController::class, 'adicionar'])->name('requisicoes.adicionar');
-    Route::get('/requisicoes/editar/{id}', [RequisicaoController::class, 'editar'])->name('requisicoes.editar');
+    Route::get('/requisicoes/editar/{id}/{retorno?}', [RequisicaoController::class, 'editar'])->name('requisicoes.editar');
     Route::get('/requisicoes/acessar/{id}', [RequisicaoController::class, 'acessar'])->name('requisicoes.acessar');
     Route::get('/requisicoes/excluir/{id}', [RequisicaoController::class, 'excluir'])->name('requisicoes.excluir');
     Route::get('/requisicoes/item/delete', [RequisicaoController::class, 'delete_item'])->name('requisicoes.itens.delete');
@@ -149,13 +161,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/requisicoes/insert', [RequisicaoController::class, 'insert'])->name('requisicoes.insert');
     Route::post('/requisicoes/update', [RequisicaoController::class, 'update'])->name('requisicoes.update');
     Route::get('/requisicoes/financeiro/delete', [RequisicaoController::class, 'financeiro_delete'])->name('requisicoes.financeiro.delete');
-    Route::get('/requisicoes/cancelar/{id}', [RequisicaoController::class, 'cancelar_requisicao'])->name('requisicoes.cancelar');
+    Route::post('/requisicoes/cancelar', [RequisicaoController::class, 'cancelar_requisicao'])->name('requisicoes.cancelar');
     Route::get('/requisicoes/retornar_para_compra/{id}', [RequisicaoController::class, 'retornar_para_compra'])->name('requisicoes.retornar_para_compra');
     Route::get('/requisicoes/retornar_para_validacao/{id}', [RequisicaoController::class, 'retornar_para_validacao'])->name('requisicoes.retornar_para_validacao');
     Route::post('/requisicoes/enviar_para_validacao', [RequisicaoController::class, 'enviar_para_validacao'])->name('requisicoes.enviar_para_validacao');
     Route::post('/requisicoes/enviar_para_autorizacao', [RequisicaoController::class, 'enviar_para_autorizacao'])->name('requisicoes.enviar_para_autorizacao');
     Route::post('/requisicoes/autorizar_compra', [RequisicaoController::class, 'autorizar_compra'])->name('requisicoes.autorizar_compra');
     Route::post('/requisicoes/ativar_compra', [RequisicaoController::class, 'ativar_compra'])->name('requisicoes.ativar_compra');
+    Route::get('/requisicoes/verifica_descricao_financeiro', [RequisicaoController::class, 'verifica_descricao_financeiro'])->name('requisicoes.verifica_descricao_financeiro');
 
     Route::get('/compras', [CompraController::class, 'index'])->name('compras');
     Route::get('/compras/acessar/{id}', [CompraController::class, 'acessar'])->name('compras.acessar');
@@ -166,10 +179,19 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/compras/integrar_set', [CompraController::class, 'integrar_set'])->name('compras.integrar.set');
     Route::post('/compras/cancelar_set', [CompraController::class, 'cancelar_set'])->name('compras.cancelar.set');
     Route::post('/compras/entregas_set', [CompraController::class, 'entregas_set'])->name('compras.entregas.set');
+    Route::get('/compras/retornar/{id}', [CompraController::class, 'retornar'])->name('compras.retornar');
+    Route::post('/compras/retornar_set', [CompraController::class, 'retornar_set'])->name('compras.retornar.set');
+    Route::get('/compras/enviar_requisicao_email', [CompraController::class, 'enviar_requisicao_email'])->name('compras.enviar_requisicao_email');
 
     Route::get('/finalizados', [FinalizadoController::class, 'index'])->name('finalizados');
     Route::get('/finalizados/acessar/{id}', [FinalizadoController::class, 'acessar'])->name('finalizados.acessar');
     Route::get('/finalizados/entregas/{id}', [FinalizadoController::class, 'entregas'])->name('finalizados.entregas');
     Route::get('/finalizados/integrar/{id}', [FinalizadoController::class, 'integrar'])->name('finalizados.integrar');
+
+    Route::get('/rel_requisicao', [RelatorioController::class, 'requisicao'])->name('rel_requisicao');
+    Route::get('/rel_financeiro', [RelatorioController::class, 'financeiro'])->name('rel_financeiro');
+    Route::post('/rel_requisicao/gerar', [RelatorioController::class, 'requisicao_gerar'])->name('rel_requisicao.gerar');
+    Route::post('/rel_financeiro/gerar', [RelatorioController::class, 'financeiro_gerar'])->name('rel_financeiro.gerar');
+    Route::post('/relatorios/imprimir', [RelatorioController::class, 'imprimir'])->name('relatorios.imprimir');
 
 });

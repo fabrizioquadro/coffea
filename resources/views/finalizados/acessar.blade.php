@@ -1,3 +1,41 @@
+@php
+$user = auth()->user();
+$var = explode(' ', $requisicao->created_at);
+$dt_criacao = dataDbForm($var[0])." ".$var[1];
+
+//vamos descobrir quem executou a validação
+$dt_validacao = null;
+$hist_val = $requisicao->historicos()->where('status','Em Autorização')->orderBy('id')->first();
+if($hist_val){
+    $var = explode(' ', $hist_val->created_at);
+    $dt_validacao = dataDbForm($var[0])." ".$var[1];
+}
+
+$dt_compra = null;
+$nm_compra = null;
+$hist_compra = $requisicao->historicos()->where('status','PEDIDO COMPRA')->orderBy('id')->first();
+if($hist_compra){
+    $nm_compra = $hist_compra->user->nome;
+    $var = explode(' ', $hist_compra->created_at);
+    $dt_compra = dataDbForm($var[0])." ".$var[1];
+}
+
+//vamos descobrir quem executou a aprovação
+$dt_aprovacao = null;
+$hist_aprov = $requisicao->historicos()->where('status','Compra Aprovada')->orderBy('id')->first();
+if($hist_aprov){
+    $var = explode(' ', $hist_aprov->created_at);
+    $dt_aprovacao = dataDbForm($var[0])." ".$var[1];
+}
+
+$dt_confirmacao = null;
+if($requisicao->qrcode()){
+    $var = explode(" ", $requisicao->qrcode()->updated_at);
+    $dt_confirmacao = dataDbForm($var[0])." ".$var[1];
+}
+
+
+@endphp
 @extends('layout.admin')
 
 @section('conteudo')
@@ -10,7 +48,7 @@
 <div class="card card-border-shadow-primary mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between">
-            <h4 class="card-title">Acessar Requisição</h4>
+            <h4 class="card-title">Acessar Requisição - Cod: {{ $requisicao->id }}</h4>
         </div>
         <hr>
         @if($mensagem = Session::get('mensagem'))
@@ -25,71 +63,88 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
-        <a href="{{ route('compras.imprimir', $requisicao->id) }}" target='_blank' class="btn btn-primary btn-sm">Imprimir</a>
+        <a href="{{ route('compras.imprimir', $requisicao->id) }}" target='_blank' class="btn btn-primary btn-sm">Imprimir Detalhado</a>
+        <a href="{{ route('compras.imprimir_simplificado', $requisicao->id) }}" target='_blank' class="btn btn-warning btn-sm">Imprimir Simplificado</a>
+        @if($requisicao->sem_validacao)
+            <a href="{{ route('requisicoes.editar', [$requisicao->id,'compras']) }}" class="btn btn-warning btn-sm">Editar</a>
+        @endif
+        @if($requisicao->financeiros()->count() > 0 && $user->perfil->integrar_financeiro)
+            <a href="{{ route('compras.integrar', $requisicao->id) }}" class="btn btn-secondary btn-sm">Integrar</a>
+        @endif
+        <button type="button" id="botao_enviar_email" class="btn btn-sm btn-info">Enviar por Email</button>
         <div class="row align-items-end mt-3 gy-2">
             <div class="col-md-6 form-group">
                 <img src="{{ $qrcode }}" height="120px">
             </div>
             <div class="col-md-6 form-group">
-                <label for="">Link Verificação Fornecedor:</label>
+                <h5>Requisição: <strong>{{ $requisicao->id }}</strong></h5>
+                <label for="">Link Fornecedor:</label>
                 <a target='_blank' href="{{ $link }}" style="text-decoration: none; color: #696969">{{ $link }}</a>
             </div>
         </div>
         <div class="row mt-3 gy-2">
-            <div class="col-md-4 form-group borda_de_linha">
-                <label for="">Status:</label><br>
-                <b>{{ $requisicao->status }}</b><br>
-            </div>
-            <div class="col-md-4 form-group borda_de_linha">
-                <label for="">Aceite Fornecedor:</label><br>
-                <b>{{ $requisicao->aceito_pelo_fornecedor ? 'Sim' : 'Não' }}</b><br>
-            </div>
-            <div class="col-md-4 form-group borda_de_linha">
-                <label for="">Data Aceite:</label><br>
-                <b>{{ $requisicao->aceito_pelo_fornecedor ? dataDbForm($requisicao->data_manifestacao_fornecedor) : '' }}</b><br>
-            </div>
-        </div>
-        <div class="row mt-2 gy-2">
-            <div class="col-md-4 form-group borda_de_linha">
+            <div class="col-md-8 form-group borda_de_linha">
                 <label for="fornecedor_id">Fornecedor:</label><br>
                 <b>{{ $requisicao->fornecedor->nome }}</b>
             </div>
             <div class="col-md-4 form-group borda_de_linha">
-                <label for="fornecedor_id">Email Fornecedor:</label><br>
-                <b>{{ $requisicao->fornecedor_email }}</b>
-            </div>
-            <div class="col-md-4 form-group borda_de_linha">
-                <label for="data_previa_conclusao">Data Prévia Conclusão:</label><br>
-                <b>{{ dataDbForm($requisicao->data_previa_conclusao) }}</b>
+                <label for="">Status:</label><br>
+                <b>{{ $requisicao->status }}</b><br>
             </div>
         </div>
         <div class="row mt-2 gy-2">
-            <div class="col-md-4 form-group borda_de_linha">
+            <div class="col-md-6 form-group borda_de_linha">
+                <label for="fornecedor_id">Email/Whatsapp Fornecedor:</label><br>
+                <b>{{ $requisicao->fornecedor_email." ".$requisicao->fornecedor_whatsapp }}</b>
+            </div>
+            <div class="col-md-3 form-group borda_de_linha">
+                <label for="data_previa_conclusao">Data Prévia Conclusão:</label><br>
+                <b>{{ dataDbForm($requisicao->data_previa_conclusao) }}</b>
+            </div>
+            <div class="col-md-3 form-group borda_de_linha">
+                <label for="Utilizada">Utilizada:</label><br>
+                <b>{{ $requisicao->aceito_pelo_fornecedor ? 'Sim '.$dt_confirmacao : 'Não' }}</b>
+            </div>
+        </div>
+        <div class="row mt-2 gy-2">
+            <div class="col-md-3 form-group borda_de_linha">
                 <label for="user_moderador_id">Solicitante:</label><br>
-                <b>{{ $requisicao->criador->nome }}</b>
+                <b>{{ $requisicao->criador->nome }}</b><br>
+                <b>{{ $dt_criacao }}</b>
             </div>
-            <div class="col-md-4 form-group borda_de_linha">
-                <label for="user_moderador_id">Moderador:</label><br>
-                <b>{{ $requisicao->moderador->nome }}</b>
+            <div class="col-md-3 form-group borda_de_linha">
+                <label for="user_moderador_id">Compra:</label><br>
+                <b>{{ $nm_compra }}</b><br>
+                <b>{{ $dt_compra }}</b>
             </div>
-            <div class="col-md-4 form-group borda_de_linha">
-                <label for="user_liberador_id">Liberador:</label><br>
-                <b>{{ $requisicao->liberador->nome }}</b>
+            <div class="col-md-3 form-group borda_de_linha">
+                <label for="user_moderador_id">Validação:</label><br>
+                <b>{{ $hist_val ? $hist_val->user->nome : '---' }}</b><br>
+                <b>{{ $dt_validacao }}</b>
+            </div>
+            <div class="col-md-3 form-group borda_de_linha">
+                <label for="user_liberador_id">Aprovação:</label><br>
+                <b>{{ $hist_aprov ? $hist_aprov->user->nome : '---' }}</b><br>
+                <b>{{ $dt_aprovacao }}</b>
             </div>
         </div>
         <div class="row mt-2 gy-2 borda_de_linha">
-            <div class="col-md-6 form-group borda_de_linha">
+            <div class="col-md-4 form-group borda_de_linha">
                 <label for="setor_id">Setor:</label><br>
                 <b>{{ $requisicao->setor->nome }}</b>
             </div>
-            <div class="col-md-6 form-group borda_de_linha">
+            <div class="col-md-4 form-group borda_de_linha">
                 <label for="unidade_id">Unidade:</label><br>
                 <b>{{ $requisicao->unidade->nome }}</b>
+            </div>
+            <div class="col-md-4 form-group borda_de_linha">
+                <label for="unidade_id">Operação:</label><br>
+                <b>{{ $requisicao->financeiros->first() ? $requisicao->financeiros->first()->operacao->descricao : '' }}</b>
             </div>
         </div>
         <div class="row mt-2 gy-2 borda_de_linha">
             <div class="col-md-12 form-group">
-                <label for="motivo_pedido_compra">Motivo de Uso:</label><br>
+                <label for="motivo_pedido_compra">Item/Motivo:</label><br>
                 <b>{{ $requisicao->motivo_pedido_compra }}</b>
             </div>
         </div>
@@ -99,39 +154,6 @@
                 <b>{{ $requisicao->justificativa }}</b>
             </div>
         </div>
-        <hr>
-        <div class="d-flex justify-content-between mt-3 mb-3">
-            <h5 class="card-title">Itens</h5>
-        </div>
-        <div class="table-responsive borda_de_linha">
-            <table class="table">
-                <thead class="table-light">
-                    <tr>
-                        <th>Item</th>
-                        <th>Qtd</th>
-                        <th>Unitário</th>
-                        <th>Total</th>
-                        <th>Entrega</th>
-                        <th>Obs</th>
-                        <th>Patrimonio</th>
-                    </tr>
-                </thead>
-                <tbody id="tabela_items">
-                    @foreach($requisicao->itens as $item)
-                        <tr id="linha_item_cadastrada_{{ $item->id }}">
-                            <td>{{ $item->item->nome }}</td>
-                            <td>{{ $item->qtd_pedida }}</td>
-                            <td>R${{ valorDbForm($item->valor_unid) }}</td>
-                            <td>R${{ valorDbForm($item->valor_total_pedido) }}</td>
-                            <td>{{ dataDbForm($item->data_previsao_entrega) }}</td>
-                            <td>{{ $item->obs }}</td>
-                            <td>{{ $item->lancar_patrimonio ? 'Sim' : 'Não' }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        <hr>
         <div class="row mt-2 gy-2 align-items-end">
             <div class="col-md-6 form-group borda_de_linha">
                 <label for="qtd_itens_pedido">Total Quantidade:</label><br>
@@ -161,6 +183,39 @@
                 <label for="total_pedido">Total Pedido:</label><br>
                 <b>R$ {{ valorDbForm($requisicao->total_pedido) }}</b>
             </div>
+        </div>
+        <div class="d-flex justify-content-between mt-3 mb-3">
+            <h5 class="card-title">Itens</h5>
+        </div>
+        <div class="table-responsive borda_de_linha">
+            <table class="table">
+                <thead class="table-light">
+                    <tr>
+                        <th>Item</th>
+                        <th>Unidade</th>
+                        <th>Qtd</th>
+                        <th>Unitário</th>
+                        <th>Total</th>
+                        <th>Entrega</th>
+                        <th>Obs</th>
+                        <th>Patrimonio</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela_items">
+                    @foreach($requisicao->itens as $item)
+                        <tr id="linha_item_cadastrada_{{ $item->id }}">
+                            <td>{{ $item->item->nome }}</td>
+                            <td>{{ $item->ds_unidade }}</td>
+                            <td>{{ $item->qtd_pedida }}</td>
+                            <td>R${{ valorDbForm($item->valor_unid) }}</td>
+                            <td>R${{ valorDbForm($item->valor_total_pedido) }}</td>
+                            <td>{{ dataDbForm($item->data_previsao_entrega) }}</td>
+                            <td>{{ $item->obs }}</td>
+                            <td>{{ $item->lancar_patrimonio ? 'Sim' : 'Não' }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
         <hr>
         <div class="d-flex justify-content-between mt-3 mb-3">
@@ -267,7 +322,20 @@
         </div>
     </div>
 </div>
-
-<script>
+<script type="text/javascript">
+document.getElementById('botao_enviar_email').addEventListener('click', ()=>{
+    email = prompt('Informe o email');
+    $.getJSON(
+        '{{route("compras.enviar_requisicao_email")}}',
+        {
+            requisicao_id : {{ $requisicao->id }},
+            email : email
+        },
+        function(json){
+            alert('Foi enviado para a fila de envio de emails a solicitação.');
+        }
+    );
+})
+</script>
 
 @endsection

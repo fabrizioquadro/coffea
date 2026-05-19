@@ -15,9 +15,9 @@ class AcessoFornecedorController extends Controller
         $ip_leitura = request()->server('REMOTE_ADDR');
 
         $qrcode = Code::where('link', $link)->first();
-        if(!$qrcode || strtotime(date('Y-m-d H:i:s')) > strtotime($qrcode->vencimento)){
-            die('Pagina Expirada ou inválida!!');
-        }
+        //if(!$qrcode || strtotime(date('Y-m-d H:i:s')) > strtotime($qrcode->vencimento)){
+        //    die('Pagina Expirada ou inválida!!');
+        //}
         $qrcode->ip_ultima_leitura = $ip_leitura;
         $qrcode->data_ultima_leitura = date("Y-m-d H:i:s");
         $qrcode->save();
@@ -35,7 +35,7 @@ class AcessoFornecedorController extends Controller
 
             //vamos verificar se o codigo de atiação é o correto
             $token = Token::where('requisicao_id', $requisicao->id)->first();
-            if($token->verificador == $request->codigo_validacao){
+            //if($token->verificador == $request->codigo_validacao){
                 if($request->acao == "Aceitar"){
                     $requisicao->aceito_pelo_fornecedor = true;
                     $requisicao->data_manifestacao_fornecedor = date('Y-m-d H:i:s');
@@ -68,10 +68,10 @@ class AcessoFornecedorController extends Controller
 
                     return redirect()->route('acesso_fornecedor', $qrcode->link)->with('mensagem_erro' ,'Pedido Rejeitado');
                 }
-            }
-            else{
-                die('Codigo de validação inválido!');
-            }
+            //}
+            //else{
+            //    die('Codigo de validação inválido!');
+            //}
         }
         else{
             die('Codigo de validação inválido!');

@@ -39,6 +39,8 @@
                         <th>Corrigir</th>
                         <th>Cancelar</th>
                         <th>Acompanhar</th>
+                        <th>Moderar Todos</th>
+                        <th>Aprovar Todos</th>
                         <th>Data Cadastro</th>
                         <th>Usuário Cadastro</th>
                         <th>Data Alteração</th>
@@ -78,6 +80,8 @@
                         <td>{{ $perfil->corrigir ? 'Sim' : 'Não' }}</td>
                         <td>{{ $perfil->cancelar ? 'Sim' : 'Não' }}</td>
                         <td>{{ $perfil->acompanhar ? 'Sim' : 'Não' }}</td>
+                        <td>{{ $perfil->moderar_todos ? 'Sim' : 'Não' }}</td>
+                        <td>{{ $perfil->aprovar_todos ? 'Sim' : 'Não' }}</td>
                         <td>{{ $dt_cad }}</td>
                         <td>{{ $perfil->user_cad ? $perfil->user_cad->nome : '' }}</td>
                         <td>{{ $dt_update }}</td>

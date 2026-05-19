@@ -35,13 +35,13 @@
                         <label for="usuario_sisagil">Usuário Sisagil:</label>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-floating form-floating-outline">
                         <input required class="form-control" type="text" id="senha_sisagil" name="senha_sisagil" value="{{ $unidade->senha_sisagil }}"/>
                         <label for="senha_sisagil">Senha Sisagil:</label>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-floating form-floating-outline mt-3">
                         <select required id="type" name='status' class="select2 form-select">
                             <option value="">Opções</option>
@@ -51,9 +51,18 @@
                         <label for="type">Status:</label>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <div class="form-floating form-floating-outline mt-3">
+                        <select required id="restrita" name='restrita' class="select2 form-select">
+                            <option @if($unidade->restrita == "Não") selected @endif value="Não">Não</option>
+                            <option @if($unidade->restrita == "Sim") selected @endif value="Sim">Sim</option>
+                        </select>
+                        <label for="restrita">Restrita:</label>
+                    </div>
+                </div>
+                <div class="col-md-3">
                     <div class="form-floating form-floating-outline">
-                        <input required class="form-control" type="file" id="logo" name="logo"/>
+                        <input class="form-control" type="file" id="logo" name="logo"/>
                         <label for="logo">Logo:</label>
                     </div>
                 </div>

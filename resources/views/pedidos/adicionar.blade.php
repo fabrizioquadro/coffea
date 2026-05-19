@@ -6,6 +6,18 @@
         <div class="d-flex justify-content-between">
             <h4 class="card-title">Adicionar Pedido</h4>
         </div>
+        @if($mensagem = Session::get('mensagem'))
+            <div class="alert alert-success alert-dismissible mt-3" role="alert">
+                {{ $mensagem }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        @if($mensagem = Session::get('mensagem_erro'))
+            <div class="alert alert-danger alert-dismissible mt-3" role="alert">
+                {{ $mensagem }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
         <hr>
         <form id="formulario" action="{{ route('pedidos.insert') }}" method="post" enctype="multipart/form-data">
             @csrf
@@ -45,11 +57,11 @@
                 </div>
                 <div class="col-md-12">
                     <div class="form-floating form-floating-outline">
-                        <textarea class="form-control h-px-100" id="motivo_pedido_compra" name="motivo_pedido_compra"></textarea>
-                        <label for="motivo_pedido_compra">Motivo de Uso:</label>
+                        <textarea onblur="verifica_motivo_pedido_compra(this)" class="form-control h-px-100" id="motivo_pedido_compra" name="motivo_pedido_compra"></textarea>
+                        <label for="motivo_pedido_compra">Item / Motivo:</label>
                     </div>
                 </div>
-                <div class="col-md-12">
+                <div class="col-md-12" style='display: none'>
                     <div class="form-floating form-floating-outline">
                         <textarea class="form-control h-px-100" id="justificativa" name="justificativa"></textarea>
                         <label for="justificativa">Justificativa:</label>
@@ -57,15 +69,16 @@
                 </div>
             </div>
             <hr>
-            <div class="d-flex justify-content-between mt-3 mb-3">
+            <div style="display:none !important" class="d-flex justify-content-between mt-3 mb-3">
                 <h5 class="card-title">Itens</h5>
                 <button class="btn btn-sm btn-primary" type="button" id="botao_adicionar_item">Adicionar Item</button>
             </div>
-            <div class="table-responsive">
+            <div style="display:none !important" class="table-responsive">
                 <table class="table">
                     <thead class="table-light">
                         <tr>
                             <th>Item</th>
+                            <th>Unidade</th>
                             <th>Qtd</th>
                             <th>Obs</th>
                             <th></th>
@@ -77,7 +90,7 @@
                 </table>
             </div>
             <hr>
-            <div class="row mt-2 gy-4 align-items-end">
+            <div style="display:none !important" class="row mt-2 gy-4 align-items-end">
                 <div class="col-md-6">
                     <div class="form-floating form-floating-outline">
                         <input onblur="calcula_total_somatorio()" class="form-control" type="text" id="qtd_itens_pedido" name="qtd_itens_pedido" pattern="[0-9]+([,\.][0-9]+)?" min="0" step="any"/>
@@ -103,18 +116,23 @@
             </div>
             <div class="modal-body">
                 <div class="row mt-2 gy-4 align-items-end">
-                    <div class="col-md-4">
-                        <div class="form-floating form-floating-outline">
-                            <select required id="grupo_id" class="select2 form-select">
-                                <option value="">Opções</option>
-                                @foreach($grupos as $grupo)
-                                    <option value="{{ $grupo->id }}">{{ $grupo->descricao }}</option>
-                                @endforeach
-                            </select>
-                            <label for="grupo_id">Grupo:</label>
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge">
+                            <div class="form-floating form-floating-outline">
+                                <select required id="grupo_id" class="select2 form-select">
+                                    <option value="">Opções</option>
+                                    @foreach($grupos as $grupo)
+                                        <option value="{{ $grupo->id }}">{{ $grupo->descricao }}</option>
+                                    @endforeach
+                                </select>
+                                <label for="grupo_id">Grupo:</label>
+                            </div>
+                            <span title="Adicionar Outro Grupo" onclick="adicionar_novo_grupo()" class="input-group-text cursor-pointer">
+                                <i class="mdi mdi-plus-circle-outline"></i>
+                            </span>
                         </div>
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-md-6">
                         <div class="input-group input-group-merge">
                             <div class="form-floating form-floating-outline">
                                 <select required id="item_id" class="select2 form-select">
@@ -127,7 +145,58 @@
                             </span>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
+                        <div class="form-floating form-floating-outline">
+                            <select required id="ds_unidade" class="select2 form-select">
+                                <option value="">Opções</option>
+                                <option value="CÁPSULA">CÁPSULA</option>
+                                <option value="CARTELA">CARTELA</option>
+                                <option value="CENTO">CENTO</option>
+                                <option value="CONJUNTO">CONJUNTO</option>
+                                <option value="CENTÍMETRO">CENTÍMETRO</option>
+                                <option value="CENTIMETRO QUADRADO">CENTIMETRO QUADRADO</option>
+                                <option value="CAIXA">CAIXA</option>
+                                <option value="DUZIA">DUZIA</option>
+                                <option value="EMBALAGEM">EMBALAGEM</option>
+                                <option value="FARDO">FARDO</option>
+                                <option value="FOLHA">FOLHA</option>
+                                <option value="FRASCO">FRASCO</option>
+                                <option value="GALÃO">GALÃO</option>
+                                <option value="GARRAFA">GARRAFA</option>
+                                <option value="GRAMAS">GRAMAS</option>
+                                <option value="JOGO">JOGO</option>
+                                <option value="QUILOGRAMA">QUILOGRAMA</option>
+                                <option value="KIT">KIT</option>
+                                <option value="LATA">LATA</option>
+                                <option value="LITRO">LITRO</option>
+                                <option value="METRO">METRO</option>
+                                <option value="METRO QUADRADO">METRO QUADRADO</option>
+                                <option value="METRO CÚBICO">METRO CÚBICO</option>
+                                <option value="MILHEIRO">MILHEIRO</option>
+                                <option value="MILILITRO">MILILITRO</option>
+                                <option value="MEGAWATT HORA">MEGAWATT HORA</option>
+                                <option value="PACOTE">PACOTE</option>
+                                <option value="PALETE">PALETE</option>
+                                <option value="PARES">PARES</option>
+                                <option value="PEÇA">PEÇA</option>
+                                <option value="POTE">POTE</option>
+                                <option value="QUILATE">QUILATE</option>
+                                <option value="RESMA">RESMA</option>
+                                <option value="ROLO">ROLO</option>
+                                <option value="SACO">SACO</option>
+                                <option value="SACOLA">SACOLA</option>
+                                <option value="TAMBOR">TAMBOR</option>
+                                <option value="TANQUE">TANQUE</option>
+                                <option value="TONELADA">TONELADA</option>
+                                <option value="TUBO">TUBO</option>
+                                <option value="UNIDADE">UNIDADE</option>
+                                <option value="VASILHAME">VASILHAME</option>
+                                <option value="VIDRO">VIDRO</option>
+                            </select>
+                            <label for="ds_unidade">Unidade:</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
                         <div class="form-floating form-floating-outline">
                             <input onblur="calcula_total_item()" class="form-control" type="number" id="qtd_pedida" pattern="[0-9]+([,\.][0-9]+)?" min="0" step="any"/>
                             <label for="qtd_pedida">Qta Pedida:</label>
@@ -172,6 +241,23 @@ function adicionar_novo_item(){
     }
 }
 
+function adicionar_novo_grupo(){
+
+    nm_grupo = prompt('Informe o nome do novo grupo.');
+    if(nm_grupo){
+        $.getJSON(
+            '{{ route("pedidos.grupos.insert") }}',
+            {
+                nm_grupo : nm_grupo,
+            },
+            function(json){
+                document.getElementById('grupo_id').innerHTML = json.html;
+            }
+        );
+    }
+
+}
+
 document.getElementById('botao_adicionar_item').addEventListener('click', ()=>{
     modalItem = new bootstrap.Modal(document.getElementById('modal_item'));
     modalItem.show();
@@ -198,6 +284,7 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
     item_id = document.getElementById('item_id').value;
     nm_item = $('#item_id').find(":selected").text();
     qtd = document.getElementById('qtd_pedida').value;
+    ds_unidade = document.getElementById('ds_unidade').value;
     obs = document.getElementById('obs').value;
 
     if(item_id && qtd){
@@ -210,17 +297,20 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
         td2 = document.createElement('td');
         td3 = document.createElement('td');
         td4 = document.createElement('td');
+        td_unidade = document.createElement('td');
 
         button = document.createElement('button');
         input1 = document.createElement('input');
         input2 = document.createElement('input');
         input3 = document.createElement('input');
+        input_unidade = document.createElement('input');
 
         tr.setAttribute('id', 'linha_item_' + contador);
 
         td1.innerHTML = nm_item;
         td2.innerHTML = qtd;
         td3.innerHTML = obs;
+        td_unidade.innerHTML = ds_unidade;
 
         button.setAttribute('type', 'button');
         button.setAttribute('onclick', 'excluir_item(' + contador + ')');
@@ -230,6 +320,7 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
         td4.appendChild(button);
 
         tr.appendChild(td1);
+        tr.appendChild(td_unidade);
         tr.appendChild(td2);
         tr.appendChild(td3);
         tr.appendChild(td4);
@@ -247,10 +338,15 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
         input3.setAttribute('name','obs_' + contador);
         input3.setAttribute('value', obs);
 
+        input_unidade.setAttribute('type','hidden');
+        input_unidade.setAttribute('name','ds_unidade_' + contador);
+        input_unidade.setAttribute('value', ds_unidade);
+
 
         tr.appendChild(input1);
         tr.appendChild(input2);
         tr.appendChild(input3);
+        tr.appendChild(input_unidade);
 
         document.getElementById('tabela_items').appendChild(tr);
         modalItem.hide();
@@ -259,6 +355,7 @@ document.getElementById('botao_salvar_item').addEventListener('click', ()=>{
         document.getElementById('item_id').innerHTML = '<option value="">Opções</option>';
         document.getElementById('qtd_pedida').value = '';
         document.getElementById('obs').value = '';
+        document.getElementById('ds_unidade').value = '';
     }
     else{
         alert('Preencha todos os campos');
@@ -300,10 +397,10 @@ document.getElementById('botao_adicionar_requisicao').addEventListener('click', 
         return;
     }
 
-    if(parseInt(document.getElementById('contador_items').value) <= 0){
-        alert('É necessário adicionar pelo menos 1 item!');
-        return;
-    }
+    //if(parseInt(document.getElementById('contador_items').value) <= 0){
+    //    alert('É necessário adicionar pelo menos 1 item!');
+    //    return;
+    //}
 
     document.getElementById('formulario').submit();
 });
@@ -313,6 +410,22 @@ document.addEventListener("keydown", function(event) {
     event.preventDefault();
   }
 });
+
+function verifica_motivo_pedido_compra(e){
+    if(e.value){
+        $.getJSON(
+            "{{ route('pedidos.verifica_motivo_compra') }}",
+            {
+                motivo : e.value
+            },
+            function(json){
+                if(json.controle == 'true'){
+                    alert('Motivo de Compra já cadastrado no sistema, não há problema na duplicidade, este é só um aviso de controle.');
+                }
+            }
+        );
+    }
+}
 
 </script>
 @endsection

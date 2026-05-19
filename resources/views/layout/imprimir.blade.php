@@ -7,7 +7,7 @@
         <title>Supporto Trading Company - Sistema de Pedido de Compras</title>
         <meta name="description" content="Supporto Trading Company - Sistema de Pedido de Compras" />
         <!-- Favicon -->
-        <link rel="icon" type="image/x-icon" href="{{ asset('/public/img/logo_supporto.png') }}" />
+        <link rel="icon" type="image/x-icon" href="{{ asset('/public/img/Supporto_Alta.png') }}" />
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -29,6 +29,7 @@
         <!-- Page CSS -->
         <!-- Page -->
         <link rel="stylesheet" href="{{ asset('/public/template/vendor/css/pages/page-auth.css') }}" />
+        <link rel="stylesheet" href="{{ asset('/public/css/bootstrap-combobox.css') }}" />
         <!-- Helpers -->
         <script src="{{ asset('/public/template/vendor/js/helpers.js') }}"></script>
         <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
@@ -51,8 +52,8 @@
     </head>
     <body>
         <!-- Sections:Start -->
-        <div class="container-fluid">
-            @yield('conteudo');
+        <div class="container-fluid" style="padding-left: 10px !important; padding-right: 10px !important">
+            @yield('conteudo')
         </div>
         <!-- build:js assets/vendor/js/core.js -->
         <script src="{{ asset('/public/template/vendor/libs/jquery/jquery.js') }}"></script>
@@ -61,5 +62,7 @@
         <script src="{{ asset('/public/template/vendor/libs/node-waves/node-waves.js') }}"></script>
 
         <script src="{{ asset('/public/template/vendor/js/front-main.js') }}"></script>
+        <script src="{{ asset('/public/js/bootstrap-combobox.js') }}"></script>
+        <script src="{{ asset('/public/js/script.js') }}"></script>
     </body>
 </html>

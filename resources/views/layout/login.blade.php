@@ -7,7 +7,7 @@
         <title>Grupo Coffea - Sistema de Solicitações</title>
         <meta name="description" content="Grupo Coffea - Sistema de Solicitações" />
         <!-- Favicon -->
-        <link rel="icon" type="image/x-icon" href="{{ asset('/public/img/logo.png') }}" />
+        <link rel="icon" type="image/x-icon" href="{{ asset('/public/img/Supporto_Alta.png') }}" />
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -59,7 +59,7 @@
                         <!-- Logo -->
                         <div class="app-brand justify-content-center mt-5">
                             <span class="app-brand-logo demo" style="background-color: #08120a">
-                                <img src="{{ asset('/public/img/logo_new.jpeg') }}" height="110px" alt="">
+                                <img src="{{ asset('/public/img/Supporto_Alta.png') }}" height="110px" alt="">
                             </span>
                         </div>
                         <!-- /Logo -->

@@ -32,6 +32,10 @@
                 <label for="type">Status:</label><br>
                 <b>{{ $unidade->status }}</b>
             </div>
+            <div class="col-md-6 form-group">
+                <label for="type">Restrita:</label><br>
+                <b>{{ $unidade->restrita }}</b>
+            </div>
         </div>
     </div>
 </div>

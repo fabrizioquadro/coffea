@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('tokens', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('requisicao_id');
+            $table->unsignedBigInteger('requisicao_id')->unique();
             $table->unsignedBigInteger('user_criacao_id');
             $table->unsignedBigInteger('user_ativacao_id')->nullable();
             $table->dateTime('vencimento');

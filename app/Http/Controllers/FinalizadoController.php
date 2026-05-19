@@ -11,10 +11,10 @@ class FinalizadoController extends Controller
     public function index(){
         $user = auth()->user();
         if($user->perfil->administrador || $user->perfil->confirmar_recebimento){
-            $requisicoes = Requisicao::whereIn('status', ['Compra Finalizada','Pedido Cancelado'])->get();
+            $requisicoes = Requisicao::whereIn('status', ['Compra Finalizada'])->get();
         }
         elseif($user->perfil->moderar){
-            $requisicoes = Requisicao::whereIn('status', ['Compra Finalizada','Pedido Cancelado'])
+            $requisicoes = Requisicao::whereIn('status', ['Compra Finalizada'])
             ->where('user_moderador_id', $user->id)
             ->get();
         }

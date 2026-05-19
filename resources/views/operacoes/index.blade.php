@@ -5,7 +5,8 @@
     <div class="card-body">
         <div class="d-flex justify-content-between">
             <h4 class="card-title">Operações</h4>
-            <a href="{{ route('operacoes.adicionar') }}" class="btn btn-primary">Adicionar</a>
+            {{--<a href="{{ route('operacoes.adicionar') }}" class="btn btn-primary">Adicionar</a>--}}
+            <button type="button" class="btn btn-secondary" id="sincronizar_sisagil">Sincronizar Sisagil</button>
         </div>
         @if($mensagem = Session::get('mensagem'))
             <div class="alert alert-success alert-dismissible mt-3" role="alert">
@@ -29,6 +30,7 @@
                         <th>Codigo Sisagil</th>
                         <th>Status</th>
                         <th>Padrão Cancelamento</th>
+                        <th>Unidade</th>
                     </tr>
                 </thead>
                 @foreach($operacoes as $operacao)
@@ -48,6 +50,7 @@
                         <td>{{ $operacao->sisagil_id }}</td>
                         <td>{{ $operacao->status }}</td>
                         <td>{{ $operacao->operacao_padrao_cancelamento }}</td>
+                        <td>{{ $operacao->unidade ? $operacao->unidade->nome : '' }}</td>
                     </tr>
                 @endforeach
             </table>
@@ -82,6 +85,12 @@ window.addEventListener('load',()=>{
       }
     }
   });
+})
+
+document.getElementById('sincronizar_sisagil').addEventListener('click', ()=>{
+    if(confirm('Tem certeza que deseja atualizar a sincronização com o sisagil na tabela de operações?')){
+        window.location.href = "{{ route('operacoes.sincronizar_sisagil') }}";
+    }
 })
 
 </script>

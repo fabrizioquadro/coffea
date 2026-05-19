@@ -15,6 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('descricao');
             $table->boolean('administrador');
+            $table->boolean('unidades');
+            $table->boolean('setores');
+            $table->boolean('perfil');
+            $table->boolean('usuarios');
+            $table->boolean('operacoes');
+            $table->boolean('contas');
             $table->boolean('criar');
             $table->boolean('preparar_compra');
             $table->boolean('duplicar_pedido_compra');

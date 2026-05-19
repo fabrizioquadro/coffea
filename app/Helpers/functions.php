@@ -4,6 +4,47 @@ use PHPMailer\PHPMailer\Exception;
 use App\Models\Historico;
 use App\Models\Alerta;
 
+if(!function_exists('enviarWhatsapp')){
+    function enviarWhatsapp($numero, $mensagem){
+        //sua key e token do chatmix
+        $key = 'REQUISICAO-SUPPORTOTRADING-COM-BR-6FF1';
+        $token = '3D64-9FE-2ACFB-5CC3';
+
+        // URL do endpoint
+        $baseUrl = "https://disparo.bulkv2.chatmix.com.br/api";
+
+        $numero = str_replace(' ','',$numero);
+        $numero = str_replace('(','',$numero);
+        $numero = str_replace(')','',$numero);
+        $numero = str_replace('-','',$numero);
+
+        $params = [
+            'key' => $key,
+            'token' => $token,
+            'numero' => '55'.$numero,
+            'message' => $mensagem,
+            'gerar_pdf' => true,
+            'ignore_duplicated' => true, // Ignora mensagens duplicadas para o mesmo número
+        ];
+
+        $url = $baseUrl .'?'.http_build_query($params);
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10,
+        ]);
+
+        $response = curl_exec($ch);
+
+        //echo "<pre>";
+        //print_r($response);
+        //echo "</pre>";
+    }
+}
+
+
 if(!function_exists('get_url_sisagil_api')){
     function get_url_sisagil_api(){
         return "https://sistema.sischef.com/service";
@@ -134,8 +175,8 @@ if(!function_exists('dataFormDb')){
     }
 }
 
-if(!function_exists('valorFormDb')){
-    function valorFormDb($valor){
+if(!function_exists('valorFormDbOld')){
+    function valorFormDbOld($valor){
         //vamos procurar se foi digitado a ,
         $virgula = strpos($valor, ',');
 
@@ -153,14 +194,41 @@ if(!function_exists('valorFormDb')){
     }
 }
 
+if(!function_exists('valorFormDb')){
+    function valorFormDb($valor){
+        //vamos procurar se foi digitado a ,
+        $virgula = strpos($valor, ',');
+
+        if($virgula === false){
+            $valor = str_replace(".","",$valor);
+            $valor = $valor.".0000";
+            return $valor;
+        }
+
+        $var = explode(',', $valor);
+        $decimal = $var[1];
+        $thousand = str_replace('.', '', $var[0]);
+        $decimal_retorno = "";
+        for($i=0 ; $i<4 ; $i++){
+            if($decimal[$i]){
+                $decimal_retorno = $decimal_retorno.$decimal[$i];
+            }else{
+                $decimal_retorno = $decimal_retorno.'0';
+            }
+        }
+        $valor = $thousand.'.'.$decimal_retorno;
+        return $valor;
+    }
+}
+
 if(!function_exists('valorDbForm')){
     function valorDbForm($valor){
-        return number_format($valor,2,",",".");
+        return number_format($valor,4,",",".");
     }
 }
 
 if(!function_exists('enviarMail')){
-    function enviarMail($destinatario, $assunto, $mensagem){
+    function enviarMail($destinatario, $assunto, $mensagem, $arquivo = null){
         $mail = new PHPMailer(true);
         try {
             //Server settings
@@ -168,18 +236,21 @@ if(!function_exists('enviarMail')){
             $mail->CharSet = "utf8";
             $mail->SMTPDebug = 0;
             $mail->isSMTP();
-            $mail->Host = 'smtp.hostinger.com';
+            $mail->Host = 'smtp.site.com.br/';
             $mail->SMTPAuth = true;
-            $mail->Username = 'contato@gapp.app.br';
-            $mail->Password = '*TCw22:vN';
+            $mail->Username = 'sistema@wobrasil.com.br';
+            $mail->Password = 'wo123456BR';
             $mail->SMTPSecure = 'tls';
             $mail->Port = 587;
             $mail->FromName = "Grupo Coffea - Sistema de Solicitações";
-            $mail->From = "contato@gapp.app.br";
+            $mail->From = "sistema@wobrasil.com.br";
             $mail->IsHTML(true);
             $mail->Subject = $assunto;
             $mail->Body = $mensagem;
             $mail->AddAddress($destinatario);
+            if($arquivo){
+                $mail->addAttachment($arquivo);
+            }
             $mail->Send();
         }
         catch (Exception $e) {

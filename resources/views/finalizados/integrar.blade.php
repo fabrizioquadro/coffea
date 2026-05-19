@@ -4,7 +4,7 @@
 <div class="card card-border-shadow-primary mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between">
-            <h4 class="card-title">Integração Sisagil Financeiro</h4>
+            <h4 class="card-title">Integração Sisagil Financeiro - Cod: {{ $requisicao->id }}</h4>
         </div>
         @if($mensagem = Session::get('mensagem'))
             <div class="alert alert-success alert-dismissible mt-3" role="alert">
@@ -43,7 +43,11 @@
                                         <i class="mdi mdi-dots-vertical"></i>
                                     </button>
                                     <div class="dropdown-menu" data-popper-placement="bottom-end">
-                                        <a target='_blank' class="dropdown-item waves-effect" href="{{ route('compras.integrar.get_parcela_sisagil', $financeiro->id) }}"><i class="mdi mdi-target me-1"></i> Verificar Sisagil</a>
+                                        @if(!$financeiro->sisagil_id_retorno)
+                                            <button class="dropdown-item waves-effect" type="button" onclick="botao_integra_financeiro({{ $financeiro->id }})"><i class="mdi mdi-link me-1"></i> Integrar Parcela</a>
+                                        @else
+                                            <a target='_blank' class="dropdown-item waves-effect" href="{{ route('compras.integrar.get_parcela_sisagil', $financeiro->id) }}"><i class="mdi mdi-target me-1"></i> Verificar Sisagil</a>
+                                        @endif
                                     </div>
                                 </div>
                             </td>
@@ -62,4 +66,20 @@
         </div>
     </div>
 </div>
+<form id="formulario" action="{{ route('compras.integrar.set') }}" method="post">
+    @csrf
+    <input type="hidden" name="requisicao_id" value="{{ $requisicao->id }}">
+    <input type="hidden" name="financeiro_id" id="financeiro_id">
+    <input type="hidden" name="tipo_integracao" id="tipo_integracao">
+</form>
+<script type="text/javascript">
+function botao_integra_financeiro(financeiro_id){
+    if(confirm('Tem certeza que deseja fazer a integração desta parcela?')){
+        document.getElementById('tipo_integracao').value = 'parcela';
+        document.getElementById('financeiro_id').value = financeiro_id;
+        document.getElementById('formulario').submit();
+    }
+}
+</script>
+
 @endsection

@@ -1,6 +1,7 @@
 @extends('layout.admin')
 
 @section('conteudo')
+
 <div class="card card-border-shadow-primary mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between">
@@ -28,6 +29,7 @@
                         <th></th>
                         <th>Nome</th>
                         <th>Status</th>
+                        <th>Restrita</th>
                     </tr>
                 </thead>
                 @foreach($unidades as $unidade)
@@ -45,9 +47,10 @@
                                 </div>
                             </div>
                         </td>
-                        <td><img src='/public/img/unidades/{{ $unidade->logo }}' style='height:40px; border-radius: 20px' alt='logo'></td>
+                        <td><img src='/public/img/unidades/{{ $unidade->logo."?".date("his") }}' style='height:40px; border-radius: 20px' alt='logo'></td>
                         <td>{{ $unidade->nome }}</td>
                         <td>{{ $unidade->status }}</td>
+                        <td>{{ $unidade->restrita }}</td>
                     </tr>
                 @endforeach
             </table>

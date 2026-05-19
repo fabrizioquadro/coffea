@@ -19,6 +19,11 @@ use App\Models\Token;
 use App\Models\Perfil;
 use App\Models\Alerta;
 use App\Models\ContaPagamento AS Conta;
+use chillerlan\QRCode\QRCode AS QRCode_gerar;
+use chillerlan\QRCode\QROptions;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
 
 class RequisicaoController extends Controller
 {
@@ -31,15 +36,27 @@ class RequisicaoController extends Controller
         elseif($user->perfil->preparar_compra){
             $requisicoes = Requisicao::whereIn('status',['Pedido Compra','Retornado para Compra'])->get();
         }
-        elseif($user->perfil->moderar){
-            $requisicoes = Requisicao::whereIn('status',['Em Validação','Retornado para Validação'])
-            ->where('user_moderador_id', $user->id)
-            ->get();
+        elseif($user->perfil->moderar || $user->perfil->moderar_todos){
+            if($user->perfil->moderar_todos){
+                $requisicoes = Requisicao::whereIn('status',['Em Validação','Retornado para Validação'])
+                ->get();
+            }
+            else{
+                $requisicoes = Requisicao::whereIn('status',['Em Validação','Retornado para Validação'])
+                ->where('user_moderador_id', $user->id)
+                ->get();
+            }
         }
-        elseif($user->perfil->aprovar){
-            $requisicoes = Requisicao::whereIn('status',['Em Autorização','Aguardando Token de Aprovação'])
-            ->where('user_liberador_id', $user->id)
-            ->get();
+        elseif($user->perfil->aprovar || $user->perfil->aprovar_todos){
+            if($user->perfil->aprovar_todos){
+                $requisicoes = Requisicao::whereIn('status',['Em Autorização','Aguardando Token de Aprovação'])
+                ->get();
+            }
+            else{
+                $requisicoes = Requisicao::whereIn('status',['Em Autorização','Aguardando Token de Aprovação'])
+                ->where('user_liberador_id', $user->id)
+                ->get();
+            }
         }
         return view('requisicoes/index', compact('requisicoes','user'));
     }
@@ -155,7 +172,7 @@ class RequisicaoController extends Controller
         return redirect()->route('requisicoes')->with('mensagem','Requisição Cadastrada!');
     }
 
-    public function editar($id){
+    public function editar($id, $retorno = null){
         $user = auth()->user();
         if($user->perfil->administrador || $user->perfil->editar){
             if($user->perfil->administrador){
@@ -168,17 +185,24 @@ class RequisicaoController extends Controller
             }
             $requisicao = Requisicao::where('id', $id)->first();
 
-            $fornecedores = Fornecedor::all()->sortBy('nome');
+            //$fornecedores = Fornecedor::all()->sortBy('nome');
+            if($requisicao->unidade->restrita == "Não"){
+                $fornecedores = Fornecedor::whereNull('unidade_id')->orderBy('nome')->get();
+                $operacoes = Operacao::where('status','Ativo')->whereNull('unidade_id')->orderBy('descricao')->get();
+            }
+            elseif($requisicao->unidade->restrita == "Sim"){
+                $fornecedores = Fornecedor::where('unidade_id',$requisicao->unidade_id)->orderBy('nome')->get();
+                $operacoes = Operacao::where('status','Ativo')->where('unidade_id', $requisicao->unidade_id)->orderBy('descricao')->get();
+            }
             $users = User::all()->sortBy('nome');
             $grupos = Grupo::all()->sortBy('descricao');
             $contas = Conta::where(['unidade_id' => $requisicao->unidade_id, 'cred_deb' => 'D'])->orderBy('descricao')->get();;
-            $operacoes = Operacao::where('status','Ativo')->orderBy('descricao')->get();
 
             $controle = 'editar';
 
             return view('requisicoes/editar', compact('fornecedores',
             'setores','unidades','users','grupos','requisicao','controle',
-            'contas','operacoes'));
+            'contas','operacoes','retorno'));
         }
         else{
             return redirect()->route('requisicoes')->with('mensagem_erro','Você não possui acesso a esta função!');
@@ -224,7 +248,7 @@ class RequisicaoController extends Controller
         $dados = [
             'fornecedor_id' => $request->fornecedor_id,
             'setor_id' => $request->setor_id,
-            'unidade_id' => $request->unidade_id,
+            //'unidade_id' => $request->unidade_id,
             'user_moderador_id' => $request->user_moderador_id,
             'user_liberador_id' => $request->user_liberador_id,
             'user_alteracao_id' => $user->id,
@@ -240,6 +264,9 @@ class RequisicaoController extends Controller
             'qtd_itens_pedido' => $request->qtd_itens_pedido,
             'data_previa_conclusao' => $request->data_previa_conclusao,
             'fornecedor_email' => $request->fornecedor_email,
+            'fornecedor_whatsapp' => $request->fornecedor_whatsapp,
+            'sem_validacao' => $request->sem_validacao == 'Sim' ? true : false,
+            'portador' => $request->portador,
         ];
 
         if($request->controle == 'preparar_compra'){
@@ -271,12 +298,16 @@ class RequisicaoController extends Controller
             $var = "item_cad_obs_".$item->id;
             $obs = $request->$var;
 
+            $var = "ds_unidade_".$item->id;
+            $ds_unidade = $request->$var;
+
             $var = "item_cad_lancar_patrimonio_".$item->id;
             $lancar_patrimonio = $request->$var;
 
             $dados = [
                 'user_alteracao_id' => $user->id,
                 'obs' => $obs,
+                'ds_unidade' => $ds_unidade,
                 'valor_unid' => valorFormDb($valor_unid),
                 'qtd_pedida' => $qtd_pedida,
                 'data_previsao_entrega' => $data_previsao_entrega,
@@ -313,6 +344,9 @@ class RequisicaoController extends Controller
                 $var = "lancar_patrimonio".$i;
                 $lancar_patrimonio = $request->$var;
 
+                $var = "ds_unidade_".$i;
+                $ds_unidade = $request->$var;
+
                 $dados = [
                     'requisicao_id' => $requisicao->id,
                     'item_id' => $item_id,
@@ -325,6 +359,7 @@ class RequisicaoController extends Controller
                     'valor_total_pedido' => valorFormDb($valor_total),
                     'status' => 'Pedido',
                     'lancar_patrimonio' => $lancar_patrimonio == "Sim" ? true : false,
+                    'ds_unidade' => $ds_unidade,
                 ];
 
                 RequisicaoItem::create($dados);
@@ -359,6 +394,7 @@ class RequisicaoController extends Controller
                 $anexos_historico .= ", ".$anexo->fornecedor->nome;
             }
         }
+
 
         //vamos fazer a parte financeiro
         //vamos verificar se teve alguma edição nos financeiros
@@ -468,7 +504,12 @@ class RequisicaoController extends Controller
             die();
         }
 
-        return redirect()->route('requisicoes')->with('mensagem','Requisição Editada!' );
+        if($request->retorno == 'compras'){
+            return redirect()->route('compras.acessar', $requisicao->id)->with('mensagem','Compra Editada!' );
+        }
+        else{
+            return redirect()->route('requisicoes')->with('mensagem','Requisição Editada!' );
+        }
     }
 
     public function acessar($id){
@@ -544,19 +585,23 @@ class RequisicaoController extends Controller
         echo json_encode($retorno);
     }
 
-    public function cancelar_requisicao($id){
+    public function cancelar_requisicao(Request $request){
         $user = auth()->user();
-        if($user->perfil->cancelar){
-            $requisicao = Requisicao::where('id', $id)->first();
+        if($user->perfil->cancelar || $user->perfil->administrador){
+            $requisicao = Requisicao::where('id', $request->requisicao_id)->first();
             $requisicao->status = "Pedido Cancelado";
-            $requisicao->mensagem = $_GET['mensagem'];
+            $requisicao->justificativa_cancelamento = $request->justificativa_cancelamento;
             $requisicao->save();
 
             $ds_historico = "Pedido Compra Cancelado";
-            $ds_historico .= $_GET['mensagem'] ? " - Mensagem:".$_GET['mensagem'] : "";
+            $ds_historico .= $request->justificativa_cancelamento ? " - Mensagem:".$request->justificativa_cancelamento : "";
             set_historico($requisicao->id, $ds_historico, $requisicao->status);
-
-            return redirect()->route('requisicoes')->with('mensagem','Requisição Cancelada');
+            if($requisicao->retorno == 'pedido'){
+                return redirect()->route('pedidos')->with('mensagem','Pedido Cancelado');
+            }
+            else{
+                return redirect()->route('requisicoes')->with('mensagem','Requisição Cancelada');
+            }
         }
     }
 
@@ -645,7 +690,13 @@ class RequisicaoController extends Controller
             $requisicao->mensagem = $request->mensagem;
             $requisicao->save();
 
-            $ds_historico = "Requisição enviada para autorização.";
+            $user = auth()->user();
+            if($user->id == $requisicao->user_moderador_id){
+                $ds_historico = "Requisição enviada para autorização.";
+            }
+            else{
+                $ds_historico = "Requisição enviada para autorização. (enviada por ".$user->nome." no lugar de ".$requisicao->moderador->nome.")";
+            }
             set_historico($requisicao->id, $ds_historico, $requisicao->status);
 
             $dados_alerta = [
@@ -664,13 +715,22 @@ class RequisicaoController extends Controller
 
     public function autorizar_compra(Request $request){
         //vamos gerar o token de ativação
-        try {
+        //try {
             $user = auth()->user();
             if($user->perfil->administrador || $user->perfil->aprovar){
                 $requisicao = Requisicao::where('id', $request->requisicao_id)->first();
                 $requisicao->status = "Compra Aprovada";
                 $requisicao->mensagem = $request->mensagem;
+                $requisicao->dt_hr_envio_email_fornecedor = date('Y-m-d H:i:s');
                 $requisicao->save();
+
+                if($user->id == $requisicao->user_liberador_id){
+                    $ds_historico = "Requisição Aprovada";
+                }
+                else{
+                    $ds_historico = "Requisição Aprovada";
+                }
+                set_historico($requisicao->id, $ds_historico, $requisicao->status);
 
                 $data_hora = new \DateTime(date('Y-m-d H:i:s'));
                 $data_hora->add(new \DateInterval('PT2H'));
@@ -690,29 +750,59 @@ class RequisicaoController extends Controller
                 $link = $requisicao->id.$requisicao->fornecedor->id.date('YmdHis');
                 $link_view   = route('acesso_fornecedor', $link);
 
-                $mensagem = "
-                <h2>Código de Ativação para Confirmar Pedido</h2>
-                <p>
-                    Codigo de ativação da compra: $verificador <br>
-                    Link para Ativação: $link_view;
-                </p>
-                ";
-
-                $requisicao->dt_hr_envio_email_fornecedor = date('Y-m-d H:i:s');
-                $requisicao->save();
-
-                enviarMail($requisicao->fornecedor_email, 'Código Ativação Pedido', $mensagem);
-
-                $ds_historico = "Requisição Aprovada, enviado token para aprovação fornecedor.";
-                set_historico($requisicao->id, $ds_historico, $requisicao->status);
-
                 $dados = [
                     'requisicao_id' => $requisicao->id,
                     'link' => $link,
                     'vencimento' => $requisicao->data_previa_conclusao." 23:59:59",
                 ];
 
-                Qrcode::create($dados);
+                $code = Qrcode::create($dados);
+
+                //vamos gerar o pdf para envio
+                $qrcode = (new QRCode_gerar)->render($link_view);
+                $dados = [
+                    'requisicao' => $requisicao,
+                    'link' => $link_view,
+                    'qrcode' => $qrcode,
+                    'code' => $code,
+                ];
+                $html = view('imprimir/gerar_pdf', $dados)->render();
+
+                //vamos gerar o pdf
+                $options = new Options();
+                //$options->set('isRemoteEnabled', TRUE);
+                $options->set('isHtml5ParserEnabled', TRUE);
+                //dd($options->get('isHtml5ParserEnabled'));
+                $dompdf = new Dompdf($options);
+                $dompdf->loadHtml($html);
+                $dompdf->setPaper('A4', 'portrait');
+                $dompdf->render();
+                $output = $dompdf->output();
+                $caminho_arquivo = "public/impressoes/".$requisicao->id.".pdf";
+                file_put_contents($caminho_arquivo, $output);
+
+                $mensagem = "
+                <h2>Solicitação de compra</h2>
+                <p>
+                    Segue anexo o arquivo de solicitação de compra.
+                </p>
+                ";
+
+                $pdf_whats = route('compras.imprimir_fornecedor', $requisicao->id);
+
+                $mensagem_whatsapp = "
+                Segue anexo sua reqisição: $pdf_whats
+                ";
+
+                if($requisicao->fornecedor_email){
+                    enviarMail($requisicao->fornecedor_email, 'Solicitação de compra', $mensagem, $caminho_arquivo);
+                }
+
+                if($requisicao->fornecedor_whatsapp){
+                    enviarWhatsapp($requisicao->fornecedor_whatsapp, $mensagem_whatsapp);
+                }
+
+                //enviarWhatsapp(, 'Código Ativação Pedido', $mensagem);
 
                 //vamos enviar para quem criou o pedido e para quem moderou que o pedido foi aprovado
                 $dados_alerta = [
@@ -733,9 +823,9 @@ class RequisicaoController extends Controller
 
                 return redirect()->route('compras')->with('mensagem', 'Compra Aprovada');
             }
-        } catch (\Exception $e) {
-            return redirect()->route('requisicoes')->with('mensagem_erro', $e->getMessage());
-        }
+        //} catch (\Exception $e) {
+        //    return redirect()->route('requisicoes')->with('mensagem_erro', $e->getMessage());
+        //}
 
     }
 
@@ -850,6 +940,16 @@ class RequisicaoController extends Controller
             return redirect()->route('requisicoes')->with('mensagem_erro', $e->getMessage());
         }
 
+    }
+
+    public function verifica_descricao_financeiro(){
+        $controle = 'false';
+        $financeiro = Financeiro::where('descricao', $_GET['descricao'])->first();
+        if($financeiro){
+            $controle = 'true';
+        }
+        $retorno['controle'] = $controle;
+        echo json_encode($retorno);
     }
 
 }

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('senha_sisagil');
             $table->string('status');
             $table->string('logo')->nullable();
+            $table->string('restrita',10)->default('Não');
             $table->timestamps();
         });
     }

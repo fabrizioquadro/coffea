@@ -4,7 +4,7 @@
 <div class="card card-border-shadow-primary mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between">
-            <h4 class="card-title">Entregas</h4>
+            <h4 class="card-title">Entregas - Cod: {{ $requisicao->id }}</h4>
             <div class="dropdown">
                 <button type="button" class="btn p-0 dropdown-toggle hide-arrow show" data-bs-toggle="dropdown" aria-expanded="true">
                     Ações
@@ -13,7 +13,7 @@
                 <div class="dropdown-menu" data-popper-placement="bottom-end">
                     <button class="dropdown-item waves-effect" id="botao_entrega_total">Entrega Total</button>
                     <button class="dropdown-item waves-effect" id="botao_entrega_parcial">Entrega Parcial</button>
-                    <button class="dropdown-item waves-effect" id="botao_entrega_cancelamento">Cancelamento/Devolução</button>
+                    <button class="dropdown-item waves-effect" id="botao_entrega_cancelamento">Devolução</button>
                 </div>
             </div>
         </div>

@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('descricao');
             $table->string('status');
             $table->string('operacao_padrao_cancelamento',5)->default('Não');
+            $table->unsignedBigInteger('unidade_id')->nullable();
+            $table->foreign('unidade_id')->references('id')->on('unidades');
             $table->timestamps();
         });
     }

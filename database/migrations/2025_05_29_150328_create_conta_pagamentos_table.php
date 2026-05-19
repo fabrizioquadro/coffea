@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('conta_pagamentos', function (Blueprint $table) {
             $table->id();
             $table->integer('sisagil_id');
-            $table->integer('unidade_id');
+            $table->unsignedBigInteger('unidade_id');
             $table->string('descricao');
             $table->string('cred_deb',1);
             $table->boolean('padrao');

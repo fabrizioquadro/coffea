@@ -4,7 +4,7 @@
 <div class="card card-border-shadow-primary mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between">
-            <h4 class="card-title">Integração Sisagil Financeiro</h4>
+            <h4 class="card-title">Integração Sisagil Financeiro - Cod: {{ $requisicao->id }}</h4>
             <div class="dropdown">
                 <button type="button" class="btn p-0 dropdown-toggle hide-arrow show" data-bs-toggle="dropdown" aria-expanded="true">
                     Ações

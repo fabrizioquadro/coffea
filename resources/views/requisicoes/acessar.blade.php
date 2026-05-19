@@ -1,3 +1,42 @@
+@php
+$user = auth()->user();
+$var = explode(' ', $requisicao->created_at);
+$dt_criacao = dataDbForm($var[0])." ".$var[1];
+
+//vamos descobrir quem executou a validação
+$dt_validacao = null;
+$hist_val = $requisicao->historicos()->where('status','Em Autorização')->orderBy('id')->first();
+if($hist_val){
+    $var = explode(' ', $hist_val->created_at);
+    $dt_validacao = dataDbForm($var[0])." ".$var[1];
+}
+
+$dt_compra = null;
+$nm_compra = null;
+$hist_compra = $requisicao->historicos()->where('status','PEDIDO COMPRA')->orderBy('id')->first();
+if($hist_compra){
+    $nm_compra = $hist_compra->user->nome;
+    $var = explode(' ', $hist_compra->created_at);
+    $dt_compra = dataDbForm($var[0])." ".$var[1];
+}
+
+//vamos descobrir quem executou a aprovação
+$dt_aprovacao = null;
+$hist_aprov = $requisicao->historicos()->where('status','Compra Aprovada')->orderBy('id')->first();
+if($hist_aprov){
+    $var = explode(' ', $hist_aprov->created_at);
+    $dt_aprovacao = dataDbForm($var[0])." ".$var[1];
+}
+
+$dt_confirmacao = null;
+if($requisicao->qrcode()){
+    $var = explode(" ", $requisicao->qrcode()->updated_at);
+    $dt_confirmacao = dataDbForm($var[0])." ".$var[1];
+}
+
+
+@endphp
+
 @extends('layout.admin')
 
 @section('conteudo')
@@ -10,8 +49,11 @@
 <div class="card card-border-shadow-primary mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between">
-            <h4 class="card-title">Acessar Requisição</h4>
+            <h4 class="card-title">Acessar Requisição - Cod: {{ $requisicao->id }}</h4>
         </div>
+        <a href="{{ route('compras.imprimir', $requisicao->id) }}" target='_blank' class="btn btn-success btn-sm">Imprimir Detalhado</a>
+        <a href="{{ route('compras.imprimir_simplificado', $requisicao->id) }}" target='_blank' class="btn btn-warning btn-sm">Imprimir Simplificado</a>
+        <button type="button" id="botao_enviar_email" class="btn btn-sm btn-info">Enviar por Email</button>
         <hr>
         @if($mensagem = Session::get('mensagem'))
             <div class="alert alert-success alert-dismissible mt-3 mb-2" role="alert">
@@ -37,7 +79,7 @@
         @if(!$requisicao->simples_cotacao)
             @if($requisicao->status == "Pedido Compra" || $requisicao->status == "Retornado para Compra")
                 @if($user->perfil->administrador || $user->perfil->preparar_compra)
-                    @if($requisicao->financeiros()->sum('valor') == 0 || $requisicao->financeiros()->sum('valor') != $requisicao->total_pedido)
+                    @if($requisicao->financeiros()->sum('valor') != $requisicao->total_pedido)
                         <div class="alert alert-danger" role="alert">Total do Financeiro não confere com o Total do Pedido ou igual a zero!</div>
                         <a href="{{ route('requisicoes.editar', $requisicao->id) }}" class="btn btn-sm btn-warning">Editar</a>
                     @else
@@ -67,7 +109,7 @@
             @if($requisicao->status == "Em Validação" || $requisicao->status == "Retornado para Validação")
                 @if($user->perfil->administrador || $user->id == $requisicao->user_moderador_id)
                     {{-- se entrar aqui pode ser moderado ou rretornado ao solicitante --}}
-                    <form action="{{ route('requisicoes.enviar_para_autorizacao') }}" method="post">
+                    <form id="formulario_moderar_compra" action="{{ route('requisicoes.enviar_para_autorizacao') }}" method="post">
                         @csrf
                         <input type="hidden" name="requisicao_id" value="{{ $requisicao->id }}">
                         <div class="row gy-2">
@@ -80,6 +122,22 @@
                         </div>
                         <div class="row mt-2 gy-2">
                             <div class="col-md-12">
+                                @if($user->id == $requisicao->user_moderador_id && $requisicao->user_moderador_id == $requisicao->user_liberador_id)
+                                    <button id='botao_carregando_autorizar_simplificar' style="display: none !important" class="btn btn-success waves-effect waves-light" type="button">
+                                        <span class="spinner-border" role="status" aria-hidden="true"></span>
+                                        <span class="visually-hidden"></span>
+                                    </button>
+                                    <button onclick="habilita_carregando_autorizar_simplificar()" class="btn btn-sm btn-success" id="autorizar_compra_simplificar" type="button">Autorizar Compra</button>
+                                    <script type="text/javascript">
+                                    function habilita_carregando_autorizar_simplificar(){
+                                        document.getElementById('autorizar_compra_simplificar').setAttribute('disabled','disabled');
+                                        document.getElementById('botao_carregando_autorizar_simplificar').style.display = 'block';
+                                        form = document.getElementById('formulario_moderar_compra');
+                                        form.setAttribute('action', "{{ route('requisicoes.autorizar_compra') }}");
+                                        form.submit();
+                                    }
+                                    </script>
+                                @endif
                                 <button class="btn btn-sm btn-primary" name="enviar_para_autorizacao" type="submit" value='true'>Enviar para Autorização</button>
                                 <button class="btn btn-sm btn-secondary" id="botao_retornar_compra" type="button">Retornar para Compra</button>
                                 <button class="btn btn-sm btn-danger" id="botao_cancelar_requisicao" type="button">Cancelar Requisição</button>
@@ -100,7 +158,7 @@
             @if($requisicao->status == "Em Autorização")
                 @if($user->perfil->administrador || $user->id == $requisicao->user_liberador_id)
                     {{-- se entrar aqui pode ser moderado ou rretornado ao solicitante --}}
-                    <form action="{{ route('requisicoes.autorizar_compra') }}" method="post">
+                    <form action="{{ route('requisicoes.autorizar_compra') }}" id="formulario_autorizar_compra" method="post">
                         @csrf
                         <input type="hidden" name="requisicao_id" value="{{ $requisicao->id }}">
                         <div class="row gy-2">
@@ -113,10 +171,21 @@
                         </div>
                         <div class="row mt-2 gy-2">
                             <div class="col-md-12">
-                                <button class="btn btn-sm btn-primary" name="autorizar_compra" type="submit" value='true'>Autorizar Compra</button>
+                                <button id='botao_carregando_autorizar' style="display: none !important" class="btn btn-primary waves-effect waves-light" type="button">
+                                    <span class="spinner-border" role="status" aria-hidden="true"></span>
+                                    <span class="visually-hidden"></span>
+                                </button>
+                                <button onclick="habilita_carregando_autorizar()" class="btn btn-sm btn-primary" name="autorizar_compra" id="autorizar_compra" type="button" value='true'>Autorizar Compra</button>
                                 <button class="btn btn-sm btn-secondary" id="botao_retornar_validacao" type="button">Retornar para Validação</button>
                                 <button class="btn btn-sm btn-danger" id="botao_cancelar_requisicao" type="button">Cancelar Requisição</button>
                                 <a href="{{ route('requisicoes.editar', $requisicao->id) }}" class="btn btn-sm btn-warning">Editar</a>
+                                <script type="text/javascript">
+                                    function habilita_carregando_autorizar(){
+                                        document.getElementById('autorizar_compra').setAttribute('disabled','disabled');
+                                        document.getElementById('botao_carregando_autorizar').style.display = 'block';
+                                        document.getElementById('formulario_autorizar_compra').submit();
+                                    }
+                                </script>
                             </div>
                         </div>
                     </form>
@@ -175,8 +244,8 @@
                 <b>{{ $requisicao->fornecedor->nome }}</b>
             </div>
             <div class="col-md-4 form-group borda_de_linha">
-                <label for="fornecedor_email">Email Fornecedor:</label><br>
-                <b>{{ $requisicao->fornecedor_email }}</b>
+                <label for="fornecedor_email">Email/Whatsapp Fornecedor:</label><br>
+                <b>{{ $requisicao->fornecedor_email." ".$requisicao->fornecedor_whatsapp }}</b>
             </div>
             <div class="col-md-2 form-group borda_de_linha">
                 <label for="data_previa_conclusao">Data Prévia Conclusão:</label><br>
@@ -188,27 +257,39 @@
             </div>
         </div>
         <div class="row mt-2 gy-2">
-            <div class="col-md-4 form-group borda_de_linha">
+            <div class="col-md-3 form-group borda_de_linha">
                 <label for="user_moderador_id">Solicitante:</label><br>
-                <b>{{ $requisicao->criador->nome }}</b>
+                <b>{{ $requisicao->criador->nome }}</b><br>
+                <b>{{ $dt_criacao }}</b>
             </div>
-            <div class="col-md-4 form-group borda_de_linha">
-                <label for="user_moderador_id">Moderador:</label><br>
-                <b>{{ $requisicao->moderador->nome }}</b>
+            <div class="col-md-3 form-group borda_de_linha">
+                <label for="user_moderador_id">Compra:</label><br>
+                <b>{{ $nm_compra }}</b><br>
+                <b>{{ $dt_compra }}</b>
             </div>
-            <div class="col-md-4 form-group borda_de_linha">
-                <label for="user_liberador_id">Liberador:</label><br>
-                <b>{{ $requisicao->liberador->nome }}</b>
+            <div class="col-md-3 form-group borda_de_linha">
+                <label for="user_moderador_id">Validação:</label><br>
+                <b>{{ $hist_val ? $hist_val->user->nome : '---' }}</b><br>
+                <b>{{ $dt_validacao }}</b>
+            </div>
+            <div class="col-md-3 form-group borda_de_linha">
+                <label for="user_liberador_id">Aprovação:</label><br>
+                <b>{{ $hist_aprov ? $hist_aprov->user->nome : '---' }}</b><br>
+                <b>{{ $dt_aprovacao }}</b>
             </div>
         </div>
         <div class="row mt-2 gy-2 borda_de_linha">
-            <div class="col-md-6 form-group borda_de_linha">
+            <div class="col-md-5 form-group borda_de_linha">
                 <label for="setor_id">Setor:</label><br>
                 <b>{{ $requisicao->setor->nome }}</b>
             </div>
-            <div class="col-md-6 form-group borda_de_linha">
+            <div class="col-md-5 form-group borda_de_linha">
                 <label for="unidade_id">Unidade:</label><br>
                 <b>{{ $requisicao->unidade->nome }}</b>
+            </div>
+            <div class="col-md-2 form-group borda_de_linha">
+                <label for="user_liberador_id">Sem Validação:</label><br>
+                <b>{{ $requisicao->sem_validacao ? 'Sim' : 'Não' }}</b>
             </div>
         </div>
         <div class="row mt-2 gy-2 borda_de_linha">
@@ -232,6 +313,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>Item</th>
+                        <th>Unidade</th>
                         <th>Qtd</th>
                         <th>Unitário</th>
                         <th>Total</th>
@@ -244,6 +326,7 @@
                     @foreach($requisicao->itens as $item)
                         <tr id="linha_item_cadastrada_{{ $item->id }}">
                             <td>{{ $item->item->nome }}</td>
+                            <td>{{ $item->ds_unidade }}</td>
                             <td>{{ $item->qtd_pedida }}</td>
                             <td>R${{ valorDbForm($item->valor_unid) }}</td>
                             <td>R${{ valorDbForm($item->valor_total_pedido) }}</td>
@@ -391,13 +474,36 @@
         </div>
     </div>
 </div>
-
+<form id='form_cancelamento' action="{{ route('requisicoes.cancelar') }}" method="post">
+    @csrf
+    <input type="hidden" name="requisicao_id" value="{{ $requisicao->id }}">
+    <input type="hidden" name="retorno" value="requisicao">
+    <input type="hidden" name="justificativa_cancelamento" id="justificativa_cancelamento">
+</form>
 <script>
 document.getElementById('botao_cancelar_requisicao').addEventListener('click', ()=>{
-    if(confirm('Tem certeza que deseja cancelar a requisição?')){
-        mensagem = document.getElementById('mensagem').value;
-        window.location.href = "{{ route('requisicoes.cancelar', $requisicao) }}?mensagem=" + mensagem;
-    }
+    let justificativa = prompt('Jusquifique o cancelamento.');
+    document.getElementById('justificativa_cancelamento').value = justificativa;
+    document.getElementById('form_cancelamento').submit();
+
+    //if(confirm('Tem certeza que deseja cancelar a requisição?')){
+    //    mensagem = document.getElementById('mensagem').value;
+    //    window.location.href = "{{ route('requisicoes.cancelar', $requisicao) }}?mensagem=" + mensagem;
+    //}
+})
+
+document.getElementById('botao_enviar_email').addEventListener('click', ()=>{
+    email = prompt('Informe o email');
+    $.getJSON(
+        '{{route("compras.enviar_requisicao_email")}}',
+        {
+            requisicao_id : {{ $requisicao->id }},
+            email : email
+        },
+        function(json){
+            alert('Foi enviado para a fila de envio de emails a solicitação.');
+        }
+    );
 })
 </script>
 @endsection

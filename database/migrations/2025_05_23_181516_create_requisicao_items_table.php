@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_criacao_id');
             $table->unsignedBigInteger('user_alteracao_id')->nullable();
             $table->text('obs')->nullable();
+            $table->string('ds_unidade')->nullable();
             $table->double('valor_unid',10,2)->nullable();
             $table->double('qtd_pedida',10,4);
             $table->date('data_previsao_entrega')->nullable();

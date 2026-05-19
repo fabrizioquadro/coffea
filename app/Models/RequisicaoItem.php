@@ -15,6 +15,7 @@ class RequisicaoItem extends Model
         'user_criacao_id',
         'user_alteracao_id',
         'obs',
+        'ds_unidade',
         'valor_unid',
         'qtd_pedida',
         'data_previsao_entrega',

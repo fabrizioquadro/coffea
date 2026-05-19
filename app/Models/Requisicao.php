@@ -39,7 +39,11 @@ class Requisicao extends Model
         'status_canc_devol',
         'mensagem',
         'fornecedor_email',
+        'fornecedor_whatsapp',
         'dt_hr_envio_email_fornecedor',
+        'justificativa_cancelamento',
+        'sem_validacao',
+        'portador',
     ];
 
     public function fornecedor(){

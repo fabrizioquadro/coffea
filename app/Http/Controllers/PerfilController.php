@@ -7,7 +7,7 @@ use App\Models\Perfil;
 
 class PerfilController extends Controller
 {
-    public $array_opcoes_db = ['administrador','criar','preparar_compra','duplicar_pedido_compra','moderar','aprovar','confirmar_recebimento','alterar_qtd_recebimento','editar','corrigir','cancelar','acompanhar'];
+    public $array_opcoes_db = ['administrador','unidades','setores','perfil','usuarios','operacoes','contas','criar','preparar_compra','duplicar_pedido_compra','moderar','aprovar','confirmar_recebimento','alterar_qtd_recebimento','editar','corrigir','cancelar','acompanhar','moderar_todos','aprovar_todos','somente_solicitar_pedido','integrar_financeiro','finalizados'];
 
     public function index(){
         $perfis = Perfil::all();
@@ -31,6 +31,7 @@ class PerfilController extends Controller
             foreach($this->array_opcoes_db as $opt){
                 $dados[$opt] = $request->$opt == "Sim" ? true : false;
             }
+            //dd($dados);
             Perfil::create($dados);
             return redirect()->route('perfis')->with('mensagem','Perfil Cadastrado!');
         }catch(\Exception $e) {
