@@ -1,0 +1,11 @@
+<svg id="logOff" width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="logout_icon_151219 1" clip-path="url(#clip0_295_223)">
+<path id="Vector" d="M12.3756 6.66683V5.00016C12.3756 4.55814 12.1963 4.13421 11.8771 3.82165C11.558 3.50909 11.1251 3.3335 10.6737 3.3335H4.71675C4.26536 3.3335 3.83245 3.50909 3.51327 3.82165C3.19409 4.13421 3.01477 4.55814 3.01477 5.00016V15.0002C3.01477 15.4422 3.19409 15.8661 3.51327 16.1787C3.83245 16.4912 4.26536 16.6668 4.71675 16.6668H10.6737C11.1251 16.6668 11.558 16.4912 11.8771 16.1787C12.1963 15.8661 12.3756 15.4422 12.3756 15.0002V13.3335" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_2" d="M6.4187 10H18.3325M18.3325 10L15.7796 7.5M18.3325 10L15.7796 12.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_295_223">
+<rect width="20.4237" height="20" fill="white" transform="translate(0.461792)"/>
+</clipPath>
+</defs>
+</svg>

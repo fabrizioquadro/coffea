@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="requiresActiveX=true"/>
+<title>Internet access</title>
+<script type="text/javascript" src="java/third/js/prototype/prototype.js"></script>
+<STYLE>
+BODY { font-family : Verdana,Arial; font-size: 12px; }
+TD   { font-family : Verdana,Arial; font-size : 8pt; }
+A    { text-decoration : none; }
+input { border: 1px #000000; border-style:solid; }
+</STYLE>
+
+</head>
+<body bgcolor="#FFFFFF" onload="BtnConnectscript();">
+<div id="preloadimage" name="preloadingimage" style="position:absolute; top:-200px; left:-200px; height:100px; width:100px;"><img src="java/third/images/bramus/custom1_bar.gif"/><img src="java/third/images/bramus/custom1_box.gif"/><img src="java/third/images/bramus/percentImage.png"/><img src="java/third/images/bramus/percentImage_back1.png"/><img src="java/third/images/bramus/percentImage_back2.png"/><img src="java/third/images/bramus/percentImage_back3.png"/><img src="java/third/images/bramus/percentImage_back4.png"/><img src="java/third/images/bramus/percentImage_back.png"/></div>
+
+<div id="javaappdiv" name="javasdiv" style="position:absolute; top:-200px; left:-200px; height:100px; width:100px;"></div>
+<div id="javaappdivtest" name="javasdivtest" style="position:absolute; top:-200px; left:-200px; height:100px; width:100px;"></div>
+
+<script type="text/javascript">
+//////////use webprint option "yes" or "no"
+var usessl = "no";	 // NO SSL
+var useprint = "no"; 	 // NO PRINTING
+var webhost = "";	 //empty, if same as rdp server
+var webport = "";	 //80, 443 and so on, or empty, if auto remote recognizing
+var webprotocol = "";	 //http or https, or empty, if auto remote recognizing
+//////////
+
+var switcher=4;
+var bpp_all=15;
+
+var server=""; 		 // Empty, if same as server called from web site
+var serverownport=3389;	 // Standard RDP port
+
+var mydomain="";
+var username="";
+var rdppass="";
+
+var optionadd=" /clean";
+//////////
+
+var programexe="clean.exe"; //program to be started from applet
+
+var pathtosave="cleanclient"; //directory where program will be stored and runned
+
+var filesdownl="clean.exe"; //you may download as many files you want, "prog1.exe;prog2.exe" and so on...
+
+////////
+
+var cmdexe="no"; 
+var parammode="array"; 
+
+////////
+
+function butwait() {
+ var mybut=document.getElementById("mainbut").style;
+ mybut.display="block";
+}
+
+function butunwait() {
+ var mybut=document.getElementById("mainbut").style;
+ mybut.display="none";
+}
+
+var manyrunning=1;
+
+function BtnConnectscript() {
+ if(document.getElementById("mainbut").style.display!="none" || document.getElementById("mybar").style.display!="none") { return false; }
+ butwait();
+
+ var rdpassval="";
+ if(rdppass!="") { rdpassval=" -psw "+ rdppass; }
+
+ var myparamau="",paramme="";
+
+ switch(switcher) {
+  case 0 : paramme=" -full 2 -remoteapp off"; break;
+  case 1 : paramme=" -full 1 -width 800 -height 600 -remoteapp off"; break;
+  case 2 : paramme=" -full 1 -width 1024 -height 768 -remoteapp off"; break;
+  case 3 : paramme=" -full 1 -width 1280 -height 1024 -remoteapp off"; break;
+  case 4 : paramme=" -full 1 -remoteapp on"; break;
+ }
+
+ if(server=="") { server = window.location.hostname; }
+ if(serverownport=="") { serverownport="3389"; }
+
+ var javaappdiv=document.getElementById("javaappdiv");
+ var added="";
+
+ if(username!="") { myparamau=" -user "+username; }
+ if(mydomain!="") { myparamau=myparamau+" -domain "+mydomain; }
+
+ var serverport="-server " + server + " -port " + serverownport;
+ var bpp=" -color "+bpp_all;
+
+ added="<applet alt=\"You do not have Java activated or installed\" id=\"myappletid\" width=\"200\" height=\"200\" name=\"Clean files\" align=\"top\" code=\"runprog.class\" archive=\"java/runprog.jar\">"+
+  "<param name=\"code\" value=\"runprog.class\">"+
+  "<param name=\"archive\" value=\"java/runprog.jar\">"+
+  "<param name=\"cabbase\" value=\"\">"+
+  "<param name=\"pathfrom\" value=\"java/\">"+
+  "<param name=\"runstring\" value=\""+optionadd+"\">"+
+  "<param name=\"myexecute\" value=\""+programexe+"\">"+
+  "<param name=\"mypath\" value=\""+pathtosave+"\">"+
+  "<param name=\"commandarch\" value=\""+filesdownl+"\">"+
+  "<param name=\"parammode\" value=\""+parammode+"\">"+
+  "<param name=\"cmdexe\" value=\""+cmdexe+"\">"+
+  "<param name=\"useprint\" value=\""+useprint+"\">"+
+  "<param name=\"usessl\" value=\""+usessl+"\">"+
+  "<param name=\"webhost\" value=\""+webhost+"\">"+
+  "<param name=\"webport\" value=\""+webport+"\">"+
+  "<param name=\"webprotocol\" value=\""+webprotocol+"\">"+
+  "<\/applet>";
+ javaappdiv.innerHTML="";
+ manyrunning++;
+ inhalttoadd=added;
+ javaappdiv.style.top = "5px";
+ javaappdiv.style.left = "5px";
+
+ if(manyrunning<3) { javaappdiv.innerHTML=added; } 
+ else { javaappdiv.innerHTML=""; setTimeout("startjavaappl()",500); }
+ ///////
+ var myinterval=2;
+ var maximalinterval=180;
+ var valdefined=maximalinterval/myinterval;
+ var valchecking=0;
+ iv1 = setInterval(function () { 
+	if(testoutputready(true)) { 
+		butunwait(); 
+		clearInterval(iv1);
+		if(alreadyconf == 0 || alreadyconf == 2) { window.setTimeout("window.close();",1000); }
+	} else { 
+		if(!testoutputready(false)) { valchecking++; }
+		if(valchecking >= valdefined) {
+                 alreadyconf = 1;
+		 clearInterval(iv1);
+                 var conf = confirm("Attention, time of " + maximalinterval + " seconds exceeded!\nProbably you have not installed or activated Java\non your system or you did not accept the certificate!\n\nForward to Java site?");
+                 if(conf) {
+  		   window.innerHeight=screen.availHeight;
+  		   window.innerWeidth=screen.availWidth;
+  		   window.resizeTo(screen.availWidth,screen.availHeight);
+  		   window.moveTo(0,0);
+  		   document.location.href="http://java.com/download/";
+                 } else { window.close(); }
+                 alreadyconf = 2;
+		} 
+	}
+ }, myinterval*1000);
+///////endbtnconnectscript
+}
+
+var inhalttoadd;
+function startjavaappl() { 
+ var javaappdiv=document.getElementById("javaappdiv");
+ javaappdiv.innerHTML=inhalttoadd;
+}
+</script>
+<center>
+<table>
+<tr>
+<td>
+<img id="mainbut" style="display:none;" src="java/img/ladebalken.gif"><span id="mybar" style="display:none;">1%</span>
+</td>
+</tr>
+<tr>
+<td>
+<div id="percenttext" name="percentagetext" style="font-family: Verdana; font-size: 10px; color: #0000FF; font-weight:bold;"></div>
+</td>
+</tr>
+</table>
+</center>
+
+</body>
+</html>

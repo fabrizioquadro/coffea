@@ -119,6 +119,32 @@ $dt_criacao = dataDbForm($var[0])." ".$var[1];
             </table>
         </div>
         <hr>
+        <div class="d-flex justify-content-between mt-3 mb-3">
+            <h5 class="card-title">Anexos Gerais</h5>
+        </div>
+        <div id="div_anexos_gerais">
+            @if($requisicao->anexos_gerais()->count() > 0)
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class="table-light">
+                            <th>Arquivo</th>
+                        </thead>
+                        <tbody>
+                            @foreach($requisicao->anexos_gerais as $anexo)
+                                <tr>
+                                    <td>
+                                        <a title="Abrir" target='_blank' href="/public/anexo_requisicoes/{{ $anexo->requisicao_id."/".$anexo->link_anexo }}" class="btn rounded-pill btn-icon btn-outline-primary waves-effect">
+                                            <span class="tf-icons mdi mdi-folder-outline"></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+        <hr>
         <div class="row mt-2 gy-2 align-items-end">
             <div class="col-md-6 form-group borda_de_linha">
                 <label for="qtd_itens_pedido">Total Quantidade:</label><br>

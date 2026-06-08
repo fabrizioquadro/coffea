@@ -8,6 +8,7 @@ use App\Models\Requisicao;
 class DashboardController extends Controller
 {
     public function index($controle = null){
+        session(['url_retorno' => url()->full()]);
         $user = auth()->user();
         if($user->perfil->somente_solicitar_pedido){
             return redirect()->route('pedidos.adicionar');

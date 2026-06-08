@@ -40,6 +40,7 @@
             <input type="hidden" name="requisicao_id" value="{{ $requisicao->id }}">
             <input type="hidden" name="contador_items" id="contador_items" value="0">
             <input type="hidden" name="contador_anexos" id="contador_anexos" value="1">
+            <input type="hidden" name="contador_anexos_gerais" id="contador_anexos_gerais" value="0">
             <input type="hidden" name="contador_financeiro" id="contador_financeiro" value="0">
             <input type="hidden" name="controle" value="{{ $controle == 'preparar_compra' ? 'preparar_compra' : '' }}">
             <input type="hidden" name="controle_enviar_moderacao" id="controle_enviar_moderacao">
@@ -157,6 +158,12 @@
                     <div class="form-floating form-floating-outline">
                         <textarea class="form-control h-px-100" id="justificativa" name="justificativa">{{ $requisicao->justificativa }}</textarea>
                         <label for="justificativa">Justificativa:</label>
+                      </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-floating form-floating-outline">
+                        <textarea class="form-control h-px-100" id="documentos" name="documentos">{{ $requisicao->documentos }}</textarea>
+                        <label for="documentos">Documentos:</label>
                       </div>
                 </div>
             </div>
@@ -308,6 +315,39 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between mt-3 mb-3">
+                <h5 class="card-title">Anexos Gerais</h5>
+                <button class="btn btn-sm btn-primary" type="button" id="botao_adicionar_anexo_geral">Adicionar Anexo Geral</button>
+            </div>
+            <div id="div_anexos_gerais">
+                @if($requisicao->anexos_gerais()->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead class="table-light">
+                                <th>Arquivo</th>
+                                <th></th>
+                            </thead>
+                            <tbody>
+                                @foreach($requisicao->anexos_gerais as $anexo)
+                                    <tr id='linha_anexo_geral_cadastrado_{{ $anexo->id }}'>
+                                        <td>
+                                            <a title="Abrir" target='_blank' href="/public/anexo_requisicoes/{{ $anexo->requisicao_id."/".$anexo->link_anexo }}" class="btn rounded-pill btn-icon btn-outline-primary waves-effect">
+                                                <span class="tf-icons mdi mdi-folder-outline"></span>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <button onclick="excluir_anexo_geral_cadastrado({{ $anexo->id }})" title="Excluir" type="button" class="btn rounded-pill btn-icon btn-outline-danger waves-effect">
+                                                <span class="tf-icons mdi mdi-delete"></span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
             </div>
             <hr>
             <div class="d-flex justify-content-between mt-3 mb-3">
@@ -1418,6 +1458,42 @@ function adicionar_novo_grupo(){
         );
     }
 
+}
+
+document.getElementById('botao_adicionar_anexo_geral').addEventListener('click', ()=>{
+    contador = parseInt(document.getElementById('contador_anexos_gerais').value);
+    contador++;
+    document.getElementById('contador_anexos_gerais').value = contador;
+    row = document.createElement('div');
+    row.setAttribute('class', 'row mt-2 gy-4 align-items-end');
+    row.setAttribute('id', 'linha_anexo_geral_' + contador);
+
+    row.innerHTML = `
+    <div class='col-md-12'>
+        <div class='form-floating form-floating-outline'>
+            <input class='form-control' type='file' id='anexo_geral_arquivo_${contador}' name='anexo_geral_arquivo_${contador}'/>
+            <label for='anexo_geral_arquivo_${contador}'>Anexo Geral ${contador}:</label>
+        </div>
+    </div>
+    `;
+
+    document.getElementById('div_anexos_gerais').appendChild(row);
+})
+
+function excluir_anexo_geral_cadastrado(anexo_id){
+    if(confirm('Tem certeza que deseja excluir este anexo? Esta ação não poderá ser desfeita.')){
+        $.getJSON(
+            '{{ route("requisicoes.anexo_geral.delete") }}',
+            {
+                anexo_id : anexo_id
+            },
+            function(json){
+                if(json.controle == "true"){
+                    document.getElementById('linha_anexo_geral_cadastrado_' + json.anexo_id).remove();
+                }
+            }
+        );
+    }
 }
 </script>
 @endsection

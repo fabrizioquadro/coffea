@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <style type="text/css">
+        body {
+            width: 100%;
+            height: 100%;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            font-family: Arial;
+            font-size: 14px;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+<div style="position:relative; left: 10px; top: 10px;">
+<b>Mobile Browsers</b>
+<pre>
+ Glossary: mouse area means the mouse icon and cursor image, the rest is screen area.
+           settings.js is located in *\www\software\html5\settings.js
+ 
+ 1. Fast tap on screen area or mouse area generates click.
+
+ 2. Double tap on screen area or mouse area generates double click.
+
+ 3.1 Fast double tap on mouse icon and immediatelly move generates pressed left mouse down 
+   and mouse move. So you can inside session reposition or resize programs, mark text etc. 
+   This approach replicates laptops touch pad behaviour.
+ 3.2 Position mouse icon on wished position and without removing finger, also while still touching 
+   mouse icon fast tap on screen with any other finger.
+   This activates same mode like 3.1, also left mouse down and move. 
+   This mode allows precisely position of cursor, very useful to make precision hits and is the fastest way.
+
+ 4.1 Long tap and hold (at least for 1 second) on screen area or mouse area generates right click.
+   So you can call context menu of programs that react on right click.
+ 4.2 Position mouse icon on wished position, than after removing finger from mouse area fast touch the mouse area 
+   with two fingers parallely. This activates same mode like 4.1, also right click, but with
+   high precision. This is actually fastest way to produce right click.
+
+ 5. Fast double tap on any screen area (except mouse area) and immediatelly move generates scroll action. 
+   So while being in this mode and moving up or down you can scroll inside documents, books, etc.
+
+ 6. While positioning the mouse cursor on editable field fast touch with 3 fingers activates keyboard edit mode. 
+   This action is only supported on devices that can track more than two parallely pressed fingers.
+
+ 7. To zoom in or zoom out touch with two fingers on screen area (except mouse area) and move. 
+   This is default action of browsers. The menu or software keyboard will auto resize according to new zoom level.
+
+ 8. To scroll down or up the zoomed screen area touch screen area (except mouse area) with one finger and move.
+   This is default action of browsers.
+
+ 9. To increase resulting session size edit viewportwidth (settings.js) and set it to higher value.
+
+ Known limitations: 
+   1. On mobile devices that only track maximal two fingers the three fingers gesture will not work, so to activate keyboard
+   use keyboard button in menu. 
+
+   2. Android 2.* native browsers do not report zoom levels, so the menu will zoom together with rest of screen.
+   
+   3. Android 4.3 and lesser native browsers do not support Websockets, so the program will automatically downgrade the connection
+     to slower XHR polling, in this mode the RDP support is processed natively on server side only.
+     If Android device has built-in Flash support, the program will try firstly the much more stable Flash Websockets connection.
+
+   4. Windows Mobile IE10 and mobile IE11 do not support touch events, or if supporting it like IE11, than unfortunally not properly enought, 
+     therefore these browsers reuse native pointer events with some small limitations.
+     To zoom in/out or scroll the screen area just swipe on the screen with finger one time only, this will shortly deactivate preventing of native behaviour, 
+     so you can than zoom or scroll screen during this time frame.
+  
+   5. Sound output on Apples iOS devices get's activated only after first finger touch on screen area.
+ 
+   6. The software is concepted so, that it automatically computes minimum zoom level, however not all browsers support it, 
+     like Windows Mobile or older native Android browsers. To workaround it on such browsers when possible the software checks if it's size
+     underflows the screen area and tries automatically to reset with different tricks the size to fill screen area.
+
+   7. Some older Android(3.*) devices with native Android browser depending on manufacturer do not allow to prevent zoom on double tap.
+
+   8. FireFox mobile introduced new feature called dynamic toolbar, but unfortunally this feature is in early state and FireFox developers did not yet fix
+     it's early stage issues, so the behaviour of this dynamic toolbar is unpreventable. To workaround it you will need to disable it manually.
+     To do so, navigate in your mobile FireFox to about:config, locate option "browser.chrome.dynamictoolbar" and set it to False.
+ 
+   9. By concept the software computes screen height on reported browser values while accounting the minimum width set by variable viewportwidth (settings.js)
+     However this works fine for portrait mode in landscape mode you may get lesser size in height than expected by your programs, to workaround it you may set variable
+     viewportminheight (settings.js) to your wished size, so when ever the resulting screen size will underflow expected size the extra size will be added to get 
+     the minimum height, in such case you have to take into account, that height will overflow the screen area so you can reach it only by scrolling.
+</pre>
+<br><b>PC Browsers</b>
+<pre>
+ 1. To copy data from clipboard to own environment, mark text inside rdp session and press Ctrl + C, (+ means and)
+ Alternatively copy it via context menu, however since most browsers do not allow pasting clipboard text on unprivileged actions 
+ after clipboard text arrived in your browser on next mouse click this text will be added into your clipboard environment outside of browser.
+
+ 2. To paste text from your environment into browser and RDP session clipboard (or text documents) focus your document and press Ctrl + V
+ The pasting via context menu will work only for inside session clipboard, not for your clipboard environment out of browser, 
+ since most browsers do not allow this action due security restrictions. 
+
+ 3. To paste images from your environment into RDP session press Ctrl + V, actually support successfully checked on Chrome, FireFox, IE11 and IE12 Edge 
+
+ 4. To copy images from session into your environemnt is little bit tricky, either copy it via context menu or with Ctrl + C from RDP session, after few seconds when copied image arrived in 
+ your browser you will see shortly small preview of this image in top right screen corner. After you saw it, indicating that image successfully arrived press right mouse button, this
+ will activate browsers native context menu where you can choose "Copy image". That is only the approach that allows to copy image into your clipboard environment.
+
+ 5. To fast copy files into session just drag and drop file/files into your screen area, this will call automatically the file manager that will upload file/files to your server.
+  To copy files back to your PC inside your session drag and drop file/files to \\tsclient\WebFile, so when files copied, the event about will be sent to browser and you will get automatically
+  the link to download the file to your local drive. This approach is used for Mac browsers too. 
+  By mobile browsers by design the drag and drop feature does not exist (browser takes entire available screen), instead you can use file manager directly to pick file/files.
+
+ 6. To increase resulting session size on PC browsers(even when fullscreen is insufficient) unlike mobile browsers there is no option, that will allow to set fixed size, 
+  instead you can increase your monitors/laptop resolution and restart session.
+  Alternatively position your mouse cursor on adress bar out of rdp session, and press either (Ctrl and +) or (Ctrl and -) to increase or decrease resolution, than refresh page.
+  But take into account, in such mode the browser uses down/upscaling and resulting image may look ugly.
+
+ Known limitations: 
+  1. IE6.0, IE6.5, IE7, IE8 do not have native Canvas support, to workaround it you need Flash installed, in this mode the RDP supports only server side RDP.
+
+  2. IE6.0, IE6.5, IE7, IE8, IE9 do not support Websockets, to workaround it either you may need Flash or when Flash is not available but Canvas supported (IE9) 
+   it will switch to slower XHR polling transport.
+
+  3. All IE browser below version 10 without Websockets support use server side RDP processing only. This is however slower mode than native RDP in browser, but very stable.
+</pre>
+<br><b>Mac Browsers</b>
+<pre>
+ Basically for copy and pasting text or images the same approach is used like by PCs, but with one difference, the Mac browsers do not support clipboard actions on their native Ctrl key
+ like in Windows world, to workaround it the RIGHT CMD button plays the role of right Ctrl button.
+ So basically to copy text press Right CMD + C, to paste text or images Right CMD + V.
+
+ Actually pasting images with Right CMD + V works fine on Safari Chrome and Safari FireFox.
+ 
+ Known limitations: 
+  1. On Mac Safari to copy text into your environments clipboard (Ctrl+C) you need to press C button two times while holding Right CMD button, on first C pressing you copy text into browser, 
+   on second C pressing into your clipboard environment. Mac Chrome and Mac FireFox do not have that limitation.
+ 
+  2. On Chrome Mac while pressing Right CMD the browser stops to fire any future keypressing events and reporting of any valuable chars, therefore Right CMD can be used only for copy/pasting
+   with C/V, and can not fully simulate Right Ctrl button, so such makros like RightCMD + A (replicating Ctrl + A) etc. will not work with Right CMD on Chrome Mac, but only with left Ctrl button.
+
+  3. Printing reuses native ability of browser to display PDF files either directly or by third part pdf plugin. Natively PDF has built in support for auto print menu popup, but not all browsers
+   completely implement all PDF commands, so commonly Apples browsers do not support it, so when wishing to print on Safari Mac browser choose printer with preview
+   like "Virtual Printer with Preview"
+
+  4. Safari accepts images for pasting only copied from session self, no external sources outside of session.
+</pre>
+<br><b>SSL</b>
+<pre>
+ The software reuses Java's SSL implementation, to get A gradation from https://www.ssllabs.com you need to do following
+ 1. Locate webserver\runwebserver.ini
+ 2. Add -Djdk.tls.ephemeralDHKeySize=matched -Djdk.tls.rejectClientInitiatedRenegotiation=true
+   as first before the rest and save the file
+ 3. Download and install from Java homepage Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files
+   for your Java version respectively. (finish all steps requested to install it)
+ 4. Restart html5 server via GUI.
+  Important notice, this will exclude some older browsers that do not support new security technologies.
+</pre>
+<br><b>Language</b>
+<pre>
+ By default the browser tries to recognize users language on value reported by browser, however by some browsers developers do not completely localize it 
+ and so the browser may report it self as english browser.
+ To workaround it you have to set wished language forcibly, either via GUI or by editing www\index.html -> var lang = "de_de"; 
+ or de_ch, fr_fr, pl_pl, and many others, up to 100 supported language maps.
+
+  To get the supported list 
+   1. Locate httpwebs.jar
+   2. Make copy of it to Desktop
+   3. Rename httpwebs.jar to httpwebs.zip
+   4. Open it as archive httpwebs.zip
+   5. Locate httpwebs.zip\keymaps\locales
+   6. There you will find over 100 *.klc files
+   7. Use the name of file without *.klc extension to set your wished language.
+</pre>
+<br><b>Printing</b>
+<pre>
+ To remove default state from printer or rename it to own name do following.
+ 1. Locate webserver\printer.bin
+ 2. Open it in notepad
+ 3. Remove %DEFAULT% 
+ 4. Restart html5 via GUI
+
+ Example before: 
+   PRINTERS=PS:%PRINTMENU%MS Publisher Imagesetter%Virtual Printer with Preview %;PS:%DEFAULT%%PRINTHIDE%MS Publisher Imagesetter%Virtual Printer %;PCL6:Microsoft PCL6 Class Driver%Virtual PCL Printer%;XPS:Microsoft XPS Class Driver%Virtual XPS Printer%;
+
+ Example after:
+   PRINTERS=PS:%PRINTMENU%MS Publisher Imagesetter%Virtual Printer with Preview %;PS:%PRINTHIDE%MS Publisher Imagesetter%Virtual Printer %;PCL6:Microsoft PCL6 Class Driver%Virtual PCL Printer%;XPS:Microsoft XPS Class Driver%Virtual XPS Printer%;
+
+ To rename it just change part with Virtual Printer****
+</pre>
+<br><b>printer.bin structure</b>
+<pre>
+   PS=C:\Program Files (x86)\*interpreterApp*\PostCriptToPDFconverter.exe
+   OPT_PS=%target% %source%
+
+   XPS=C:\Program Files (x86)\*interpreterApp*\XpsToPDFconverter.exe
+   OPT_XPS=%target% %source%
+
+   PDF=C:\Program Files (x86)\*interpreterApp*\PdfToPDFconverter_merger.exe
+   OPT_PDF=%target% %source%
+
+   PCL6=C:\Program Files (x86)\*interpreterApp*\Pcl6ToPDFconverter.exe
+   OPT_PCL6=%target% %source%
+
+   PRINTERS=PDF:%DEFAULT%%MULTI_CONV_PDF%%PRINTMENU%Microsoft Print to PDF%HTML5 Pdf%;PS:%PRINTMENU%MS Publisher Imagesetter%HTML5 PostScript%;XPS:%PRINTMENU%Microsoft XPS Class Driver%HTML5 Xps%;PCL6:%PRINTMENU%Microsoft PCL6 Class Driver%HTML5 Pcl%;
+
+
+    PS=C:\Program Files***,XPS=C:\Program Files***,PDF=C:\Program Files***,PCL6=C:\Program Files***
+    the drive path to converter/interpreter/merger etc..
+
+    OPT_*=***
+    stands for options passed to linked executable, the executable must be able to convert the output of used printer driver.
+    The %target% %source% in OPT_* will be replaced automatically, the %source% may contain several files by multiple files printing.
+
+    PRINTERS=***
+    contains all wished printers, differentiated by PS:*, PDF:*, PCL6:* and XPS:* types.
+
+    The PDF:**** printer allows to print on modern Windows systems like Windows10 etc. with on-board "Microsoft Print to PDF" printer driver directly,
+    in such case the interpreter line PDF=C:\Program Files****  may be deleted but it may be still required to merge PDF files
+    when many fast prints are created in very short time producing so many files to be merged.
+ 
+   Known printer drivers 
+     MS Publisher Imagesetter - default Microsoft's PostScript driver present on almost all known systems 
+     Microsoft Print to PDF - this PDF driver may be present on modern Windows systems like Windows10, Windows 2012 etc.
+     Microsoft XPS Class Driver - this XPS driver may be present on modern Windows systems like Windows10, Windows 2012 etc.
+     Microsoft PCL6 Class Driver - this PCL6 driver may be present on modern Windows systems like Windows10, Windows 2012 etc.
+
+     There are many drivers that may produce different convertable output from other manufacturers than Microsoft, 
+     but not every driver supports piping for RDP protocol, so that trying such driver may make your RDP session instable.
+
+   Tag description  
+     %DEFAULT% - will set this printer to default, only one printer may be auto-set to default!
+     %PRINTMENU% - produced PDF file will be injected with printing tag, this command may fail depending on used converters, succeed on GhostScript.
+     %PRINTHIDE% - same as %PRINTMENU% but PDF file won't be displayed inside browser, potentially this may create troubles on browsers to print hidden PDF file.
+     %NETWORK_FLAG% - marks for RDP protocol such printer as network printer.
+     %TS_FLAG% - marks for RDP protocol such printer as nested printer from other nested RDP session.
+     %XPS_FLAG% - marks for RDP protocol such printer as XPS printer, according to Microsoft any print will be converted to XPS format despite of used driver if supported by remote RDP server.
+     %MULTI_CONV_PDF% - since HTML5 8.37, makes sense when used with PDF printers only, the converting program will be reused only when several print files were printed that fast to be merged in one file. 
+     %AVOID_PS_MARK% - since HTML5 8.37, makes sense when used with PS printers only, when used PostScript converter do not inject in executed command line PostScript file for auto-print but try other methods.
+
+   Java interpreters
+     Since HTML5 8.37 the interpreter may be Java program instead executable, to enforce it the line must start with * char
+     As example
+       PDF=*com.myMerger.handlePrint.Pdf()
+     according to this example the class "handlePrint" must contain following method
+       public static void Pdf(File[] files) throws Exception { *** }
+
+     the files array of Files[] type contains all files to be processed 
+     files[0] contains final TARGET PDF file name to be converted to, this file name must be checked against null if there is no conversion wished
+     files[1] always contains first SOURCE file of printer driver output type, it is always not empty!
+     files[*] if there were more SOURCE files produced by many parallel prints to be joined to one file check the array length > 2
+     The final *.jar file that contains by given example the class "com.myMerger.handlePrint" must be placed 
+     to *\Clients\webserver\extrajars\ folder to be preloaded by internal Jar loader.
+</pre>
+<br><b>Other notices</b>
+<pre>
+  1. The software supports auto resizing on the fly only for servers based new Windows kernel, like Windows12, Windows10 etc. Other servers support resizing after reconnection to server, therefore
+   when using "reconnectonresize" variable (settings.js) this will force disconnect and reconnect with session restoring. 
+   Alternatively by default the Smart Sizing technology is activated for such servers, same like Microsoft's native mstsc.exe client, but you have to be aware, that like by mstsc.exe
+   same way in browsers "smartsizing" the image get's scaled to your real dimensions producing ugly image.
+   Additioanally when using with native rdp protocol and server does not support auto resizing any page refresh will force to recompute it to new dimensions, so called "resize on refresh".
+
+  2. The software uses maximal available compression technology, RDP5, RDP6, and RDP6.1, on older systems it will downgrade respectively.
+
+  3. The minimum supported color depth is 15, maximum 32.
+
+  4. By default maximal screen height that can be used by RDP session is limited to 2048 pixels for older Windows RDP servers, this is important to know for mobile devices that in portrait mode may
+   compute more than 2048 pixels for actually set width, as example if viewportwidth is set to 1400 > pixels depending on physical screen resolution.
+  
+  5. When loosing connection you get maximal 2 minutes grace time to restore connection, after this time the server will handle the opened client session as interrupted and remove it from permanent
+   connections, so disconnect it from RDP server, release resources etc.
+
+  6. The native RDP implementation reuses different tricks to reduce memory usage of your browser, especially on mobile browsers you get best speed and browser stabilty.
+   However without saying to much words compare it with competitors directly and you will wonder how much it overpowers in speed and low memory usage the well known competitors solutions.
+</pre>
+</div>
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="requiresActiveX=true"/>
+<meta http-equiv="cache-control" content="max-age=0" />
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="expires" content="0" />
+<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+<meta http-equiv="pragma" content="no-cache" />
+<title>Connect</title>
+<script type="text/javascript" src="java/third/js/prototype/prototype.js"></script>
+<script type="text/javascript" src="java/third/jws.js"></script>
+<STYLE>
+BODY { margin: 0; padding: 0; height:100%; width:100%; }
+A    { text-decoration : none; }
+input { border: 1px #000000; border-style:solid; }
+select { border: 1px #000000; border-style:solid; }
+</STYLE>
+</head>
+<body bgcolor="#FFFFFF" onload="BtnConnectscript();" marginwidth="0" marginheight="0" leftmargin="0" topmargin="0">
+<div id="preloadimage" name="preloadingimage" style="position:absolute; top:-200px; left:-200px; height:100px; width:100px;">
+ <img src="java/third/images/bramus/custom1_bar.gif"/>
+ <img src="java/third/images/bramus/custom1_box.gif"/>
+ <img src="java/third/images/bramus/percentImage.png"/>
+ <img src="java/third/images/bramus/percentImage_back1.png"/>
+ <img src="java/third/images/bramus/percentImage_back2.png"/>
+ <img src="java/third/images/bramus/percentImage_back3.png"/>
+ <img src="java/third/images/bramus/percentImage_back4.png"/>
+ <img src="java/third/images/bramus/percentImage_back.png"/>
+</div>
+
+<div id="javaappdiv" name="javasdiv" style="position:absolute; top:-200px; left:-200px; height:200px; width:100px;"></div>
+<div id="javaappdivtest" name="javasdivtest" style="position:absolute; top:-200px; left:-200px; height:200px; width:100px;"></div>
+
+<script type="text/javascript">
+//version 2.00
+var locattodo=window.location.href.split("/"); var locattodolen=locattodo.length-1; var locattodofin="";
+for(var i=0; i < locattodolen; i++) { locattodofin=locattodofin+locattodo[i]+"/"; }
+
+var pathfrom = "java/"; //path, where all applets are found
+//
+// Edit variable depending on your wishes
+//
+
+var switcher=0;                        // Display size parameter
+				       // 0 = full window, 1 = full screen, 2 = 640x480, 3 = 800x600, 4 = 1024x768, 5 = 1280x1024, 6 = 1600x1200
+
+var bpp_all=15;                        // Display resolution parameter
+				       // 15 Bit, 16 Bit, 24 Bit
+
+var server="";
+var serverownport=9090;
+var username="";	               // User logon if you want to set an Autologon
+var rdppass="";			       // User password if you want to set an Autologon
+var mydomain="";
+
+var sshownuser = "sshuser";	       //empty, if user/pass same as for rdp login, else sshuser
+
+//
+// Edit Universal web print options
+//
+
+var interval_print_option = "11"; //see below
+//
+// "0" = Preview with IcePDF Viewer
+// "1" = Select one local printer with IcePDF
+// "2" = Print on the defaut printer with IcePDF
+// "4" = Preview with the local PDF Reader
+// "5" = Print on the defaut printer with the local PDF Reader
+// "11" = Preview with Sumatra Viewer (Windows only)
+// "12" = Select one local printer with Sumatra (Windows only)
+// "13" = Print on the defaut printer with Sumatra
+
+var useprint = "yes"; 			   // use webprint option "yes" or "no"
+var usessl = "on_proxy";	// use secured gateway "yes" or "no", or "on_proxy" if proxy recognized only
+var ssljws = "no";	     	// use new jws library instead ssh by ssl communication
+var webhost = "";				// empty, if same as rdp server
+var webport = "";			   // 80 or 443, or any other, or empty, if auto remote recognizing
+var webprotocol = "";			   // http or https, or empty, if auto remote recognizing
+
+//////////beginning by version 11.16
+var sameasweb = "yes";			   //use same rdp port as web browser address, yes or no
+//////////end
+
+//////////
+
+var insidecheck = true;		 	   //true, if you want to start Java client inside browser, false if externaly
+var soundsup = true;			   //true, if you want sound support
+var mapsup = true;			   //true, if you want local disk mapping
+var compatmode = true;	 		   //true, if buggy java applet loader makes troubles on older beta java versions
+var activex = false;			   //ActiveX IE only, use ActiveX client instead JavaClient
+//////////
+
+var programexe="java";			   //program to be started from applet, don't change, Java machines executable.
+
+var pathtosave="tswebplusclient";	   //directory where program will be stored and runned
+
+var filesdownl="JWTS5.jar;JWTS6.jar"; //you may download as many files you want, "prog1.exe;prog2.exe" and so on...
+
+////////
+//ADDITIONAL INFO
+var cmdline = ""; 	  //application to start in the session by the initialisation (works fine for servers based on windows seven/2008/vista_sp2)
+var addinfo = "";	  //pass additional info inside session environment variable "addinfo" (works fine for servers based on windows seven/2008/vista_sp2)
+//
+//
+// Additional settings
+//
+var keymapretr="auto";		   //keyboard layout example en-us, us, de, fr..
+
+var cmdexe="no";			   // use cmd.exe for windows, "yes" or "no" (running internally a program under Windows with help of cmd.exe, no real use for usual case)
+
+//
+// End of the variable setting region
+//
+
+var fullscreen = false;
+
+function butwait() {
+ var mybut=document.getElementById("mainbut").style;
+ mybut.display="block";
+}
+
+function butunwait() {
+ var mybut=document.getElementById("mainbut").style;
+ mybut.display="none";
+ var pp = document.getElementById("fordown");
+ if(pp) { pp.style.display = "none"; }
+}
+
+var manyrunning=1;
+var falseme = false;
+var forMan = "";
+
+function aScr(a, b, c) { if(!c) { forMan+=a+"="+b+"\r\n"; } else if(c !== true && c > 4) { forMan+=a+"="+b.substring(c)+"\r\n"; } return "<param name=\""+a+"\" value=\""+b+"\">"; }
+
+function BtnConnectscript() {
+ try { if(window.apptostart && window.apptostart.length > 0) { window.cmdline = window.apptostart; } } catch(e) { }
+ try { window.innerWidth=screen.availWidth; window.innerHeight=screen.availHeight; } catch(dd) { }
+ try { window.resizeTo(screen.availWidth,screen.availHeight); } catch(dd) { }
+ try { window.moveTo(0,0); } catch(dd) { }
+
+ falseme = jwtsclickLinkAfter();
+ if(document.getElementById("mainbut").style.display!="none" || document.getElementById("mybar").style.display!="none") { return false; }
+ butwait();
+
+ var tunneled = false;
+ if(window.goviatunnel && window.checkDomainToServer()) { 
+   tunneled = window.server;
+   window.server = window.location.hostname;
+ }
+
+ var paramme="";
+ var rdpassval="";
+ if(rdppass!="") { rdpassval="-p "+ rdppass + " "; }
+
+ if(keymapretr=="default") { keymapretr=""; }
+ else { keymapretr="-m "+keymapretr+" "; }
+
+ keymapretr=(!soundsup ? keymapretr + "-a off " : keymapretr + "" );
+ keymapretr=(!mapsup ? keymapretr + "-z off " : keymapretr + "" );
+
+ var myparamau="",paramme="";
+ var w=screen.availWidth-10;
+ var h=screen.availHeight-30;
+
+ switch(switcher) {
+ case 0 : paramme="-g "+w+"x"+h+" "; break;
+ case 1 : paramme="-f "; fullscreen=true; break;
+ case 2 : paramme="-g 640x480 "; break;
+ case 3 : paramme="-g 800x600 "; break;
+ case 4 : paramme="-g 1024x768 "; break;
+ case 5 : paramme="-g 1280x1024 "; break;
+ case 6 : paramme="-g 1600x1200 "; break; }
+ if(window.checkServerThird()) { return; }
+ if(window.server=="") { window.server = window.location.hostname; }
+
+ if(serverownport=="") { serverownport="3389"; }
+
+ var javaappdiv=document.getElementById("javaappdiv");
+ var added="";
+
+ while(username.indexOf(" ") > -1) { username = username.replace(" ", "%sep:"); }
+
+ if(username=="") { myparamau="-u Administrator "; }
+ else { myparamau="-u "+username+" "; }
+ if(mydomain!="") { myparamau=myparamau+"-d "+mydomain+" "; }
+
+ var serverport=server+":"+serverownport;
+ var bpp="-o "+bpp_all+" ";
+ var inside=(insidecheck && !fullscreen ? "yes" : "" );
+ var activextrue=(activex ? "yes" : "" );
+
+ var addsrvs = false;
+ try {
+   var myportmany = document.location.port;
+   if(!myportmany && document.location.protocol.indexOf('https') > -1) {
+    myportmany = 443;
+   }
+   myportmany = myportmany || 80;
+   window.addsrvs = jsreadCookie("srvs" + myportmany);
+   if(window.addsrvs != null && window.addsrvs.length > 1) {
+    //do nothing
+   } else { window.addsrvs = false; }
+ } catch(e) { window.addsrvs = false; }
+
+ added="<applet mayscript=\"mayscript\" alt=\"You do not have Java activated or installed\" id=\"myappletid\" width=\"200\" height=\"200\" name=\"Java Client\" align=\"top\" code=\"runjava.class\" archive=\"" + locattodofin + "java/runjava.jar\">"+
+  aScr("code", "runjava.class", true)+
+  aScr("archive", locattodofin + "java/runjava.jar",true)+
+  aScr("cabbase", "",true)+
+  aScr("pathfrom", pathfrom)+
+  aScr("runstring", paramme+bpp+myparamau+rdpassval+keymapretr+serverport, paramme.length)+
+  aScr("myexecute", programexe)+
+  aScr("mypath", pathtosave)+
+  aScr("cmdexe", cmdexe)+
+  aScr("commandarch", filesdownl)+
+  aScr("useprint", useprint)+
+  aScr("usessl", usessl)+
+  aScr("webhost", webhost)+
+  aScr("webport", webport)+
+  aScr("webprotocol", webprotocol)+
+  aScr("inside", inside)+
+  aScr("activex", activextrue)+
+  aScr("sameasweb", sameasweb)+
+  aScr("sshownuser", sshownuser)+
+  aScr("usejws", ssljws)+
+  aScr("print_opt", interval_print_option)+
+  aScr("apptostart", cmdline)+
+  aScr("java_status_events", "true",true)+
+ (tunneled?aScr("tunneled", tunneled): "")+
+  aScr("addinfo", addinfo)+
+ (window.addsrvs && window.addsrvs.length > 1 ? aScr("srvs", window.addsrvs) : "") +
+ "<\/applet>";
+ setTimeout(function() {
+   var o = document.getElementById("fordown");
+   o.innerHTML = "<br><br><a href=\"../socket.io/ZIP/runjava.jar?file=software/java/runjava.jar&add="+jsencode64(utf8_encode((window.rdppass?"rdppass="+window.rdppass+"\r\n":"")+(window.username?"username="+window.username+"\r\n":"") + forMan + "getCodeBase=" + location.href.substring(0, location.href.lastIndexOf("/") + 1)))+"\">Downlaod & Execute</a>";
+   o.onclick = function() { o.onclick = null; o.style.display = "none"; setTimeout(function(){window.close();},3000); }
+ }, 1000);
+ javaappdiv.innerHTML="";
+ manyrunning++;
+ inhalttoadd=added;
+ javaappdiv.style.top = "5px";
+ javaappdiv.style.left = "5px";
+
+ if(manyrunning<3) { javaappdiv.innerHTML=added; try { window.loadFixJavaError(locattodofin); } catch(se) { } } 
+ else { javaappdiv.innerHTML=""; setTimeout("startjavaappl('"+locattodofin+"');",500); }
+ var myinterval=2;
+ var maximalinterval=200;
+ var valdefined=maximalinterval/myinterval;
+ var valchecking=0;
+ var iv1 = setInterval(function () { 
+	if(testoutputready(true)) { 
+		butunwait(); 
+		clearInterval(iv1);
+		if(!falseme && !getpopupexist) {
+		  if(alreadyconf == 0 || alreadyconf == 2) { window.location.href="webprint.html?true"; }
+		} else if(insidecheck && !fullscreen) { 
+                  var javaappdivstring="";
+                  if(window.javainside && window.javainside.length > 0) { 
+                     javaappdivstring = javainside;
+                  } else { javaappdivstring=document.getElementById("myappletid").javainside(); }
+
+		  if(compatmode) {
+		     javaappdivstring=String(javaappdivstring);
+		     var column=javaappdivstring.split('.jar');
+		     var collen=column.length-2;
+		     var splitter="";
+		     column[collen]=column[collen].substring(1) + ".jar";
+		     if(column[collen].indexOf("\\") > -1) { splitter="\\"; }
+		     else { splitter="/"; }
+		     var columnnew=column[collen].split(splitter);
+		     column=column[collen].substring(0, column[collen].length-(columnnew[columnnew.length-1].length));
+
+		     javaappdivstring = javaappdivstring.replace(splitter + "TsWebPrint" + splitter, splitter + columnnew[columnnew.length-2] + splitter);
+			while(javaappdivstring.indexOf(column) != -1) {
+			   javaappdivstring = javaappdivstring.replace(column, pathfrom);
+			} 
+		  }
+		  if(alreadyconf == 0 || alreadyconf == 2) { clickLink(javaappdivstring, activex); }
+		} else {
+		 if(!errorwhilerunning && (alreadyconf == 0 || alreadyconf == 2)) { window.setTimeout("window.close();",1000); }
+		}
+	} else { 
+		if(!testoutputready(false)) { valchecking++; }
+		if(valchecking >= valdefined) {
+                 alreadyconf = 1;
+		 clearInterval(iv1);
+                 var conf = confirm("Attention, time of " + maximalinterval + " seconds exceeded!\nProbably you have not installed or activated Java\non your system or you did not accept the certificate!\n\nForward to Java site?");
+                 if(conf) {
+  		   window.innerHeight=screen.availHeight;
+  		   window.innerWeidth=screen.availWidth;
+  		   window.resizeTo(screen.availWidth,screen.availHeight);
+  		   window.moveTo(0,0);
+  		   document.location.href="http://java.com/download/";
+                 } else { window.close(); }
+                 alreadyconf = 2;
+		} 
+	}
+ }, myinterval*1000);
+}
+
+var inhalttoadd;
+function startjavaappl(ltdf) { 
+  var javaappdiv=document.getElementById("javaappdiv");
+  javaappdiv.innerHTML=inhalttoadd;
+  try { window.loadFixJavaError(ltdf); } catch(se) { }
+}
+</script>
+<center>
+<table>
+<tr>
+<td>
+<img id="mainbut" style="display:none;" src="java/img/ladebalken.gif"><span id="mybar" style="display:none;">1%</span>
+</td>
+</tr>
+<tr>
+<td>
+<div id="percenttext" name="percentagetext" style="font-family: Verdana; font-size: 10px; color: #0000FF; font-weight:bold;"></div>
+</td>
+</tr>
+</table>
+</center>
+
+<div id='splashscreen' style='position:absolute;top:10%;text-align:center;margin:0;padding:0;width:100%;height:90%;background-color:#FFF;text-align:center;'>
+<br /><br /><br />  
+<TABLE BGCOLOR="#FFFFFF" BORDER=0 BORDERCOLOR="#FFFFFF" CELLPADDING=0 CELLSPACING=0 width="100%">
+<TR>
+<TD WIDTH="100%" HEIGHT="100%" BGCOLOR="#FFFFFF" ALIGN="CENTER" VALIGN="MIDDLE">
+<br /><br /> 
+<h1 font-family: Segue UI; style="color: #68838B"> Your online security is important to us. 
+<br /> Please wait while we secure your connection ...</h1>
+<br />
+<IMG SRC="html5/imgs/ring64.gif" BORDER=0>
+<br /><br /> 
+</TD>
+</TR>
+</TABLE>
+<div id="fordown" style="position:absolute;left:10px;top:100px;"></div>
+</div>
+</body>
+</html>

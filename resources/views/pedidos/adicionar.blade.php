@@ -22,6 +22,7 @@
         <form id="formulario" action="{{ route('pedidos.insert') }}" method="post" enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="contador_items" id="contador_items" value="0">
+            <input type="hidden" name="contador_anexos_gerais" id="contador_anexos_gerais" value="0">
             <div class="row mt-2 gy-4 align-items-end">
                 <div class="col-md-4">
                     <div class="form-floating form-floating-outline">
@@ -97,6 +98,14 @@
                         <label for="qtd_itens_pedido">Total Quantidade:</label>
                     </div>
                 </div>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between mt-3 mb-3">
+                <h5 class="card-title">Anexos Gerais</h5>
+                <button class="btn btn-sm btn-primary" type="button" id="botao_adicionar_anexo_geral">Adicionar Anexo Geral</button>
+            </div>
+            <div id="div_anexos_gerais">
+                <!-- Anexos gerais aqui -->
             </div>
             <div class="row mt-2 gy-4 align-items-end">
                 <div class="col-md-12 form-group">
@@ -426,6 +435,26 @@ function verifica_motivo_pedido_compra(e){
         );
     }
 }
+
+document.getElementById('botao_adicionar_anexo_geral').addEventListener('click', ()=>{
+    contador = parseInt(document.getElementById('contador_anexos_gerais').value);
+    contador++;
+    document.getElementById('contador_anexos_gerais').value = contador;
+    row = document.createElement('div');
+    row.setAttribute('class', 'row mt-2 gy-4 align-items-end');
+    row.setAttribute('id', 'linha_anexo_geral_' + contador);
+
+    row.innerHTML = `
+    <div class='col-md-12'>
+        <div class='form-floating form-floating-outline'>
+            <input class='form-control' type='file' id='anexo_geral_arquivo_${contador}' name='anexo_geral_arquivo_${contador}'/>
+            <label for='anexo_geral_arquivo_${contador}'>Anexo Geral ${contador}:</label>
+        </div>
+    </div>
+    `;
+
+    document.getElementById('div_anexos_gerais').appendChild(row);
+})
 
 </script>
 @endsection

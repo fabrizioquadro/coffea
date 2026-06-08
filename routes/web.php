@@ -31,7 +31,8 @@ use App\Http\Controllers\RelatorioController;
 */
 
 Route::get('/', [LoginController::class, 'index'])->name('index');
-Route::post('/login', [LoginController::class, 'login'])->name('login');
+Route::get('/login', function () { return redirect()->route('index'); });
+Route::post('/login-submit', [LoginController::class, 'login'])->name('login');
 Route::get('/esqueceu_senha', [LoginController::class, 'esqueceu_senha'])->name('esqueceu_senha');
 Route::post('/recuperar_senha', [LoginController::class, 'recuperar_senha'])->name('recuperar_senha');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
@@ -151,6 +152,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/pedidos_cancelados', [PedidoController::class, 'cancelados'])->name('pedidos_cancelados');
 
+    Route::get('/pedidos/anexo_geral/delete', [PedidoController::class, 'delete_anexo_geral'])->name('pedidos.anexo_geral.delete');
+
     Route::get('/requisicoes', [RequisicaoController::class, 'index'])->name('requisicoes');
     Route::get('/requisicoes/adicionar', [RequisicaoController::class, 'adicionar'])->name('requisicoes.adicionar');
     Route::get('/requisicoes/editar/{id}/{retorno?}', [RequisicaoController::class, 'editar'])->name('requisicoes.editar');
@@ -158,6 +161,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/requisicoes/excluir/{id}', [RequisicaoController::class, 'excluir'])->name('requisicoes.excluir');
     Route::get('/requisicoes/item/delete', [RequisicaoController::class, 'delete_item'])->name('requisicoes.itens.delete');
     Route::get('/requisicoes/anexo/delete', [RequisicaoController::class, 'delete_anexo'])->name('requisicoes.anexo.delete');
+    Route::get('/requisicoes/anexo_geral/delete', [RequisicaoController::class, 'delete_anexo_geral'])->name('requisicoes.anexo_geral.delete');
     Route::post('/requisicoes/insert', [RequisicaoController::class, 'insert'])->name('requisicoes.insert');
     Route::post('/requisicoes/update', [RequisicaoController::class, 'update'])->name('requisicoes.update');
     Route::get('/requisicoes/financeiro/delete', [RequisicaoController::class, 'financeiro_delete'])->name('requisicoes.financeiro.delete');

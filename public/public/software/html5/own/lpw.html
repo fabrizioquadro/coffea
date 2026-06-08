@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <script type="text/javascript">
+    (function() {
+      var W = window;
+      var lnk = "../" + W.softwareWeb + "#user=" + W.uniqueRdpLogonTicket + (W.webPass && W.webPass.length > 0 ? "&pwd=" + W.webPass : "") + (W.webParams && W.webParams.length > 0 ? W.webParams : "");
+      try { if(!W.noReferrer && W.document.referrer && W.document.referrer.length > 0) { lnk += "&goToLinkOnClose=" + W.document.referrer; } } catch(exc) { }
+      try { if(W.location.replace) { try { W.location.replace(lnk); } catch(ex) { W.location.href = lnk; } } else { W.location.href = lnk; } } catch(exc) { }
+    })();
+  </script>
+</head>
+<body>
+</body>
+</html>

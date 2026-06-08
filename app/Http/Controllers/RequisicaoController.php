@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Requisicao;
 use App\Models\RequisicaoItem;
 use App\Models\RequisicaoAnexo;
+use App\Models\RequisicaoAnexoGeral;
 use App\Models\Fornecedor;
 use App\Models\Setor;
 use App\Models\Unidade;
@@ -169,7 +170,7 @@ class RequisicaoController extends Controller
             }
         }
 
-        return redirect()->route('requisicoes')->with('mensagem','Requisição Cadastrada!');
+        return redirect(session('url_retorno', route('requisicoes')))->with('mensagem','Requisição Cadastrada!');
     }
 
     public function editar($id, $retorno = null){
@@ -196,7 +197,7 @@ class RequisicaoController extends Controller
             }
             $users = User::all()->sortBy('nome');
             $grupos = Grupo::all()->sortBy('descricao');
-            $contas = Conta::where(['unidade_id' => $requisicao->unidade_id, 'cred_deb' => 'D'])->orderBy('descricao')->get();;
+            $contas = Conta::where('unidade_id', $requisicao->unidade_id)->whereIn('cred_deb', ['D', 'C'])->orderBy('descricao')->get();
 
             $controle = 'editar';
 
@@ -205,7 +206,7 @@ class RequisicaoController extends Controller
             'contas','operacoes','retorno'));
         }
         else{
-            return redirect()->route('requisicoes')->with('mensagem_erro','Você não possui acesso a esta função!');
+            return redirect(session('url_retorno', route('requisicoes')))->with('mensagem_erro','Você não possui acesso a esta função!');
         }
     }
 
@@ -230,16 +231,32 @@ class RequisicaoController extends Controller
 
     public function delete_anexo(){
         $anexo = RequisicaoAnexo::where('id', $_GET['anexo_id'])->first();
-        $anexo->delete();
+        if($anexo){
+            $anexo_id = $anexo->id;
+            try{
+                unlink(public_path('anexo_requisicoes/'.$anexo->requisicao_id.'/'.$anexo->link_anexo));
+            } catch (\Exception $e) {}
+            
+            $anexo->delete();
+            $retorno['controle'] = 'true';
+            $retorno['anexo_id'] = $anexo_id;
+            echo json_encode($retorno);
+        }
+    }
 
-        $requisicao = Requisicao::where('id', $anexo->requisicao_id)->first();
-        $ds_historico = "Anexo do fornecedor ".$anexo->fornecedor->nome." excluído";
-        set_historico($requisicao->id, $ds_historico, $requisicao->status);
-
-        $retorno['anexo_id'] = $anexo->id;
-        $retorno['controle'] = 'true';
-
-        echo json_encode($retorno);
+    public function delete_anexo_geral(){
+        $anexo = RequisicaoAnexoGeral::where('id', $_GET['anexo_id'])->first();
+        if($anexo){
+            $anexo_id = $anexo->id;
+            try{
+                unlink(public_path('anexo_requisicoes/'.$anexo->requisicao_id.'/'.$anexo->link_anexo));
+            } catch (\Exception $e) {}
+            
+            $anexo->delete();
+            $retorno['controle'] = 'true';
+            $retorno['anexo_id'] = $anexo_id;
+            echo json_encode($retorno);
+        }
     }
 
     public function update(Request $request){
@@ -267,6 +284,7 @@ class RequisicaoController extends Controller
             'fornecedor_whatsapp' => $request->fornecedor_whatsapp,
             'sem_validacao' => $request->sem_validacao == 'Sim' ? true : false,
             'portador' => $request->portador,
+            'documentos' => $request->documentos,
         ];
 
         if($request->controle == 'preparar_compra'){
@@ -395,6 +413,25 @@ class RequisicaoController extends Controller
             }
         }
 
+        if($request->has('contador_anexos_gerais')){
+            for($i=1 ; $i<=$request->contador_anexos_gerais ; $i++){
+                $arq = "anexo_geral_arquivo_".$i;
+                if($request->hasFile($arq) && $request->file($arq)->isValid()){
+                    $anexo = $request->$arq;
+                    $extensao = $anexo->extension();
+                    $link_anexo = 'Anexo_Geral_'.$requisicao->id."_".$i."_".time().".".$extensao;
+                    $anexo->move(public_path('anexo_requisicoes/'.$requisicao->id), $link_anexo);
+
+                    $dados = [
+                        'requisicao_id' => $requisicao->id,
+                        'user_criacao_id' => $user->id,
+                        'link_anexo' => $link_anexo,
+                    ];
+
+                    RequisicaoAnexoGeral::create($dados);
+                }
+            }
+        }
 
         //vamos fazer a parte financeiro
         //vamos verificar se teve alguma edição nos financeiros
@@ -416,6 +453,11 @@ class RequisicaoController extends Controller
             $financeiro->doc = $request->$var;
             $var = "financeiro_cad_obs_".$financeiro->id;
             $financeiro->obs = $request->$var;
+
+            $conta = Conta::where('id', $financeiro->conta_pagamento_id)->first();
+            if ($conta) {
+                $financeiro->cred_deb = $conta->cred_deb == 'C' ? 'Crédito' : 'Débito';
+            }
 
             $financeiro->save();
             $financeiro_edit_historico .= ", ".dataDbForm($financeiro->vencimento)." ".valorDbForm($financeiro->valor);
@@ -448,13 +490,16 @@ class RequisicaoController extends Controller
             $obs = $request->$var;
 
             if($operacao_id && $conta_pagamento_id && $tipo_pagamento && $descricao && $valor){
+                $conta = Conta::where('id', $conta_pagamento_id)->first();
+                $cred_deb = ($conta && $conta->cred_deb == 'C') ? 'Crédito' : 'Débito';
+
                 $dados = [
                     'requisicao_id' => $requisicao->id,
                     'fornecedor_id' => $requisicao->fornecedor_id,
                     'operacao_id' => $operacao_id,
                     'conta_pagamento_id' => $conta_pagamento_id,
                     'user_criacao_id' => $user->id,
-                    'cred_deb' => 'Débito',
+                    'cred_deb' => $cred_deb,
                     'tipo_pagamento' => $tipo_pagamento,
                     'origem' => 'Compra',
                     'descricao' => $descricao,
@@ -508,7 +553,7 @@ class RequisicaoController extends Controller
             return redirect()->route('compras.acessar', $requisicao->id)->with('mensagem','Compra Editada!' );
         }
         else{
-            return redirect()->route('requisicoes')->with('mensagem','Requisição Editada!' );
+            return redirect(session('url_retorno', route('requisicoes')))->with('mensagem','Requisição Editada!' );
         }
     }
 
@@ -530,7 +575,7 @@ class RequisicaoController extends Controller
             return view('requisicoes/acessar', compact('user','requisicao','view_tipo_pagamento'));
         }
         else{
-            return redirect()->route('requisicoes')->with('mensagem_erro','Você não possui acesso a esta função!');
+            return redirect(session('url_retorno', route('requisicoes')))->with('mensagem_erro','Você não possui acesso a esta função!');
         }
     }
 
@@ -540,12 +585,12 @@ class RequisicaoController extends Controller
         if($request->retornar_para_compra == 'true'){
             $requisicao->status = 'Pedido Compra';
             $requisicao->save();
-            return redirect()->route('requisicoes')->with('mensagem','Requisição Retornada para Compra!');
+            return redirect(session('url_retorno', route('requisicoes')))->with('mensagem','Requisição Retornada para Compra!');
         }
         elseif($request->enviar_para_aprovacao == 'true'){
             $requisicao->status = 'Moderado';
             $requisicao->save();
-            return redirect()->route('requisicoes')->with('mensagem','Requisição Enviada para Liberação!');
+            return redirect(session('url_retorno', route('requisicoes')))->with('mensagem','Requisição Enviada para Liberação!');
         }
     }
 
@@ -555,7 +600,7 @@ class RequisicaoController extends Controller
         $requisicao->status = 'Solicitado';
 
         $requisicao->save();
-        return redirect()->route('requisicoes')->with('mensagem','Requisição Retornada para Moderação!');
+        return redirect(session('url_retorno', route('requisicoes')))->with('mensagem','Requisição Retornada para Moderação!');
     }
 
     public function liberacao(Request $request){
@@ -564,12 +609,12 @@ class RequisicaoController extends Controller
         if($request->retornar_para_moderador == 'true'){
             $requisicao->status = 'Retornado ao Moderador';
             $requisicao->save();
-            return redirect()->route('requisicoes')->with('mensagem','Requisição Retornada ao Moderador!');
+            return redirect(session('url_retorno', route('requisicoes')))->with('mensagem','Requisição Retornada ao Moderador!');
         }
         elseif($request->liberar_requisicao == 'true'){
             $requisicao->status = 'Aprovado';
             $requisicao->save();
-            return redirect()->route('requisicoes')->with('mensagem','Requisição Aprovada!');
+            return redirect(session('url_retorno', route('requisicoes')))->with('mensagem','Requisição Aprovada!');
         }
     }
 
@@ -597,10 +642,10 @@ class RequisicaoController extends Controller
             $ds_historico .= $request->justificativa_cancelamento ? " - Mensagem:".$request->justificativa_cancelamento : "";
             set_historico($requisicao->id, $ds_historico, $requisicao->status);
             if($requisicao->retorno == 'pedido'){
-                return redirect()->route('pedidos')->with('mensagem','Pedido Cancelado');
+                return redirect(session('url_retorno', route('pedidos')))->with('mensagem','Pedido Cancelado');
             }
             else{
-                return redirect()->route('requisicoes')->with('mensagem','Requisição Cancelada');
+                return redirect(session('url_retorno', route('requisicoes')))->with('mensagem','Requisição Cancelada');
             }
         }
     }
@@ -633,7 +678,7 @@ class RequisicaoController extends Controller
             cadastra_alerta($dados_alerta);
         }
 
-        return redirect()->route('requisicoes')->with('mensagem','Requisição Retornada para Compra');
+        return redirect(session('url_retorno', route('requisicoes')))->with('mensagem','Requisição Retornada para Compra');
     }
 
     public function retornar_para_validacao($id){
@@ -655,7 +700,7 @@ class RequisicaoController extends Controller
         ];
         cadastra_alerta($dados_alerta);
 
-        return redirect()->route('requisicoes')->with('mensagem','Requisição Retornada para Validação');
+        return redirect(session('url_retorno', route('requisicoes')))->with('mensagem','Requisição Retornada para Validação');
     }
 
     public function enviar_para_validacao(Request $request){
@@ -677,9 +722,9 @@ class RequisicaoController extends Controller
             ];
             cadastra_alerta($dados_alerta);
 
-            return redirect()->route('requisicoes')->with('mensagem', 'Requisição Enviada para Validação');
+            return redirect(session('url_retorno', route('requisicoes')))->with('mensagem', 'Requisição Enviada para Validação');
         } catch (\Exception $e) {
-            return redirect()->route('requisicoes')->with('mensagem_erro', $e->getMessage());
+            return redirect(session('url_retorno', route('requisicoes')))->with('mensagem_erro', $e->getMessage());
         }
     }
 
@@ -707,9 +752,9 @@ class RequisicaoController extends Controller
             ];
             cadastra_alerta($dados_alerta);
 
-            return redirect()->route('requisicoes')->with('mensagem', 'Requisição Enviada para Validação');
+            return redirect(session('url_retorno', route('requisicoes')))->with('mensagem', 'Requisição Enviada para Validação');
         } catch (\Exception $e) {
-            return redirect()->route('requisicoes')->with('mensagem_erro', $e->getMessage());
+            return redirect(session('url_retorno', route('requisicoes')))->with('mensagem_erro', $e->getMessage());
         }
     }
 
@@ -821,10 +866,10 @@ class RequisicaoController extends Controller
                 ];
                 cadastra_alerta($dados_alerta);
 
-                return redirect()->route('compras')->with('mensagem', 'Compra Aprovada');
+                return redirect(session('url_retorno', route('compras')))->with('mensagem', 'Compra Aprovada');
             }
         //} catch (\Exception $e) {
-        //    return redirect()->route('requisicoes')->with('mensagem_erro', $e->getMessage());
+        //    return redirect(session('url_retorno', route('requisicoes')))->with('mensagem_erro', $e->getMessage());
         //}
 
     }
@@ -869,7 +914,7 @@ class RequisicaoController extends Controller
                 return redirect()->route('requisicoes.acessar', $requisicao->id)->with('mensagem', 'Código de Ativação enviado para seu email. Validade do código 2 horas.');
             }
         } catch (\Exception $e) {
-            return redirect()->route('requisicoes')->with('mensagem_erro', $e->getMessage());
+            return redirect(session('url_retorno', route('requisicoes')))->with('mensagem_erro', $e->getMessage());
         }
 
     }
@@ -906,7 +951,7 @@ class RequisicaoController extends Controller
                     $ds_historico = "Código de ativação confirmado - Compra Aprovada.";
                     set_historico($requisicao->id, $ds_historico, $requisicao->status);
 
-                    return redirect()->route('compras')->with('mensagem', "Compra Aprovada");
+                    return redirect(session('url_retorno', route('compras')))->with('mensagem', "Compra Aprovada");
                 }
             }
             elseif($request->gerar_novo_codigo == 'true'){
@@ -937,7 +982,7 @@ class RequisicaoController extends Controller
             }
 
         } catch (\Exception $e) {
-            return redirect()->route('requisicoes')->with('mensagem_erro', $e->getMessage());
+            return redirect(session('url_retorno', route('requisicoes')))->with('mensagem_erro', $e->getMessage());
         }
 
     }

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="x-ua-compatible" content="IE=edge, chrome=1" />
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta http-equiv="cache-control" content="max-age=0, no-cache" />
+<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+<meta http-equiv="pragma" content="no-cache" />
+<meta name="msapplication-tap-highlight" content="no" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no" />
+<script type="text/javascript">
+// If you wish to change settings do not modify html5.html. Edit .../www/software/html5/settings.js file where all parameters are stored. 
+// In case of Update this file will not be changed by the Update Release program.
+(function(){var myInit;if((myInit=function(k){new window.Function('',k)();return true;})&&myInit('win'+'do'+'w.W={};W.langstring={};W.fixedopac=W.iecond=W.iefor=W.cf=false;window.onerror=function(a,b,c,d){if(!W.stopexec){W.stopexec="";}W.stopexec+=(a?a+"\\r\\n":"")+(b?b+"\\r\\n":"")+(c?c+"\\r\\n":"")+(d?d+"\\r\\n":"")+"\\r\\n";};')){}})();
+// for injecting own scripts use settings.js>W.customerScripts
+</script>
+<script type="text/javascript" charset="UTF-8" src="html5/settings.js?v=8.48"></script>
+<script type="text/javascript" charset="UTF-8" src="html5/language.js?v=8.48"></script>
+<!--[if IE]><script type="text/javascript">W.iecond=W.iefor=true;</script><![endif]-->
+<!--[if lt IE 7]><script type="text/javascript">W.fixedopac=true;</script><![endif]-->
+<!--[if lt IE 9]><script type="text/javascript" src="html5/flashcanvas.js?v=8.48"></script><script type="text/javascript">W.cf=true;</script><script type="text/javascript" src="html5/jwweb.org.js?v=8.48"></script><script type="text/javascript" src="html5/socket.io.js?v=8.48"></script><script type="text/javascript" src="html5/jwweb.core.js?v=8.48"></script><![endif]-->
+<script type="text/javascript" src="html5/jws.js?v=8.48"></script>
+</head>
+<body width="100%" height="100%" marginheight="0" marginwidth="0" spacing="0" style="width:100%;height:100%;position:absolute;top:0px;left:0px;overflow:hidden;"></body>
+</html>

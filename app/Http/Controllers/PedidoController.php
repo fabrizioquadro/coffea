@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Requisicao;
 use App\Models\RequisicaoItem;
+use App\Models\RequisicaoAnexoGeral;
 use App\Models\Setor;
 use App\Models\Unidade;
 use App\Models\Grupo;
@@ -170,6 +171,26 @@ class PedidoController extends Controller
             $ds_historico = "Pedido Aberto com os itens: ".$itens_historico;
             set_historico($requisicao->id, $ds_historico, $requisicao->status);
 
+            if($request->has('contador_anexos_gerais')){
+                for($i=1 ; $i<=$request->contador_anexos_gerais ; $i++){
+                    $arq = "anexo_geral_arquivo_".$i;
+                    if($request->hasFile($arq) && $request->file($arq)->isValid()){
+                        $anexo = $request->$arq;
+                        $extensao = $anexo->extension();
+                        $link_anexo = 'Anexo_Geral_'.$requisicao->id."_".$i."_".time().".".$extensao;
+                        $anexo->move(public_path('anexo_requisicoes/'.$requisicao->id), $link_anexo);
+
+                        $dados = [
+                            'requisicao_id' => $requisicao->id,
+                            'user_criacao_id' => $user->id,
+                            'link_anexo' => $link_anexo,
+                        ];
+
+                        RequisicaoAnexoGeral::create($dados);
+                    }
+                }
+            }
+
             //vamos setar para os que fazem p preparo do pedido que tem pedido novo
             $perfis = Perfil::where('preparar_compra', true)->get();
             $in = array();
@@ -193,10 +214,10 @@ class PedidoController extends Controller
                 return redirect()->route('pedidos.adicionar')->with('mensagem', "Pedido Cadastrado!");
             }
             else{
-                return redirect()->route('pedidos')->with('mensagem', "Pedido Cadastrado!");
+                return redirect(session('url_retorno', route('pedidos')))->with('mensagem', "Pedido Cadastrado!");
             }
         } catch (\Exception $e) {
-            return redirect()->route('pedidos')->with('mensagem_erro', $e->getMessage());
+            return redirect(session('url_retorno', route('pedidos')))->with('mensagem_erro', $e->getMessage());
         }
     }
 
@@ -238,7 +259,7 @@ class PedidoController extends Controller
                 $grupos = Grupo::all()->sortBy('descricao');
                 $controle = 'preparar_compra';
 
-                $contas = Conta::where(['unidade_id' => $requisicao->unidade_id, 'cred_deb' => 'D'])->orderBy('descricao')->get();;
+                $contas = Conta::where('unidade_id', $requisicao->unidade_id)->whereIn('cred_deb', ['D', 'C'])->orderBy('descricao')->get();
                 //$operacoes = Operacao::where('status','Ativo')->orderBy('descricao')->get();
                 $retorno = null;
                 return view('requisicoes/editar', compact('requisicao','setores','unidades',
@@ -250,7 +271,7 @@ class PedidoController extends Controller
 
                 $ds_historico = "Pedido Cancelado.";
                 set_historico($requisicao->id, $ds_historico, $requisicao->status);
-                return redirect()->route('pedidos')->with('mensagem','Pedido Cancelado');
+                return redirect(session('url_retorno', route('pedidos')))->with('mensagem','Pedido Cancelado');
             }
         }
     }
@@ -330,10 +351,31 @@ class PedidoController extends Controller
             else{
                 $ds_historico = "Pedido Editado.";
             }
+
+            if($request->has('contador_anexos_gerais')){
+                for($i=1 ; $i<=$request->contador_anexos_gerais ; $i++){
+                    $arq = "anexo_geral_arquivo_".$i;
+                    if($request->hasFile($arq) && $request->file($arq)->isValid()){
+                        $anexo = $request->$arq;
+                        $extensao = $anexo->extension();
+                        $link_anexo = 'Anexo_Geral_'.$requisicao->id."_".$i."_".time().".".$extensao;
+                        $anexo->move(public_path('anexo_requisicoes/'.$requisicao->id), $link_anexo);
+
+                        $dados = [
+                            'requisicao_id' => $requisicao->id,
+                            'user_criacao_id' => $user->id,
+                            'link_anexo' => $link_anexo,
+                        ];
+
+                        RequisicaoAnexoGeral::create($dados);
+                    }
+                }
+            }
+
             set_historico($requisicao->id, $ds_historico, $requisicao->status);
-            return redirect()->route('pedidos')->with('mensagem', "Pedido Editado!");
+            return redirect(session('url_retorno', route('pedidos')))->with('mensagem', "Pedido Editado!");
         } catch (\Exception $e) {
-            return redirect()->route('pedidos')->with('mensagem_erro', $e->getMessage());
+            return redirect(session('url_retorno', route('pedidos')))->with('mensagem_erro', $e->getMessage());
         }
     }
 
@@ -345,6 +387,21 @@ class PedidoController extends Controller
         }
         $retorno['controle'] = $controle;
         echo json_encode($retorno);
+    }
+
+    public function delete_anexo_geral(){
+        $anexo = RequisicaoAnexoGeral::where('id', $_GET['anexo_id'])->first();
+        if($anexo){
+            $anexo_id = $anexo->id;
+            try{
+                unlink(public_path('anexo_requisicoes/'.$anexo->requisicao_id.'/'.$anexo->link_anexo));
+            } catch (\Exception $e) {}
+            
+            $anexo->delete();
+            $retorno['controle'] = 'true';
+            $retorno['anexo_id'] = $anexo_id;
+            echo json_encode($retorno);
+        }
     }
 
     public function listagem(){

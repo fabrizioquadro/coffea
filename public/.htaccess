@@ -5,6 +5,9 @@
 
     RewriteEngine On
 
+    # Force /login and /login/ to be handled by Laravel despite physical folder
+    RewriteRule ^login/?$ index.php [L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

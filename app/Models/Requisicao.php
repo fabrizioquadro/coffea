@@ -44,6 +44,7 @@ class Requisicao extends Model
         'justificativa_cancelamento',
         'sem_validacao',
         'portador',
+        'documentos',
     ];
 
     public function fornecedor(){
@@ -76,6 +77,10 @@ class Requisicao extends Model
 
     public function anexos(){
         return $this->hasMany(RequisicaoAnexo::class);
+    }
+
+    public function anexos_gerais(){
+        return $this->hasMany(RequisicaoAnexoGeral::class);
     }
 
     public function financeiros(){

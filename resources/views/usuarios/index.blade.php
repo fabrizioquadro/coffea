@@ -86,6 +86,8 @@
 <script>
 window.addEventListener('load',()=>{
   $('#table-index').DataTable({
+      pageLength: 50,
+    "pageLength": 50,
     order: [[2, 'asc']],
     "language": {
 			"sEmptyTable": "Nenhum registro encontrado",

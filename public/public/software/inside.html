@@ -1,0 +1,633 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="requiresActiveX=true"/>
+<meta content="no-cache" http-equiv="pragma">
+<meta content="NO-CACHE" http-equiv="CACHE-CONTROL">
+
+<title>Internet Access</title>
+<style>
+BODY { margin: 0; padding: 0; height:100%; width:100%; }
+
+#loading {
+	margin:0px;padding:0px;
+	position:absolute;left:40%;top:5%;
+	width:224px;
+	display:block;
+	color:#000;background-color:#eee;
+	border:4px #999 solid;
+	font-size:1em;
+	overflow:auto;
+	z-index:10
+}
+#loading p {margin:0px;padding:8px}
+
+html, body, div, img {
+  white-space:nowrap;
+
+  border: none;
+  border-style: none;
+  outline-color: transparent;
+  outline-style: none; 
+  margin: 0;
+  padding: 0;
+
+  outline: none;
+  -khtml-outline: none; 
+  -webkit-outline: none; 
+  -moz-outline: none; 
+  -ms-outline: none; 
+  -o-outline: none; 
+
+  tap-highlight-color: rgba(0,0,0,0);
+  -khtml-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -moz-tap-highlight-color: rgba(0,0,0,0);
+  -ms-tap-highlight-color: rgba(0,0,0,0);
+  -o-tap-highlight-color: rgba(0,0,0,0);
+
+  user-drag: none;
+  -khtml-user-drag: none;
+  -webkit-user-drag: none;
+  -moz-user-drag: none;
+  -ms-user-drag: none;
+  -o-user-drag: none;
+
+  user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+
+  touch-callout: none;
+  -khtml-touch-callout: none;
+  -webkit-touch-callout: none;
+  -moz-touch-callout: none;
+  -ms-touch-callout: none;
+  -o-touch-callout: none;
+
+  -ms-touch-select: none;
+}
+</style>
+
+<script type="text/javascript">
+//v3 28.04.14
+var widtha = 800;
+var heighta = 600;
+var width = 800;
+var height = 600;
+var splashtimeout = 4; //Show screen on time out in seconds after connect, preset as example to 7 seconds.
+
+function testbridge(){return "ok";}
+function call_on_connect() { }
+function call_on_disconnect() { }
+function call_on_connect_do_before() {
+ setTimeout('removeLoadBox()', window.splashtimeout  * 1000);
+ call_on_connect();
+}
+var channels = "";
+
+function rdpchannel(msg) {
+  if(msg.indexOf("CONNECTED") > -1) { 
+   call_on_connect_do_before(); 
+   return true;
+  } else if(msg.indexOf("DISCONNECT") > -1) {
+   call_on_disconnect();
+   return true;
+  }
+  var ind = msg.indexOf("#");
+  var channel = msg;
+  if(ind > -1) {
+   msg = msg.substring(ind + 1);
+   channel = channel.substring(0, ind);
+   eval("on_call_"+ channel + "(\'" + msg + "\')");
+  }
+}
+
+function send_to_channel(channel, data) {
+   max = 0;
+   while(max < 1) {
+    try {
+     var docum = document.getElementById("myappletid");
+     if(docum != null) {
+       document.getElementById("myappletid").sendData(channel + "#" + data);
+     }
+     max = 2;
+    } catch (e) { max++; }
+   }
+}
+
+var wj = 800;
+var hj = 640;
+
+function testoutputready() {
+ var javaappdiv=document.getElementById("myappletid");
+ if(!javaappdiv) { return false; }
+ return true;
+}
+
+function recognizeDim() {
+        widtha = document.body.clientWidth & ~3;
+	heighta = document.body.clientHeight & ~3;
+
+        if(!widtha || !heighta || widtha < 10 || heighta < 10) { 
+             widtha = window.innerWidth & ~3; 
+             heighta = window.innerHeight & ~3;
+        }
+
+        if(!widtha || !heighta || widtha < 10 || heighta < 10) { 
+           widtha = document.documentElement.clientWidth;
+           heighta = document.documentElement.clientHeight;
+        }       
+
+        if(!widtha || !heighta || widtha < 10 || heighta < 10) { 
+          return false;
+        }   
+ 
+        return true;
+}
+
+
+		var loadBox;
+		function appendLoadBox(){
+			if(typeof loadBox!=='undefined')return false;
+			try{
+				loadBox=document.createElement('div');
+				if(loadBox){
+					loadBox.id='loading';
+					loadBox.innerHTML='<p><strong>Internet Access<\/strong><br \/><em>Loading applet<\/em>...<\/p>';
+					loadBox.style.display='block';
+					loadBox.style.zIndex = 2000;
+					document.body.appendChild(loadBox);
+				}
+			}catch(e){
+				try{
+					if(loadBox)while(loadBox.hasChildNodes())loadBox.removeChild(loadBox.lastChild);
+				}catch(e){}
+				finally{loadBox=null;}
+			}
+			finally{
+				return (loadBox)?true:false;
+			}
+		}
+
+		function removeLoadBox(){
+			try{
+				if(loadBox){
+					loadBox.style.display='none';
+					while(loadBox.hasChildNodes())loadBox.removeChild(loadBox.lastChild);
+					loadBox.parentNode.removeChild(loadBox);
+				}
+			}catch(e){
+                        }
+			finally{
+                         loadBox=null;
+                         hidemybody();
+                        }
+		}
+
+		var myinterval=1;
+		var maximalinterval=180;
+		var valdefined=maximalinterval/myinterval;
+		var valchecking=0;
+		var iv1,iv2;
+		var valcheck2=0;
+
+
+		function addsplash() {
+                 recognizeDim();
+
+                 try { 
+                  var docj = document.getElementById("javaappdivtest");
+                  docj.style.top = "-" + (heighta + 10) + "px"; 
+                  docj.style.left = "-" + (widtha + 10) + "px"; 
+                 } catch(exc) { }
+
+		 appendLoadBox();
+		 iv2 = setInterval(function () {
+		   valcheck2++;
+		   if(loadBox) { loadBox.innerHTML='<p><strong>Internet Access<\/strong><br \/><em>Loading applet<\/em>...<\/p>&nbsp;' + valcheck2 + ' sec.'; }
+		 }, 1000);
+
+		 iv1 = setInterval(function () { 
+			if(testoutputready()) {
+			  clearInterval(iv2);
+			  clearInterval(iv1);
+			  if(loadBox) { 
+				loadBox.innerHTML='<p><strong>Internet Access<\/strong><br \/><em>Connecting to the server<\/em>...<\/p>';
+			  }
+			} 
+		 }, myinterval*1000);
+		}
+
+var locattodo=window.location.href.split("/"); var locattodolen=locattodo.length-1; var locattodofin="";
+for(var i=0; i < locattodolen; i++) { locattodofin=locattodofin+locattodo[i]+"/"; }
+
+function createCookie(name,value,days) {
+	if (days) {
+		var date = new Date();
+		date.setTime(date.getTime()+(days*24*60*60*1000));
+		var expires = "; expires="+date.toGMTString();
+	}
+	else var expires = "";
+	document.cookie = name+"="+value+expires+"; path=/";
+}
+
+function readCookie(name) {
+	var nameEQ = name + "=";
+	var ca = document.cookie.split(';');
+	for(var i=0;i < ca.length;i++) {
+		var c = ca[i];
+		while (c.charAt(0)==' ') c = c.substring(1,c.length);
+		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+	}
+	return null;
+}
+
+var referrer = "";
+
+
+var b64array = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+function decode64(input) {
+    var output = "";
+    var hex = "";
+    var chr1, chr2, chr3 = "";
+    var enc1, enc2, enc3, enc4 = "";
+    var i = 0;
+    input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+    do {
+        enc1 = b64array.indexOf(input.charAt(i++));
+        enc2 = b64array.indexOf(input.charAt(i++));
+        enc3 = b64array.indexOf(input.charAt(i++));
+        enc4 = b64array.indexOf(input.charAt(i++));
+        chr1 = (enc1 << 2) | (enc2 >> 4);
+        chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+        chr3 = ((enc3 & 3) << 6) | enc4;
+        output = output + String.fromCharCode(chr1);
+        if (enc3 != 64) {
+            output = output + String.fromCharCode(chr2);
+        }
+        if (enc4 != 64) {
+            output = output + String.fromCharCode(chr3);
+        }
+        chr1 = chr2 = chr3 = "";
+        enc1 = enc2 = enc3 = enc4 = "";
+    } while (i < input.length);
+    return unescape(output);
+}
+
+function reseapp(w, h) { }
+
+function rese(w, h) {
+  var k = document.getElementById("myappletid");
+  if(k != null) {
+    k.width = w;
+    k.height = h;
+    window.resizeScreen(w, h);
+  }
+}
+
+function setElemOverflow(bod, w, h) {
+ var hover = false;
+ var wover = false;
+ if(h != window.hj && h + 10 >= window.hj) { hover = true; }
+ if(w != window.wj && w + 10 >= window.wj) { wover = true; }
+ if(hover || wover) {
+   bod.style.overflow = "auto";
+   try {
+    bod.style.overflowX = "auto";
+    bod.style.overflowY = "auto";
+   } catch(e) { }
+ } else {
+   bod.style.overflow = "hidden";
+   try {
+    bod.style.overflowX = "hidden";
+    bod.style.overflowY = "hidden";
+   } catch(e) { }
+ }
+}
+
+function checkWithInterval(mya) {
+  setTimeout(function() {
+    if(!mya.isalready) { 
+      if(mya.status < 2) { 
+        window.checkWithInterval(mya);
+      } else if(mya.status == 3) {
+        try { mya.onerror(); } catch(fs) { }
+      } else { try { mya.onload(); } catch(fs) { } }
+    } 
+  }, 300);
+}
+
+function loadFixJavaError(bl, inhalttoadd) {
+  if(bl.indexOf("https://") == 0) {
+    var mya = document.getElementById("myappletid");
+    if(mya) { 
+       mya.isalready = 0;
+       mya.onload = mya.onstop = function() { mya.isalready = 1; mya.onload = mya.onstop = mya.onerror = function() { } }
+       mya.onerror = function() { 
+         mya.onload = mya.onstop = mya.onerror = function() { }
+         if(!mya.isalready) { 
+           mya.isalready = 2;
+           var javaappdiv=document.getElementById("javaappdivtest");
+           if(javaappdiv) { 
+             var blnew = bl.substring(8);
+             var bl1 = blnew.indexOf("/");
+             if(bl1 > -1) { 
+               var blnew1 = blnew.substring(0, bl1);
+               var blnew2 = blnew.substring(bl1);
+               bl1 = blnew1.indexOf(":");
+               if(bl1 > -1) { 
+                  blnew = "http://" + blnew;
+               } else { 
+                  blnew = "http://" + blnew1 + ":443" + blnew2;                  
+               }
+               var inht = inhalttoadd;
+               while(inht.indexOf(bl) > -1) { inht = inht.replace(bl, blnew); }
+               window.javasslerror = window.compatmode = true;
+               javaappdiv.innerHTML = inht;
+             }
+           }
+         }
+       }
+      window.checkWithInterval(mya);
+    }
+  }
+}
+
+function resizeScreen(w, h) {
+ var tw = window.wj;
+ var th = window.hj;
+ if(tw > 0 && th > 0) {
+  var bod = document.getElementsByTagName("body")[0];
+  bod.width = w;
+  bod.height = h;
+  bod.style.width = w + "px";
+  bod.style.height = h + "px";
+  window.setElemOverflow(bod, w, h);
+ }
+}
+
+function clickLink(todim) { 
+ todim++;
+ var recogdim = recognizeDim(todim);
+ if(!recogdim && todim < 4) { 
+   window.setTimeout(function() { 
+     clickLink(todim);
+   }, 1000);  
+   return;
+ } else if(!recogdim && todim > 3) { 
+     widtha = 800;
+     heighta = 640;
+ }
+ self.focus();
+
+ var wnl = String(window.name);
+ if(window.opener != null) {
+  try {
+   var wnlop = String(window.opener.name);
+   if(wnlop.length > 10 && wnlop != wnl) {
+    window.name = wnlop;
+    wnl = wnlop;
+   }
+  } catch (e) { }
+ }
+
+ wnl = wnl.length;
+
+ addsplash();
+
+ var tosplit = document.location.search.substring(1);
+ if(tosplit.length < 20) {
+   if(wnl > 10) {
+    tosplit = window.name;
+   } else {
+    tosplit = readCookie("tswebsecuredrun" + tosplit);
+   }
+   if(!tosplit && wnl < 11) { alert("Something wrong with cookies!\nContact your administrator!"); return false; }
+ }
+
+ if(wnl > 10) {
+   tosplit = unescape(decode64(window.name.replace(/_/g,'=')));
+ } else {
+   tosplit = unescape(decode64(tosplit.replace(/_/g,'=')));
+ }
+
+ var doreplace = true;
+ var find = tosplit.indexOf('|');
+ var doonexit = tosplit.substring(0, find);
+ tosplit = tosplit.substring(find + 1);
+ find = tosplit.indexOf('|');
+ referrer = tosplit.substring(0, find);
+ tosplit = tosplit.substring(find + 1);
+
+ var find = tosplit.lastIndexOf('#');
+ var execcommand = tosplit.substring(0, find);
+ var loadjars = tosplit.substring(find + 1);
+ var newloadjars = "";
+ loadjars = loadjars.split(';');
+ var llen = loadjars.length;
+ var file = "";
+ if(loadjars[0].substring(0, 1) == "/") { file = "file://"; }
+ else if(loadjars[0].substring(1, 2) == ":") { file = "file:///"; }
+
+ for(var i=0; i < llen; i++) {
+  if(loadjars[i].length > 0 && loadjars[i + 1].length > 0) newloadjars += file + loadjars[i] + ',';
+  else if(loadjars[i].length > 0) { newloadjars += file + loadjars[i]; }
+ }
+ loadjars = newloadjars;
+
+ find = execcommand.indexOf('-g ');
+ var geometry = "";
+ if(find > -1) {
+   geometry = execcommand.substring(find + 3);
+   find = geometry.indexOf(' ');
+   if(find > -1) {
+    geometry = geometry.substring(0, find);
+    if(geometry=="640x480" || geometry=="800x600" || geometry=="1024x768" || geometry=="1280x1024" || geometry=="1600x1200") {
+      doreplace = false;
+    }
+    find = geometry.indexOf('x');
+    if(find > -1) {
+      width = geometry.substring(0, find);
+      height = geometry.substring(find + 1);
+    }
+   }
+ }
+
+ if(execcommand.indexOf('-y ') < 0 && channels.length > 0) {
+  execcommand = "-y " + channels + " " + execcommand;
+ }
+
+ find = execcommand.indexOf('-y ');
+ if(find > -1) {
+   var chan =  execcommand.substring(find + 3);
+   find = chan.indexOf(' ');
+   if(find > 1) {
+    chan = chan.substring(0, find);
+    if(chan.indexOf(';') > -1) {
+      var newchan = chan.split(';');
+      for(var i=0; i < newchan.length; i++) {
+       if(newchan[i].length > 0) { 
+         eval("function on_call_"+ newchan[i] + "(msg){}");
+       }
+      }
+    } else {
+        eval("function on_call_"+ chan + "(msg){}");
+    }
+   }   
+ }
+
+ loadjars = loadjars.replace(/\\/g, "\\\\");
+ if(file=="") {
+  loadjars = loadjars.split(',');
+  newloadjars = "";
+  llen = loadjars.length - 1;
+  for(var i=0; i < llen; i++) {
+    newloadjars = newloadjars + locattodofin + loadjars[i] + ",";
+  }
+  newloadjars = newloadjars + locattodofin + loadjars[llen];
+  loadjars = newloadjars;
+ }
+
+ if(doreplace) {
+  execcommand = execcommand.replace(width+'x'+height, widtha+'x'+heighta);
+  execcommand = execcommand.replace('-f', '-g ' + widtha+'x'+heighta);
+  width = widtha;
+  height = heighta;
+ }  
+ window.wj = width;
+ window.hj = height;
+
+ if(doonexit == "close") { doonexit = "window.close()"; }
+ else { doonexit = "unhidemybody()"; }
+ execcommand = execcommand.replace(/\\/g, "\\\\");
+
+ var appleted = 'var addedtest = \'<applet mayscript=\"mayscript\" id=\"myappletid\" width=\"' + width + '\" height=\"' + height + '\" name=\"JavaRDP\" align=\"top\" code=\"tsplus_net.tsweb.juergenwagner.applet.RdpApplet.class\" archive=\"' + loadjars + '\">\'+'+
+ '\'<param name=\"code\" value=\"tsplus_net.tsweb.juergenwagner.applet.RdpApplet.class\">\'+'+
+ '\'<param name=\"archive\" value=\"' + loadjars + '\">\'+'+
+ '\'<param name=\"cabbase\" value=\"\">\'+'+
+ '\'<param name=\"name\" value=\"JavaRDP\">\'+'+
+ '\'<param name=\"align\" value=\"top\">\'+'+
+ '\'<param name=\"height\" value=\"' + height + '\">\'+'+
+ '\'<param name=\"width\" value=\"' + width + '\">\'+'+
+ '\'<param name=\"java_status_events\" value=\"true\">\'+'+
+ '\'<param name=\"inside\" value=\"' + execcommand + '\">\'+'+
+ '\'<param name=\"redirect_on_exit\" value=\"javascript:'+doonexit+'\">\'+'+
+ '\'<\/applet>\'\;';
+
+ var funcexec = 'function startme() { self.focus()\; ' + 'var documjava = document.getElementById("javaappdivtest"); documjava.innerHTML=addedtest; } ';
+
+ eval(appleted)
+ eval(funcexec);
+
+ document.getElementById("javaappdivtest").style.display = "block"; 
+ startme();
+ try { window.loadFixJavaError(locattodofin, addedtest); } catch(se) { }
+}
+
+function realhidemybody() { 
+ var kt = document.getElementById("splashscreen");
+ try { 
+  if(kt) { try { kt.parentNode.removeChild(kt); } catch(e) { } }
+ } catch(e) {
+   if(kt) {
+    kt.style.visibility = "hidden"; 
+    kt.style.display = "none"; 
+   }
+ } 
+
+ var bd = document.getElementById("javaappdivtest");
+ if(!bd) { return; }
+ bd.style.display = "block"; 
+ bd.style.width = "100%";
+ bd.style.height = "100%";
+ bd.style.top = "0px";
+ bd.style.left = "0px";
+ if(navigator && (navigator.userAgent.toLowerCase()).indexOf("chrome") > -1) {
+  bd.onmousedown = function(event) { myChromeTest(); }
+  appendChrome();
+ }
+}
+
+function myChromeTest() { 
+ try { document.getElementById("javaappdivtest").onmousedown = ""; } catch(e) { return; }
+ removeChrome();
+ var ab = window.open('about:blank','','left=0,top=0,width=1,height=1');
+ ab.close();
+}
+
+function appendChrome() { 
+ try{
+  var lx=document.createElement('div');
+  if(lx) {
+     lx.id='lxa';
+     lx.innerHTML='<center><p><strong>Click inside window, if you see this text!<\/strong><\/p></center>';
+     lx.style.display='block';
+     lx.style.zIndex = 0;
+     lx.style.top = "50%";
+     lx.style.left = "45%";
+     lx.style.width = "100%";
+     lx.style.height = "100%";
+     document.body.appendChild(lx);
+  }
+ }catch(e){ }
+}
+
+function removeChrome() { 
+ try {
+   var lxu = document.getElementById("lxa");
+   if(lxu){
+	lxu.style.display='none';
+	while(lxu.hasChildNodes())lxu.removeChild(lxu.lastChild);
+	lxu.parentNode.removeChild(lxu);				
+   }
+ } catch(e){ }
+}
+
+function hidemybody() {
+ window.setTimeout(function() { realhidemybody(); }, 0);
+}
+
+function unhidemybody() {
+ var bodyelem = document.getElementById("javaappdivtest");
+ bodyelem.innerHTML = "";
+ bodyelem.style.display = "none";
+ document.location.href=referrer;
+}
+</script>
+<script type="text/javascript" src="insidech.js"></script>
+</HEAD>
+<BODY marginwidth="0" marginheight="0" leftmargin="0" topmargin="0" width="100%" height="100%" style="width:100%;height:100%;overflow:hidden;" onload="clickLink(0);">
+
+<div id="javaappdivtest" name="javasdivtest" style="position:absolute; height:100px; width:100px; display:none;"></div>
+
+<center>
+<div id="hidbut" name="hidbutton" style="display:none;">
+TSWEB Inside browser gets now started!
+<input type="button" value="clickme" id="myLink2" onclick="clickLink(document.location.search.substring(1));" />
+</div>
+
+<div id='splashscreen' style='position:absolute;top:10%;text-align:center;margin:0;padding:0;width:100%;height:90%;background-color:#FFF;text-align:center;'>
+<br /><br /><br />  
+<TABLE BGCOLOR="#FFFFFF" BORDER=0 BORDERCOLOR="#FFFFFF" CELLPADDING=0 CELLSPACING=0 width="100%">
+<TR>
+<TD WIDTH="100%" HEIGHT="100%" BGCOLOR="#FFFFFF" ALIGN="CENTER" VALIGN="MIDDLE">
+<br /><br /> 
+<h1 font-family: Segue UI; style="color: #68838B"> Your online security is important to us. 
+<br /> Please wait while we secure your connection ...</h1>
+<br />
+<IMG SRC="html5/imgs/ring64.gif" BORDER=0>
+<br /><br /> 
+</TD>
+</TR>
+</TABLE>
+</div>
+
+</center>
+
+</BODY>
+</HTML>

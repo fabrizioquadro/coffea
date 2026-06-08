@@ -503,7 +503,9 @@
 <script>
 window.addEventListener('load',()=>{
       $('#table-preparar').DataTable({
-        order: [[1, 'desc']],
+      pageLength: 50,
+        "pageLength": 50,
+        order: [[1, 'asc']],
         "language": {
     			"sEmptyTable": "Nenhum registro encontrado",
           "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
@@ -530,7 +532,9 @@ window.addEventListener('load',()=>{
       });
 
       $('#table-validacao').DataTable({
-        order: [[1, 'desc']],
+      pageLength: 50,
+        "pageLength": 50,
+        order: [[1, 'asc']],
         "language": {
     			"sEmptyTable": "Nenhum registro encontrado",
           "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
@@ -557,7 +561,9 @@ window.addEventListener('load',()=>{
       });
 
       $('#table-autorizacao').DataTable({
-        order: [[1, 'desc']],
+      pageLength: 50,
+        "pageLength": 50,
+        order: [[1, 'asc']],
         "language": {
     			"sEmptyTable": "Nenhum registro encontrado",
           "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",

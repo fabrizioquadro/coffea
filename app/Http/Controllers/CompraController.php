@@ -292,9 +292,9 @@ class CompraController extends Controller
                     EntregaDevolucao::where('requisicao_item_id', $item->id)->delete();
                 }
 
-                return redirect()->route('compras')->with('mensagem', 'Compra Cancelada');
+                return redirect(session('url_retorno', route('compras')))->with('mensagem', 'Compra Cancelada');
             } catch (\Exception $e) {
-                return redirect()->route('compras')->with('mensagem_erro', $e->getMessage());
+                return redirect(session('url_retorno', route('compras')))->with('mensagem_erro', $e->getMessage());
             }
         }
     }
@@ -384,7 +384,7 @@ class CompraController extends Controller
             return view('compras/integrar', compact('requisicao','view_tipo_pagamento'));
         }
         else{
-            return redirect()->route('compras')->with('mensagem_erro','Você não possui este acesso');
+            return redirect(session('url_retorno', route('compras')))->with('mensagem_erro','Você não possui este acesso');
         }
     }
 
@@ -401,7 +401,7 @@ class CompraController extends Controller
 
             //return redirect()->route('compras.integrar', $request->requisicao_id)->with('mensagem','Integração Realizada');
         } catch (\Exception $e) {
-            return redirect()->route('compras')->with('mensagem_erro',$e->getMessage());
+            return redirect(session('url_retorno', route('compras')))->with('mensagem_erro',$e->getMessage());
         }
     }
 
@@ -429,7 +429,7 @@ class CompraController extends Controller
 
             return redirect()->route('compras.integrar', $request->requisicao_id)->with('mensagem','Integração Realizada');
         } catch (\Exception $e) {
-            return redirect()->route('compras')->with('mensagem_erro',$e->getMessage());
+            return redirect(session('url_retorno', route('compras')))->with('mensagem_erro',$e->getMessage());
         }
     }
 
@@ -478,7 +478,7 @@ class CompraController extends Controller
 
         Token::where('requisicao_id', $requisicao->id)->delete();
 
-        return redirect()->route('compras')->with('mensagem','Pedido retornado para análise');
+        return redirect(session('url_retorno', route('compras')))->with('mensagem','Pedido retornado para análise');
     }
 
     public function enviar_requisicao_email(){

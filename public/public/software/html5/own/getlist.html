@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="cache-control" content="no-store" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta http-equiv="x-ua-compatible" content="edge, chrome=1" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <title>File Transfer</title>
+    <style type="text/css">
+        body {
+            width: 100%;
+            height: 100%;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            font-family: Arial;
+            font-size: 13px;
+            color: #777777;
+            user-select: none; -khtml-user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; -o-user-select: none;
+        }
+        
+        #title {
+            width: 100%;
+            height: 25px;
+            background-color: #dcdcdc;
+            padding: 0 0px;
+            margin-bottom: 5px;
+        }
+        
+        #title p {
+            float: left;
+            line-height: 25px;
+            margin: 0;
+            padding: 0;
+            color: #959595;
+        }
+        
+        #title p:first-child {
+            float: right;
+            font-weight: bold;
+        }
+        
+        #title a {
+            text-decoration: none;
+            color: #959595;
+        }
+        
+        #title a:hover {
+            color: #ffffff;
+        }
+
+        #ownglu4 {
+            cursor:pointer;
+        } 
+
+        #ownglu4:hover {
+            color: red;
+        } 
+
+        #ownglu0 {
+            cursor:pointer;
+        } 
+
+        #ownglu0:hover {
+            color: red;
+        } 
+
+        .uploadButton {
+            -moz-box-shadow: inset 0px 1px 0px 0px #ffffff;
+            -webkit-box-shadow: inset 0px 1px 0px 0px #ffffff;
+            box-shadow: inset 0px 1px 0px 0px #ffffff;
+            background-color: #ededed;
+            -webkit-border-top-left-radius: 5px;
+            -moz-border-radius-topleft: 5px;
+            border-top-left-radius: 5px;
+            -webkit-border-top-right-radius: 5px;
+            -moz-border-radius-topright: 5px;
+            border-top-right-radius: 5px;
+            -webkit-border-bottom-right-radius: 5px;
+            -moz-border-radius-bottomright: 5px;
+            border-bottom-right-radius: 5px;
+            -webkit-border-bottom-left-radius: 5px;
+            -moz-border-radius-bottomleft: 5px;
+            border-bottom-left-radius: 5px;
+            text-indent: 0;
+            border: 1px solid #dcdcdc;
+            display: inline-block;
+            font-size: 13px;
+            font-weight: bold;
+            height: 30px;
+            line-height: 30px;
+            text-decoration: none;
+            text-align: center;
+            text-shadow: 1px 1px 0px #ffffff;
+            margin-bottom: 5px;
+            min-width: 180px;
+            padding-left: 10px;
+            padding-right: 10px;
+            overflow: visible;
+        }
+        
+        .uploadButton:hover {
+            background-color: #dfdfdf;
+        }
+        
+        #fileTransfer {
+            width: 100%;
+            height: 100%;
+            background-color: #f5f5f5;
+        }
+
+        a {
+            color: #000000;
+        }
+        
+        a:hover {
+            text-decoration: none;
+        }
+        
+        .dropFi {
+            background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIGhlaWdodD0nNTAnIHdpZHRoPScxMjAnPjx0ZXh0IHg9JzE1JyB5PScxNScgZmlsbD0nZ3JleScgZm9udC1zaXplPScxMCc+RFJPUCBGSUxFUyBIRVJFITwvdGV4dD48L3N2Zz4=");
+            background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIGhlaWdodD0nNTAnIHdpZHRoPScxMjAnPjx0ZXh0IHg9JzE1JyB5PScxNScgZmlsbD0nZ3JleScgZm9udC1zaXplPScxMCc+RFJPUCBGSUxFUyBIRVJFITwvdGV4dD48L3N2Zz4=");
+            width: 100%;
+            height: 100%;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            font-family: Arial;
+            font-size: 13px;
+            color: #777777;
+        }
+
+        #forform, #frm1, #file {
+            filter: alpha(opacity=0);
+            opacity: 0;
+        }
+
+        table tbody tr td {
+            text-indent: 5px;
+            color: #444;
+            border-bottom: 1px solid #BBB;
+            border-left: 1px solid #BBB;
+        }
+
+        table tbody tr .left, table thead tr .left {
+            text-align: left;
+        }
+
+        table thead tr th {
+            height: 20px;
+            color: #777777;
+            text-align: center;
+            border-top: 1px solid #BBB;
+            border-bottom: 1px solid #BBB;
+            border-left: 1px solid #BBB;
+            background-color: #EDEDED;
+        }
+
+        .right {
+            cursor: pointer;
+        }
+
+        .chMid input {
+            text-align: center;
+            margin-left: -2px;
+        }
+
+        td {
+            min-width: 0px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+    <script charset="utf-8" type="text/javascript">
+      (function() {
+        "use strict";
+
+        var WIND, DOC, OPR, INR = "inn"+"erH"+"TML";
+        (function() { WIND = window; DOC = WIND.document; })();
+        WIND.langString = false;
+        try { 
+          if((OPR = "pa"+"re"+"nt") && WIND[OPR] && WIND[OPR].W && WIND[OPR].W !== WIND[OPR]) {
+            WIND.langString = WIND[OPR].W.langstring;
+          } else if((OPR = "ope"+"ne"+"r") && WIND[OPR] && WIND[OPR].W && WIND[OPR].W !== WIND[OPR]) {
+            WIND.langString = WIND[OPR].W.langstring;
+          } else { OPR = "undefined_1"; } 
+        } catch(e) { OPR = "pa"+"re"+"nt"; }
+        WIND.uploadRulesSize = 0; 
+        WIND.uploadRulesExt = ""; 
+        WIND.uploadRulesAllowExt = ""; 
+        WIND.uploadRulesRun = ""; 
+        WIND.onerror = function(a, b, c, d) {
+          try {
+            if(WIND[OPR] && WIND[OPR].onerror) {
+              return WIND[OPR].onerror(a, b, c, d);
+            }
+          } catch(exc) { }
+        };
+
+        WIND.fireErrMessage = function(a, b) { 
+          var c = (a == "dow1" ? "extension" : "size");
+          try {
+            if(WIND[OPR] && WIND[OPR].W) {
+              if(!WIND.langString || !(a in WIND.langString) || !(a = WIND.langString[a])) { return false; }
+              WIND[OPR].W.alertDiv(a + (b ? ": " + b : ""), false, 3000);
+              return true;
+            }
+          } catch(e) { }          
+          if(WIND.console && WIND.console.log) { WIND.console.log("GetList " + c + " rule exception" + (b ? ": " + b : "")); }
+          return false; 
+        };
+
+        WIND.ondragleave = WIND.ondrop = WIND.dragenter = WIND.ondragover = function(a) { return false; };
+        WIND.avoidHover = false;
+        WIND.allFilesNumber = 0;
+        var DragHoverTimeout = false;
+        WIND.deleteHover = function() { if(DragHoverTimeout) { WIND.clearTimeout(DragHoverTimeout); DragHoverTimeout = false; } };
+        WIND.actualStateJW = false;
+
+        (function() {
+          var illegalChars = [ "/", "\\", "|", "<", ">", "\"", "?", "*", ":" ];
+
+          WIND.replaceIllegalChars = function(a, isFolder) {
+            var i = isFolder ? 2 : 0;
+            for(; i < illegalChars.length; i += 1) {
+              while(a.indexOf(illegalChars[i]) > -1) {
+                a = a.replace(illegalChars[i], "_");
+              } 
+            }
+            return a;
+          };
+        })();
+
+        WIND.getDataSet = function(elem, evt) { 
+          WIND.deleteHover();
+          var HREF = elem.href || elem.src;
+          if(HREF && HREF.length > 0 && evt && evt.dataTransfer && evt.dataTransfer.setData) { 
+            var I = HREF.lastIndexOf("/"); 
+            if(I > -1 && I !== (HREF.length - 1)) { evt.dataTransfer.setData("DownloadURL", "application/octet-stream:" + HREF.substring(I + 1) + ":" + HREF); } 
+          } 
+        };
+
+        WIND.repURI = function(a) {
+          if(a.indexOf("%") > -1) { a = a.replace(/%/g, "%25"); }
+          if(a.indexOf(";") > -1) { a = a.replace(/;/g, "%3B"); }
+          if(a.indexOf("#") > -1) { a = a.replace(/#/g, "%23"); }
+          return a;
+        };
+
+        WIND.endsWith = function(th, str) {
+          return str.length > 0 && th.substring(th.length - str.length, th.length) === str;
+        };
+
+        WIND.myUploadExtRule = function(S) {
+          var tC = S + "";
+          while(tC.indexOf("|") == 0 || tC.indexOf("*") == 0) { tC = tC.substring(1); }
+          while(WIND.endsWith(tC, "|")) { tC = tC.substring(0, tC.length - 1); }
+          tC = tC.replace("|*.", ",.");
+          return tC.replace("|", ",");
+        };
+
+        WIND.onSentHandle = function() {
+          if(WIND.sent) {
+            WIND.sent = false;
+            WIND.onbeforeunload = WIND.onunload = null;
+            try { var C = $("#mainrow")[0].childNodes[2]; try { C.onclick = null; } catch(exc) { } C[INR] = !WIND.langString || !WIND.langString.ownglu3 ? "Action" : WIND.langString.ownglu3; } catch(esd) { }
+          }
+        };
+
+        var selfIframe = false;
+        var selfIfr = false;
+        var selfDropFileReadyWait = false;
+        var newstyle = false;
+        var sent = false;
+        var jsb64array = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+        WIND.jsencode64 = function(input) {
+            var base64 = "";
+            var hex = "";
+            var chr1, chr2, chr3 = "";
+            var enc1, enc2, enc3, enc4 = "";
+            var i = 0;
+            do {
+                chr1 = input.charCodeAt(i++);
+                chr2 = input.charCodeAt(i++);
+                chr3 = input.charCodeAt(i++);
+                enc1 = chr1 >> 2;
+                enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+                enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+                enc4 = chr3 & 63;
+                if(isNaN(chr2)) {
+                    enc3 = enc4 = 64;
+                } else if(isNaN(chr3)) {
+                    enc4 = 64;
+                }
+                base64 = base64 +
+                    jsb64array.charAt(enc1) +
+                    jsb64array.charAt(enc2) +
+                    jsb64array.charAt(enc3) +
+                    jsb64array.charAt(enc4);
+                chr1 = chr2 = chr3 = "";
+                enc1 = enc2 = enc3 = enc4 = "";
+            } while (i < input.length);
+            return base64;
+        };
+
+        WIND.coSize = function(a) {
+          if(a < 1025) {
+            a += "B";
+          } else if(a < 1048577) {
+            a = ((a / 1024).toFixed(2)) + "KB";
+          } else {
+            a = ((a / 1048576).toFixed(2)) + "MB";
+          }
+          return a;
+        };
+
+        WIND.callExternUpload = function(a) {
+           if("action" in WIND && WIND.MySelectHandler) {
+             WIND.MySelectHandler(a);
+           } else { WIND.setTimeout(function() { try { WIND.MySelectHandler(a); } catch(ex) { } }, 200); }
+        };
+
+        var UNDEFINED = void 0;
+        var allFiles = { };
+        var allXhrFiles = { };
+        WIND.allFoldersCounter = 0;
+        WIND.maxParallelUploads = 2;
+
+        WIND.sendFinishDir = function(a, f) {
+            try {
+                if(WIND[OPR] && WIND[OPR].W) {
+                    if(WIND[OPR].W.sendFinishDir(a, f, WIND.allFoldersCounter) || WIND.allFoldersCounter > 0) { 
+                      WIND.allFoldersCounter++;
+
+                      WIND.setTimeout(function() { 
+                        WIND.allFoldersCounter--;
+
+                        var k = 0;                          
+                        for(var p in allFiles) {
+                          if(allFiles[p] != UNDEFINED) {
+                            k++; break;
+                          }
+                        }
+                        if(k == 0 && WIND.allFoldersCounter < 1) {
+                          WIND.onSentHandle();
+                          if(!WIND.erroronupload) {
+                            if(WIND.sendF5(false)) { WIND.setTimeout(function() { DOC.location.reload(true); }, 3000); }
+                          }
+                        }
+                      }, 100);
+                    }
+                }
+            } catch(e) { }
+        };
+
+        WIND.firstload = function() {
+            var parallelUploads = []; 
+            var timeoutRunUp = false;
+
+            var processUploads = function() {
+              if(timeoutRunUp) { WIND.clearTimeout(timeoutRunUp); }
+              timeoutRunUp = WIND.setTimeout(processUploadsMain, 20);
+            };
+
+            var processUploadsMain = function() {
+              timeoutRunUp = false; 
+              var c; 
+              for(var i1 = 0; i1 < parallelUploads.length; i1 += 1) {
+                c = parallelUploads[i1].failureUpload;
+                if(c == 1 || c == 2) {
+                  parallelUploads.shift(); 
+                  i1 = 0;
+                  continue;
+                } else { break; } //if first not found 
+              }
+
+              var amount = 0;
+              var allP1 = [];
+
+              for(var i2 = 0; i2 < parallelUploads.length; i2 += 1) {
+                c = parallelUploads[i2].failureUpload;
+                if(c < 0) { //not initiated yet
+                  parallelUploads[i2].failureUpload = 0; //init then
+                  allP1.push(parallelUploads[i2]);
+                  amount++;
+                  if(amount >= WIND.maxParallelUploads) { break; }
+                } else if(c == 0) { //initiated already, still running
+                  amount++;
+                  if(amount >= WIND.maxParallelUploads) { break; }
+                }
+              } 
+
+              if(amount == 0) { return; }
+              var i4 = 0;
+              for(var i3 = 0; i3 < allP1.length; i3 += 1) {
+                if(allP1[i3].funcUp) { 
+                  (function() { //simulate let for compatibility
+                    var iA1 = i3;
+                    WIND.setTimeout(function() {
+                      allP1[iA1].funcUp();
+                    }, 20); 
+                  })();              
+                } 
+              }
+            };
+
+            WIND.action = "../../../uploads/" + WIND.uniquetab + "/upload/?path=" + WIND.forupload; 
+            var addOwnInner = "";
+
+            var fg = DOC.getElementById("fileTransfer");
+            var allAr = DOC.getElementsByTagName("body")[0];
+            var allFilesCounter = 1;
+          
+            WIND.fg = fg;
+            WIND.allAr = allAr;
+
+            WIND.UploadMeNew = function(file, parentDirA, uploadRulesRun, initTry) {
+                var xhrObject = { };
+                xhrObject.failureUpload = -1;
+                xhrObject.lastPercent = 0;
+                xhrObject.aborted = false;
+                xhrObject.funcCall = [ file, parentDirA, uploadRulesRun, initTry ];
+
+                var xhr;
+                try {
+                    if(WIND.myxhr) {
+                        xhr = WIND.myxhr;
+                        WIND.myxhr = false;
+                    } else {
+                        xhr = new WIND.XMLHttpRequest();
+                    }
+                } catch(df) {
+                    return;
+                }
+                var nameown = WIND.replaceIllegalChars("nameown" in file ? file.nameown : file.name, false);
+                var errorhandled = false;
+                var myfile = (allFilesCounter++) + nameown;
+                allFiles[myfile] = parentDirA + nameown;
+                var fullFileName = allFiles[myfile];
+                allXhrFiles[myfile] = xhr;
+
+                WIND.allFilesNumber++;
+                var progress = WIND.appendFile(fullFileName, file.size, xhr); 
+                var progressItem2 = progress[2];
+                var progressItem0 = progress[0];
+                var pcB = -1;
+                var abortStr = !WIND.langString || !WIND.langString.owngl4 ? "abort" : WIND.langString.owngl4.toLowerCase();
+
+                xhr.upload.addEventListener("progress", function(e) {
+                    var pc = (e.loaded / e.total * 100) | 0;
+                    xhrObject.lastPercent = pc;
+                    if(e.loaded == e.total) {
+                        progressItem2[INR] = "100%";
+                        xhrObject.lastPercent = 100;
+                        return;
+                    } else if(pcB != pc) {
+                        pcB = pc;
+                        progressItem2[INR] = pc + "% " + abortStr;
+                    }
+                }, false);
+
+                xhr.abortThat = function() {
+                  xhrObject.aborted = true;
+                  xhrObject.failureUpload = 2;
+                  xhr.abort();
+                  if(xhrObject.funcUp) { try { if(xhr.onabort) { xhr.onabort(false); }; } catch(ex) { } }
+                  processUploads();
+                };
+
+                xhr.onabort = function(e) {
+                    WIND.erroronupload = true;
+                    if(!errorhandled) {
+                        errorhandled = true;
+                        var errstate = xhr.status;
+                        try { 
+                          var errE = xhr.getResponseHeader("Spec-Error");
+                          if(errE) { errstate = errE; }
+                        } catch(exc) { }
+                        progressItem2[INR] = "FAILURE: " + errstate;
+                        progressItem0[INR] = progressItem0.hrefdisabled;
+                        try { progressItem0.onclick = progressItem0.onmousedown = progressItem0.onmouseup = function(a) { return false; }; } catch(exc) { }
+                        try { progressItem2.onclick = null; } catch(exc) { }
+                        WIND.removeTR(progressItem2, true, progressItem0.hrefdel);
+                        WIND.setTimeout(function() { 
+                          WIND.removeTR(progressItem2, false, progressItem0.hrefdel); 
+                          if(allFiles[myfile] != UNDEFINED) {
+                            try {
+                                allFiles[myfile] = UNDEFINED;
+                                allXhrFiles[myfile] = UNDEFINED;
+                                delete allFiles[myfile];
+                                delete allXhrFiles[myfile];
+                            } catch(oxs) {
+                                allFiles[myfile] = UNDEFINED;
+                                allXhrFiles[myfile] = UNDEFINED;
+                            }
+                          }
+                          var k = 0;
+                          for(var p in allXhrFiles) {
+                            if(allXhrFiles[p] != UNDEFINED) {
+                              k++;
+                            }
+                          }
+                          WIND.allFilesNumber = k;
+                          if(k == 0) { 
+                            if(WIND.allFoldersCounter < 1) { WIND.onSentHandle(); }
+                          }
+                        }, 1000);
+                        if(xhrObject.failureUpload == 0) {
+                          xhrObject.failureUpload = 2;
+                          processUploads();
+                        }
+                        if(!xhrObject.aborted && xhrObject.funcCall) { 
+                          var xfc = xhrObject.funcCall;
+                          if(++xfc[3] < 2) {
+                            WIND.UploadMeNew(xfc[0], xfc[1], xfc[2], xfc[3]);
+                          } else if(WIND.console && WIND.console.log) { WIND.console.log("Failed upload: " + (parentDirA + nameown)); }
+                        }
+                    }
+                    xhr.onerror = xhr.onabort = null;
+                };
+                xhr.onerror = xhr.onabort;
+
+                xhr.onreadystatechange = function(e) {
+                    if(xhr.readyState == 4) {
+                        try {
+                            allFiles[myfile] = UNDEFINED;
+                            allXhrFiles[myfile] = UNDEFINED;
+                            delete allFiles[myfile];
+                            delete allXhrFiles[myfile];
+                        } catch(oxs) {
+                            allFiles[myfile] = UNDEFINED;
+                            allXhrFiles[myfile] = UNDEFINED;
+                        }
+
+                        var k = 0;
+                          
+                        for(var p in allFiles) {
+                          if(allFiles[p] != UNDEFINED) {
+                            k++;
+                          }
+                        }
+                        WIND.allFilesNumber = k;
+
+                        if(xhr.status == 200) {
+                            xhrObject.failureUpload = 1; 
+                            var specfilename = "";
+                            try { 
+                              specfilename = xhr.getResponseHeader("Spec-Filename");
+                            } catch(exc) { specfilename = ""; }
+                            WIND.sendFinishUpload(WIND.realpathmain, fullFileName, specfilename, uploadRulesRun);
+                            WIND.setTimeout(function() { 
+                              progressItem2[INR] = "OK"; 
+                              progressItem0[INR] = progressItem0.hrefdisabled;
+                              var myPrnt = progressItem2.parentNode;
+                              if(myPrnt && myPrnt.childNodes && myPrnt.childNodes[3]) {
+                                myPrnt = myPrnt.childNodes[3];
+                                var xA = progressItem0.hrefdel;
+                                try { myPrnt.onclick = function(a) { try { myPrnt.onclick = null; } catch(ex) { } WIND.removeTR(progressItem2, false, xA); } } catch(exc) { }
+                              }
+                            }, 1000);
+                        } else {
+                          xhrObject.failureUpload = 2; 
+                          xhr.onabort(false);
+                        }
+
+                        if(k == 0) {
+                            if(WIND.allFoldersCounter < 1) { WIND.onSentHandle(); }
+                            if(xhr.status == 200 && !WIND.erroronupload) {
+                              if(WIND.allFoldersCounter < 1 && WIND.sendF5(false)) { WIND.setTimeout(function() { DOC.location.reload(true); }, 3000); }
+                              return;
+                            } else {
+                              WIND.erroronupload = false;
+                              if(WIND.allFoldersCounter < 1) {
+                                WIND.setTimeout(function() {
+                                  if(WIND.sendF5(false)) { WIND.setTimeout(function() { DOC.location.reload(true); }, 3000); }
+                                }, 1000);
+                              }
+                            }
+                        }
+
+                        processUploads();
+                    }
+                };
+
+                xhr.open("POST", WIND.repURI(WIND.action), true);
+                try {
+                    xhr.setRequestHeader("X-File-Name", "base64" + WIND.jsencode64(WIND.encodeURIComponent(String(fullFileName))));
+                } catch(dx) {
+                    return;
+                }
+                if(!WIND.sent) {
+                  WIND.sent = true;
+                  WIND.erroronupload = false;
+                  try {
+                    var C = $("#mainrow")[0].childNodes[2]; 
+                    C[INR] = !WIND.langString || !WIND.langString.owngl3 ? "Abort All" : WIND.langString.owngl3; 
+
+                    C.onclick = function(s) { 
+                      try { C.onclick = null; } catch(exc) { }
+                      C[INR] = !WIND.langString || !WIND.langString.ownglu3 ? "Action" : WIND.langString.ownglu3;
+                      for(var p in allXhrFiles) {
+                        if(allXhrFiles[p] != UNDEFINED) {
+                          try { allXhrFiles[p].abortThat(); } catch(as) { }
+                        }
+                      }
+                      WIND.sent = false;
+                    };
+                  } catch(asd) { }
+
+                  WIND.onbeforeunload = function(e) {
+                   if(WIND.sent) { 
+                      return !WIND.langString || !WIND.langString.owngl6 ? "File transfer in progress!" : WIND.langString.owngl6;
+                   }
+
+                  };
+
+                  WIND.onunload = function(e) {
+                    if(WIND.sent) { 
+                      try {
+                        var C = $("#mainrow")[0].childNodes[2];
+                        if(C && C.onclick) { C.onclick(e); }
+                      } catch(exc) { }
+                    }
+                  };
+                }
+
+                xhrObject.funcUp = function() { xhrObject.funcUp = false; if(!xhrObject.aborted) { xhr.send(file); } };
+                parallelUploads.push(xhrObject);
+                processUploads();
+            };
+
+            WIND.DragHover = function(e) {
+                var mytype;
+                try {
+                  mytype = e.type;
+                  e.stopPropagation();
+                  e.preventDefault();
+                } catch(exc) { return false; }
+
+                if(DragHoverTimeout) { WIND.clearTimeout(DragHoverTimeout); }
+
+                DragHoverTimeout = WIND.setTimeout(function() {
+                    DragHoverTimeout = false;
+                    if(fg) {
+                        if(WIND.sent || WIND.avoidHover) { return; }
+                        if(mytype == "dragover") {
+                            if(!WIND.beforeFG || fg[INR] != addOwnInner) {
+                                WIND.beforeFG = fg[INR];
+                            }
+                            fg.style.display = "none";
+                            if(allAr) {
+                              allAr.className = "dropFi";
+                              if(!selfIframe) {
+                                if(!selfIfr) { selfIfr = WIND.iterateIframes(); }                                                             
+                              }
+                              if(selfIfr) {
+                                  selfIframe = selfIfr[0];
+                                  if(!("oldOpac" in selfIframe)) { selfIframe.oldOpac = selfIframe.parentNode.style.opacity; }
+                                  selfIframe.parentNode.style.opacity = selfIfr[1].W.fileFramePosition.opac;
+                              }
+                            }
+                        } else if(WIND.beforeFG) {
+                            fg.style.display = "";
+                            if(allAr) {
+                                allAr.className = "";
+                            }
+                            if(selfIframe && ("oldOpac" in selfIframe)) { selfIframe.parentNode.style.opacity = selfIframe.oldOpac; }
+                        }
+                    }
+                }, 10);
+            };
+
+            WIND.ignoreDrag = function(e) {
+                if(e && e.preventDefault) { e.preventDefault(); }
+            };
+
+            WIND.startsWith = function(th, str) {
+              return str.length > 0 && th.substring(0, str.length) === str;
+            };
+
+            var endsWith = WIND.endsWith;
+            var dirResolving = 0;
+
+            WIND.SelectHandler = function(e) {
+                if(e) {
+                  if(e.stopPropagation) { e.stopPropagation(); }
+                  if(e.preventDefault) { e.preventDefault(); }
+                }
+                var files, items;
+                try {
+                  files = e.U_R || e.target.files || e.dataTransfer.files;
+                  items = (e.U_R_I ? e.U_R_I : (e.dataTransfer && e.dataTransfer.items ? e.dataTransfer.items : false));
+                  e.U_R = e.U_R_I = void 0;
+                } catch(as) { }
+                var uploadRulesSize = "uploadRulesSize" in e ? e.uploadRulesSize : WIND.uploadRulesSize;
+                var uploadRulesExt = "uploadRulesExt" in e ? e.uploadRulesExt : WIND.uploadRulesExt;
+                var uploadRulesAllowExt = "uploadRulesAllowExt" in e ? e.uploadRulesAllowExt : WIND.uploadRulesAllowExt;
+                var uploadRulesRun = "uploadRulesRun" in e ? e.uploadRulesRun : WIND.uploadRulesRun;
+
+                if(fg && WIND.beforeFG) {
+                    fg.style.display = "";
+                    if(allAr) {
+                        allAr.className = "";
+                    }
+                    if(selfIframe && ("oldOpac" in selfIframe)) { selfIframe.parentNode.style.opacity = selfIframe.oldOpac; }
+                }
+                var directories = [], aGE = [ 0, 0 ], dirlen = 0, entry, errThrown;
+                dirResolving++;
+                try {
+                    for(var i = 0, f; f = files[i]; i++) {
+                        errThrown = false;
+                        if(!("UPLOADING_" in f)) { 
+                          f.UPLOADING_ = true;
+                          var found = false;
+                          if(!("name" in f)) { f.name = f.fileName; if(!("size" in f)) { f.size = f.fileSize; } }
+                          f.nameown = f.name;
+                          if(!found && (uploadRulesSize > 0 || uploadRulesExt.length > 0 || uploadRulesAllowExt.length > 0)) {
+                            if(uploadRulesSize > 0 && f.size > uploadRulesSize) { 
+                              found = errThrown = true; 
+                              WIND.fireErrMessage("dow2", (f.size - uploadRulesSize));
+                            }
+                            if(!found) {
+                              var uriLook = (f.nameown + "").toLowerCase();
+                              while(startsWith(uriLook, "\\") || startsWith(uriLook, "/")) { uriLook = uriLook.substring(1); }
+                              if(!endsWith(uriLook, "|")) { uriLook += "|"; }
+                              if(uriLook.length > 1 && !startsWith(uriLook, "|")) { uriLook = "|" + uriLook; }
+
+                              var allowUpload = true;
+
+                              if(uploadRulesAllowExt.length > 0) { //should prefer
+                                allowUpload = false;
+                                if(uploadRulesAllowExt.indexOf(uriLook) < 0) {
+                                  var bO = uploadRulesAllowExt.split("|");
+                                  for(var ii = 0; ii < bO.length; ii += 1) {
+                                    if(bO[ii].length < 1) { continue; }
+                                    var foundA = false;
+                                    while(startsWith(bO[ii], "*")) { bO[ii] = bO[ii].substring(1); foundA = true; } 
+                                    if(!foundA) { bO[ii] = "|" + bO[ii]; }
+                                    foundA = false;
+                                    while(endsWith(bO[ii], "*")) { bO[ii] = bO[ii].substring(0, bO[ii].length - 1); foundA = true; } 
+                                    if(!foundA) { bO[ii] += "|"; }
+                                    if(uriLook.indexOf(bO[ii]) > -1) { allowUpload = true; break; }
+                                  }
+                                } else {
+                                  allowUpload = true;
+                                }
+                              } else if(uploadRulesExt.indexOf(uriLook) < 0) {
+                                var bO = uploadRulesExt.split("|");
+                                for(var ii = 0; ii < bO.length; ii += 1) {
+                                  if(bO[ii].length < 1) { continue; }
+                                  var foundA = false;
+                                  while(startsWith(bO[ii], "*")) { bO[ii] = bO[ii].substring(1); foundA = true; } 
+                                  if(!foundA) { bO[ii] = "|" + bO[ii]; }
+                                  foundA = false;
+                                  while(endsWith(bO[ii], "*")) { bO[ii] = bO[ii].substring(0, bO[ii].length - 1); foundA = true; } 
+                                  if(!foundA) { bO[ii] += "|"; }
+                                  if(uriLook.indexOf(bO[ii]) > -1) { allowUpload = false; break; }
+                                }
+                              } else {
+                                allowUpload = false;
+                              }
+
+                              if(!allowUpload) { 
+                                found = true;
+                              }
+                            }
+                          }
+
+                          try { 
+                            var wasDir = false;
+                            if(items && items[i]) {
+                              try { entry = (items[i].webkitGetAsEntry ? items[i].webkitGetAsEntry() : (items[i].getAsEntry ? items[i].getAsEntry() : false)); } catch(abs) { entry = false; }
+                              if(entry && entry.isDirectory && entry.createReader) {
+                                wasDir = true;
+                                directories[dirlen++] = [ entry, WIND.replaceIllegalChars(entry.name, false) ];
+                              }
+                            }  
+                            if(!wasDir) { 
+                              if(!found) { 
+                                aGE[0]++; WIND.UploadMeNew(f, "", uploadRulesRun, 0);
+                              } else { 
+                                aGE[1]++;
+                                if(!errThrown) { errThrown = true; WIND.fireErrMessage("dow1", f.nameown); }
+                              }
+                            }
+                          } catch(kl) { }
+                        } 
+                    }
+                } catch(fkl) { alert("1: " + fkl); }
+                for(var i = 0; i < dirlen; i++) {                   
+                  try { WIND.uploadDirectory(aGE, directories[i][0], directories[i][1], uploadRulesSize, uploadRulesExt, uploadRulesAllowExt, uploadRulesRun); } catch(kl) { }
+                }
+                dirResolving--;
+                if(!WIND.sent && dirResolving < 1 && aGE[0] == 0 && aGE[1] > 0) { WIND.sendF5(true); }
+            };
+            
+            WIND.uploadDirectory = function(aGE, entry, parentDir, uploadRulesSize, uploadRulesExt, uploadRulesAllowExt, uploadRulesRun) {
+               var directories = [], dirlen = 0, errThrown;
+               var reader = entry.createReader();
+               dirResolving++;
+               var entriesF = [];
+
+               var handleEntries = function(entries) {
+                  if(entries.length < 1) { WIND.sendFinishDir(WIND.realpathmain, parentDir); }
+                  for(var i = 0; i < entries.length; i++) {
+                     errThrown = false;
+                     entry = entries[i];
+                     if(entry && entry.isDirectory && entry.createReader) {
+                       directories[dirlen++] = [ entry, WIND.replaceIllegalChars(entry.name, false) ];
+                     } else if(entry.file) { //fetch file
+                       entry.file(function(f) {
+                         try { 
+                          var found = false;
+                          if(!("name" in f)) { f.name = f.fileName; if(!("size" in f)) { f.size = f.fileSize; } }
+                          f.nameown = f.name;
+                          if(!found && (uploadRulesSize > 0 || uploadRulesExt.length > 0 || uploadRulesAllowExt.length > 0)) {
+                            if(uploadRulesSize > 0 && f.size > uploadRulesSize) {
+                              found = errThrown = true; 
+                              WIND.fireErrMessage("dow2", (f.size - uploadRulesSize));
+                            }
+                            if(!found) {
+                              var uriLook = (f.nameown + "").toLowerCase();
+                              while(startsWith(uriLook, "\\") || startsWith(uriLook, "/")) { uriLook = uriLook.substring(1); }
+                              if(!endsWith(uriLook, "|")) { uriLook += "|"; }
+                              if(uriLook.length > 1 && !startsWith(uriLook, "|")) { uriLook = "|" + uriLook; }
+                              var allowUpload = true;  
+                              if(uploadRulesAllowExt.length > 0) { //should prefer
+                                allowUpload = false;
+                                if(uploadRulesAllowExt.indexOf(uriLook) < 0) {
+                                  var bO = uploadRulesAllowExt.split("|");
+                                  for(var ii = 0; ii < bO.length; ii += 1) {
+                                    if(bO[ii].length < 1) { continue; }
+                                    var foundA = false;
+                                    while(startsWith(bO[ii], "*")) { bO[ii] = bO[ii].substring(1); foundA = true; } 
+                                    if(!foundA) { bO[ii] = "|" + bO[ii]; }
+                                    foundA = false;
+                                    while(endsWith(bO[ii], "*")) { bO[ii] = bO[ii].substring(0, bO[ii].length - 1); foundA = true; } 
+                                    if(!foundA) { bO[ii] += "|"; }
+                                    if(uriLook.indexOf(bO[ii]) > -1) { allowUpload = true; break; }
+                                  }
+                                } else {
+                                  allowUpload = true;
+                                }
+                              } else if(uploadRulesExt.indexOf(uriLook) < 0) {
+                                var bO = uploadRulesExt.split("|");
+                                for(var ii = 0; ii < bO.length; ii += 1) {
+                                  if(bO[ii].length < 1) { continue; }
+                                  var foundA = false;
+                                  while(startsWith(bO[ii], "*")) { bO[ii] = bO[ii].substring(1); foundA = true; } 
+                                  if(!foundA) { bO[ii] = "|" + bO[ii]; }
+                                  foundA = false;
+                                  while(endsWith(bO[ii], "*")) { bO[ii] = bO[ii].substring(0, bO[ii].length - 1); foundA = true; } 
+                                  if(!foundA) { bO[ii] += "|"; }
+                                  if(uriLook.indexOf(bO[ii]) > -1) { allowUpload = false; break; }
+                                }
+                              } else {
+                                allowUpload = false;
+                              }
+
+                              if(!allowUpload) { 
+                                found = true;
+                                if(!errThrown) { errThrown = true; WIND.fireErrMessage("dow1", f.nameown); }
+                              }
+                            }
+                          }
+
+                          if(!found) { aGE[0]++; WIND.UploadMeNew(f, parentDir + "/", uploadRulesRun, 0); } else { aGE[1]++; }
+                         } catch(ex) { }
+                       }, function(er) { });
+                     }
+                  }
+                  for(var i = 0; i < dirlen; i++) {
+                    try { WIND.uploadDirectory(aGE, directories[i][0], parentDir + "/" + directories[i][1], uploadRulesSize, uploadRulesExt, uploadRulesAllowExt, uploadRulesRun); } catch(kl) { }
+                  }
+                  dirResolving--;
+                  if(!WIND.sent && dirResolving < 1 && aGE[0] == 0 && aGE[1] > 0) { WIND.sendF5(true); }
+               };
+
+               var readEntries = function() {
+                 reader.readEntries(function(results) {
+                   if(results.length) {
+                     for(var i = 0; i < results.length; i += 1) { entriesF.push(results[i]); } 
+                     readEntries();
+                   } else {
+                     handleEntries(entriesF);
+                   }
+                 }, function(err) { });
+               };
+               readEntries();
+            };
+
+            WIND.MySelectHandler = SelectHandler;
+
+            var forma = DOC.getElementById("forform");
+
+            if(WIND.File && WIND.FileList && WIND.FileReader) {
+                try {
+                    WIND.myxhr = new WIND.XMLHttpRequest();
+                    var filedrag = allAr;
+ 
+                    if(filedrag && WIND.myxhr.upload) {
+                        var myExtRuleClean = WIND.myUploadExtRule(WIND.uploadRulesAllowExt);
+                        var fortxt = "<"+"fo"+"rm id=\"frm1\" action=\"" + WIND.repURI(WIND.action) + "\" method=\"post\" enctype=\"multipart/form-data\">";
+                        fortxt += "&nbsp;<input id=\"file\" style=\"position:absolute;left:-9999px;\" onchange=\"window.MySelectHandler(event);window.clearValue(this);\" type=\"file\" " + (myExtRuleClean && myExtRuleClean.length > 0 ? "accept=\"" + myExtRuleClean + "\" " : "") + "name=\"file[]\" multiple />";
+                        fortxt += "</form>";
+                        WIND.ondragleave = WIND.ondrop = WIND.dragenter = WIND.ondragover = null;
+                        WIND.addEventListener("dragleave", DragHover, false);
+                        WIND.addEventListener("drop", SelectHandler, false);
+                        WIND.addEventListener("dragenter", ignoreDrag, false);
+                        WIND.addEventListener("dragover", function(a) { try { var effect = a.dataTransfer.effectAllowed; a.dataTransfer.dropEffect = ("move" === effect || "linkMove" === effect ? "move" : "copy"); } catch(asd) { }  }, false);
+                        WIND.addEventListener("dragover", DragHover, false);
+                        if(forma) {
+                            try {
+                              forma[INR] = fortxt;
+                            } catch(exc1) { 
+                              try {
+                                var trA = $(fortxt);
+                                if(trA && trA.length) { 
+                                  for(var ii = 0; ii < trA.length; ii += 1) {
+                                    content.appendChild(trA[ii]); 
+                                  }
+                                }
+                              } catch(exc2) { }
+                            }
+                            forma.style.display = "";
+                            WIND.newstyle = true;
+
+                            WIND.onblur = function() {
+                                if(WIND.fg) {
+                                    WIND.fg.style.display = "";
+                                    if(WIND.allAr) {
+                                        WIND.allAr.className = "";
+                                    }
+                                    if(selfIframe && ("oldOpac" in selfIframe)) { selfIframe.parentNode.style.opacity = selfIframe.oldOpac; }
+                                }
+                            }
+                            WIND.blur = WIND.onblur;
+                            WIND.onmouseout = WIND.onblur;
+                        }
+                    }
+
+                    if(selfDropFileReadyWait && selfDropFileReadyWait !== false && selfDropFileReadyWait !== true) {
+                       var eci = selfDropFileReadyWait;
+                       selfDropFileReadyWait = true;
+                       WIND.SelectHandler(eci);
+                    }
+                } catch(xn) { }
+            }
+        };
+
+        WIND.NewLoadme = function() {
+            var filed = DOC.getElementById("file");
+            try {
+                filed.focus();
+                filed.click();
+            } catch(d) { }
+        };
+
+        WIND.remChild = function(c) {
+          try {
+            if(c) { 
+               try { c.style.display = 'none'; } catch(ex) { }
+               while(c.hasChildNodes()) { c.removeChild(c.lastChild); }
+               if(c.parentNode) { try { c.parentNode.removeChild(c); } catch(ka) { } }
+            }
+          } catch(em) { }
+        };
+
+        WIND.checkBoxEnabled = function(a) { };
+
+        WIND.removeTR = function(a, direct, link) { 
+          var empty = false;
+          if(a && a.parentNode) { 
+            try {
+               var elem = a.parentNode.childNodes[0].childNodes[0]; 
+               if(elem.href && elem.href.length > 0 && !elem.alreadyDeleted) {
+                 if(WIND[OPR] && WIND[OPR].W && WIND[OPR].W.deleteFiles) {
+                   WIND[OPR].W.deleteFiles(link ? WIND.repURI(link) : elem.href);
+                 }
+                 elem.alreadyDeleted = true;
+               }
+               if(direct) { return; }
+               if(a.parentNode.parentNode.childNodes.length < 3) { empty = true; }
+               WIND.remChild(a.parentNode);
+               if(empty) {
+                 var hs = DOC.getElementById("hastransfer");
+                 if(hs) { hs.style.display = ""; } 
+               }
+            } catch(ad) { }
+          }
+          WIND.checkBoxEnabled();
+        };
+
+        WIND.getDialog = function() {
+            var k = "";
+            try {
+                if(WIND[OPR] && WIND[OPR].W) {
+                  k = WIND[OPR].W.getDialog();
+                }
+            } catch(e) {}
+            if(!k) {
+                k = "";
+            }
+            eval("window.getDialog = function() { return '" + k + "'; }");
+            return k;
+        };
+
+        WIND.getFakeExt = function() {
+            var k = "";
+            try {
+                if(WIND[OPR] && WIND[OPR].W) {
+                    k = WIND[OPR].W.getFakeExt();
+                }
+            } catch(e) {}
+            if(!k) {
+                k = "";
+            }
+            eval("window.getFakeExt = function() { return '" + k + "'; }");
+            return k;
+        };
+
+        WIND.getFileHash = function() {
+            var k = "";
+            try {
+                if(WIND[OPR] && WIND[OPR].W) {
+                    k = WIND[OPR].W.getFileHash();
+                }
+            } catch(e) {}
+            if(!k) {
+                k = "";
+            }
+            eval("window.getFileHash = function() { return '" + k + "'; }");
+            return k;
+        };
+
+        WIND.makeFile = function(a) {
+          if(W.path_shared.length > 0) { return a; }
+          if(W.unique && W.unique.length > 0) { //already processed
+            return W.unique;
+          }
+          var hash = WIND.getFileHash(); 
+          if(hash) { 
+            var pm = a.indexOf("/");
+            if(pm < 0) { pm = a.indexOf("\\"); }
+            if(pm < 0) {
+              a = a + "/" + WIND.getFileHash();
+            } else { 
+              a = a.substring(0, pm) + "/" + WIND.getFileHash() + a.substring(pm); 
+            } 
+            W.unique = a;
+          }
+          return a;
+        };
+
+        (function() {
+          WIND.checkMyBox = function(el) { };
+
+          WIND.makeMarkable = function() {
+            try { 
+              var p = DOC.getElementById("ownglu4");
+              var content = DOC.getElementById("content");
+              var owngl1 = DOC.getElementById("owngl1");
+              var ownglu0 = DOC.getElementById("ownglu0");
+              if(ownglu0) { 
+                ownglu0.onmousedown = function(e) {
+                  WIND.tryCheckDownload(true);
+                  return false;
+                };
+              }
+
+              p.onmousedown = function(e) {
+                var els = content.getElementsByTagName("tr");
+                if(!els || els.length < 1) { 
+                  if(WIND.langString && WIND.langString.owngl1) { owngl1[INR] = WIND.langString.owngl1; }
+                  WIND.actualStateJW = false; 
+                  return false;
+                }
+                var acS = !WIND.actualStateJW;
+                var amount = 0;
+                try {
+                  for(var i = 0, elem, len = els.length; i < len; i += 1) {
+                    elem = els[i].childNodes[1].childNodes;
+                    if(elem.length > 0 && elem[0].type && elem[0].type.toLowerCase() === "checkbox") { amount += 1; elem[0].checked = acS; }
+                  }
+                } catch(exc) { }
+                if(acS && amount > 0) { 
+                  if(WIND.langString && WIND.langString.owngl7) { owngl1[INR] = WIND.langString.owngl7; }
+                  WIND.actualStateJW = true; 
+                } else { 
+                  if(WIND.langString && WIND.langString.owngl1) { owngl1[INR] = WIND.langString.owngl1; } 
+                  WIND.actualStateJW = false; 
+                }
+                return false;
+              };
+
+              WIND.checkMyBox = function(el) {
+                if(el.checked) {
+                  if(WIND.langString && WIND.langString.owngl7) { owngl1[INR] = WIND.langString.owngl7; }
+                } else {
+                  try {
+                    var els = content.getElementsByTagName("tr");
+                    if(!els || els.length < 1) { 
+                      owngl1[INR] = WIND.langString.owngl1; 
+                      WIND.actualStateJW = false; 
+                      return; 
+                    } //no one checked
+                    for(var i = 0, elem, len = els.length; i < len; i += 1) {
+                      elem = els[i].childNodes[1].childNodes;
+                      if(elem.length > 0 && elem[0].type && elem[0].type.toLowerCase() === "checkbox" && elem[0].checked) {
+                        if(WIND.langString && WIND.langString.owngl7) { owngl1[INR] = WIND.langString.owngl7; }
+                        return;
+                      }
+                    }
+                  } catch(exc) { }
+                  WIND.actualStateJW = false; 
+                  owngl1[INR] = WIND.langString.owngl1;
+                }
+              };
+              
+              var checkTimer = false;
+              WIND.checkBoxEnabled = function() { 
+                if(checkTimer) { WIND.clearTimeout(checkTimer); }
+                checkTimer = WIND.setTimeout(function() {
+                  checkTimer = false;
+                  try {
+                    var els = content.getElementsByTagName("tr");
+                    if(!els || els.length < 1) { 
+                      if(WIND.langString && WIND.langString.owngl1) { owngl1[INR] = WIND.langString.owngl1; }
+                      WIND.actualStateJW = false; 
+                      return; 
+                    } //no one checked
+                    for(var i = 0, elem, len = els.length; i < len; i += 1) {
+                      elem = els[i].childNodes[1].childNodes;
+                      if(elem.length > 0 && elem[0].type && elem[0].type.toLowerCase() === "checkbox" && elem[0].checked) {
+                        if(WIND.langString && WIND.langString.owngl7) { owngl1[INR] = WIND.langString.owngl7; }
+                        return;
+                      }
+                    }
+                  } catch(exc) { }
+                  WIND.actualStateJW = false; 
+                  if(WIND.langString && WIND.langString.owngl1) { owngl1[INR] = WIND.langString.owngl1; }
+                }, 16);
+              };
+
+              WIND.tryCheckDownload = function(delet) { 
+                WIND.actualStateJW = false; 
+                var amount = [];
+                try {
+                  if(WIND.langString && WIND.langString.owngl1) { owngl1[INR] = WIND.langString.owngl1; }
+                  var els = content.getElementsByTagName("tr");
+                  if(!els || els.length < 1) { return false; } //no one checked
+                  var check;
+                  for(var i = 0, elem, len = els.length; i < len; i += 1) {
+                    elem = els[i].childNodes[1].childNodes;
+                    if(elem.length > 0) {
+                      check = false;
+                      if(elem[0].type && elem[0].type.toLowerCase() === "checkbox" && elem[0].checked) {
+                        check = true;
+                        elem[0].checked = false;
+                      }
+                      if(!delet) {
+                        if(check) {
+                          WIND.actLink = false;
+                          try { els[i].childNodes[0].childNodes[0].onchange(); } catch(es) { }
+                          var href = els[i].childNodes[0].childNodes[0].href;                          
+                          if(WIND.actLink) { 
+                            var look;
+                            if(WIND.actLink.indexOf("../../../../") == 0) {
+                              WIND.actLink = WIND.actLink.substring(12);
+                              if((look = WIND.actLink.indexOf("/")) > -1) { 
+                                var toLook = "/" + WIND.actLink.substring(0, look) + "/";
+                                if((look = href.indexOf("://")) > -1 && (look = href.indexOf(toLook, look + 3)) > -1) { 
+                                  WIND.actLink = href.substring(0, look + 1) + WIND.actLink;
+                                } else { WIND.actLink = false; }
+                              } else { WIND.actLink = false; }
+                            }
+                            if(WIND.actLink) { href = WIND.actLink; WIND.actLink = false; }
+                          }
+                          amount.push(href); 
+                        }
+                      } else if(els[i].childNodes.length > 2) { 
+                        amount.push(els[i].childNodes[3]); 
+                      }
+                    } else if(delet && els[i].childNodes.length > 2) { amount.push(els[i].childNodes[3]); }
+                  }
+                  if(amount.length > 0) {
+                    if(!delet) {
+                      if(WIND[OPR] && WIND[OPR].W && WIND[OPR].W.addDownloadLinkIfr) {
+                        try { WIND[OPR].W.addDownloadLinkIfr(amount, true); } catch(exc) { }
+                      }
+                    } else { 
+                      var xA = { };
+                      for(var i = 0, len = amount.length; i < len; i += 1) { 
+                        if(amount[i].onclick) {
+                          try { amount[i].onclick(xA); } catch(exc) { }
+                        } 
+                      } 
+                    }
+                  }
+                } catch(exc) { }
+                if(amount.length > 0) { return true; }
+                return false;
+              };
+            } catch(a) { } 
+          };
+        })();
+
+        WIND.languaize = function() {
+          try { 
+            var l;
+            if((l = WIND.langString)) { 
+              if(l.ownglu1) { 
+                var x1 = "<span style=\"display:inline-block;float:left;\">&nbsp;" + l.ownglu1 + "</span>";
+                if(l.ownglu0) { 
+                  x1 += "<span id=\"ownglu0\" style=\"display:inline-block;float:right;\">&nbsp;" + l.ownglu0 + "&nbsp;</span>";
+                }
+                DOC.getElementById("ownglu1")[INR] = x1;
+              } 
+              if(l.ownglu2) { DOC.getElementById("ownglu2")[INR] = l.ownglu2; }
+              if(l.ownglu3) { DOC.getElementById("ownglu3")[INR] = l.ownglu3; }
+              if(l.ownglu4) { DOC.getElementById("ownglu4")[INR] = l.ownglu4; }
+
+              if(l.owngl5) { DOC.getElementById("owngl5")[INR] = "&nbsp;" + l.owngl5 + "&nbsp;&nbsp;<span style=\"display:inline-block;transform:rotate(90deg);\">&#8635;</span>"; }
+              if(l.owngl1) { DOC.getElementById("owngl1")[INR] = l.owngl1; }
+              if(l.owngl2) { DOC.getElementById("owngl2")[INR] = l.owngl2; }
+            }
+          } catch(a) { }
+          WIND.makeMarkable();          
+        }
+
+        WIND.onloadFunc = function() {
+            if(WIND.isholder && WIND.sentByParent) {
+              var externAddDownloadLink = function(a, x) {
+                var EL = DOC.createElement("div");
+                var S = EL.style;
+                S.visibility = S.overflow = "hidden";
+                S.height = S.width = "1px";
+                S.left = S.top = "-100px";
+                S.zIndex = -100;
+
+                var b = a.indexOf("?");
+                var filename = a;
+                if(b > -1) { filename = filename.substring(0, b); }
+                b = filename.lastIndexOf("/");
+                if(b > -1) { filename = filename.substring(b + 1); }
+                if(x) { a = x; }  
+
+                var xM = false;
+
+                var xMf = function() {
+                  xM = false; 
+                  if(DOC.body && DOC.body.appendChild) { DOC.body.appendChild(EL); } 
+                  EL[INR] = "<a data-auto-download=\"\" download=\"" + filename + "\" target=\"_blank\" href=\"" + a + "\">" + filename + "</a>";     
+                  try {
+                    EL.childNodes[0].click(); 
+                  } catch(ex) {
+                    EL[INR] = "<iframe src=\"" + a + "\"></iframe>"; 
+                  }
+
+                  WIND.setTimeout(function() {
+                    EL[INR] = "<br />"; 
+                    WIND.remChild(EL);  
+                  }, 30000);
+                }; 
+
+                try {
+                  if(WIND.XMLHttpRequest) {
+                    var xhr = false;
+                    try {
+                      xhr = new WIND.XMLHttpRequest();
+                    } catch(eC) {
+                      try {
+                        xhr = new WIND.ActiveXObject("MSXML2.XMLHTTP");
+                      } catch(eB) { 
+                        try {
+                          xhr = new WIND.ActiveXObject("Microsoft.XMLHTTP");
+                        } catch(eA) { }
+                      }
+                    }
+                    if(xhr) {
+                      xhr.onreadystatechange = function(e) {
+                        if(xM) { WIND.clearTimeout(xM); xMf(); }
+                        try { 
+                          if(xhr.readyState == 4) { 
+                            if((xhr.status * 1) == 200) {
+                              var xp = xhr.getResponseHeader("Content-Length");
+                            }
+                          }
+                        } catch(exc) { }
+                      };
+
+                      xhr.onabort = xhr.onerror = function(e) {
+                        if(xM) { WIND.clearTimeout(xM); xMf(); }
+                        xhr.onerror = xhr.onabort = null;
+                      }; 
+
+                      xhr.open("HEAD", a, true);
+                      xhr.send(null);
+                    }
+                  }
+                } catch(cb) { alert(cb); }
+
+                xM = WIND.setTimeout(xMf, 300);
+              };
+              
+              WIND.callExternAddDownloadLink = function() {
+                if(WIND.lastFrameDownloads) {
+                  while(WIND.lastFrameDownloads.length > 0) {
+                    var o = WIND.lastFrameDownloads.pop();
+                    externAddDownloadLink(o[0], o[1]);
+                  }
+                }
+              };
+
+              WIND.callExternAddDownloadLink();
+              return;
+            }
+   
+            WIND.languaize();  
+            selfIfr = WIND.iterateIframes(); 
+            if(selfIfr) { 
+               selfIframe = selfIfr[0];  
+               if(!("oldOpac" in selfIframe)) { selfIframe.oldOpac = selfIframe.parentNode.style.opacity; }
+               if(selfIfr[1] && selfIfr[1].W && selfIfr[1].W.dropFileReadyWait) {
+                 selfDropFileReadyWait = selfIfr[1].W.dropFileReadyWait;
+                 selfIfr[1].W.dropFileReadyWait = false;
+               }
+            }
+
+            var content = DOC.getElementById("content");
+            var W = WIND;
+            if(!W.W) { W.W = W; }
+            (function() {
+             var mainJuerg = (W[OPR] && W[OPR].W && W[OPR].W.mainJuerg ? W[OPR].W.mainJuerg.toString() : false);
+             if(mainJuerg) { 
+              W.JQW = { }; 
+              eval("mainJuerg = " + mainJuerg)(W.JQW, W);
+              if(W.JQW.$) {
+                !function(t){var i=t(DOC),e=t("head"),r=null,n=[],o=0,a="id",s="px",d="JColResizer",l="JCLRFlex",f=parseInt,c=Math,h=navigator.userAgent.indexOf("Trident/4.0")>0,p;try{p=sessionStorage}catch(g){}e.append("<style type='text/css'>  .JColResizer{table-layout:fixed;} .JColResizer td, .JColResizer th{overflow:hidden;padding-left:0!important; padding-right:0!important;}  .JCLRgrips{ height:0px; position:relative;} .JCLRgrip{margin-left:-5px; position:absolute; z-index:5; } .JCLRgrip .JColResizer{position:absolute;background-color:red;filter:alpha(opacity=1);opacity:0;width:10px;height:100%;cursor: e-resize;top:0px} .JCLRLastGrip{position:absolute; width:1px; } .JCLRgripDrag{ border-left:1px dotted black;	} .JCLRFlex{width:auto!important;}</style>");var u=function(i,e){var r=t(i);if(r.opt=e,r.opt.disable)return w(r);var s=r.id=r.attr(a)||d+o++;if(r.p=r.opt.postbackSafe,!r.is("table")||n[s]&&!r.opt.partialRefresh)return;if(r.addClass(d).attr(a,s).before('<div class="JCLRgrips"/>'),r.g=[],r.c=[],r.w=r.width(),r.gc=r.prev(),r.f=r.opt.fixed,e.marginLeft)r.gc.css("marginLeft",e.marginLeft);if(e.marginRight)r.gc.css("marginRight",e.marginRight);r.cs=f(h?i.cellSpacing||i.currentStyle.borderSpacing:r.css("border-spacing"))||2,r.b=f(h?i.border||i.currentStyle.borderLeftWidth:r.css("border-left-width"))||1,n[s]=r,v(r)},w=function(t){var i=t.attr(a),t=n[i];if(!t||!t.is("table"))return;t.removeClass(d+" "+l).gc.remove(),delete n[i]},v=function(i){var e=i.find(">thead>tr>th,>thead>tr>td");if(!e.length)e=i.find(">tbody>tr:first>th,>tr:first>th,>tbody>tr:first>td, >tr:first>td");if(e=e.filter(":visible"),i.cg=i.find("col"),i.ln=e.length,i.p&&p&&p[i.id])m(i,e);if(e.each(function(e){var r=t(this),n=t(i.gc.append('<div class="JCLRgrip"></div>')[0].lastChild);if(n.append(i.opt.gripInnerHtml).append('<div class="'+d+'"></div>'),e==i.ln-1)if(n.addClass("JCLRLastGrip"),i.f)n.html("");n.bind("touchstart mousedown",J),n.t=i,n.i=e,n.c=r,r.w=r.width(),i.g.push(n),i.c.push(r),r.width(r.w).removeAttr("width"),n.data(d,{i:e,t:i.attr(a),last:e==i.ln-1})}),i.cg.removeAttr("width"),b(i),i.find("td, th").not(e).not("table th, table td").each(function(){t(this).removeAttr("width")}),!i.f)i.removeAttr("width").addClass(l)},m=function(t,i){var e,r=0,n=0,o=[],a;if(i){if(t.cg.removeAttr("width"),t.opt.flush)return void(p[t.id]="");if(e=p[t.id].split(";"),a=e[t.ln+1],!t.f&&a)t.width(a);for(;n<t.ln;++n)o.push(100*e[n]/e[t.ln]+"%"),i.eq(n).css("width",o[n]);for(n=0;n<t.ln;++n)t.cg.eq(n).css("width",o[n])}else{for(p[t.id]="";n<t.c.length;++n)e=t.c[n].width(),p[t.id]+=e+";",r+=e;if(p[t.id]+=r,!t.f)p[t.id]+=";"+t.width()}},b=function(t){t.gc.width(t.w);for(var i=0;i<t.ln;++i){var e=t.c[i];if(!e)continue;t.g[i].css({left:e.offset().left-t.offset().left+e.outerWidth(!1)+t.cs/2+s,height:t.opt.headerOnly?t.c[0].outerHeight(!1):t.outerHeight(!1)})}},C=function(t,i,e){var n=r.x-r.l,o=t.c[i],a=t.c[i+1],d=o.w+n,l=a.w-n;if(o.width(d+s),t.cg.eq(i).width(d+s),t.f)a.width(l+s),t.cg.eq(i+1).width(l+s);if(e)o.w=d,a.w=t.f?l:a.w},R=function(i){var e=t.map(i.c,function(t){return t.width()});i.width(i.width()).removeClass(l),t.each(i.c,function(t,i){i.width(e[t]).w=e[t]}),i.addClass(l)},x=function(t){if(!r)return;var i=r.t,e=t.originalEvent.touches,n=e?e[0].pageX:t.pageX,o=n-r.ox+r.l,a=i.opt.minWidth,d=r.i,l=1.5*i.cs+a+i.b,f=d==i.ln-1,h=d?i.g[d-1].position().left+i.cs+a:l,p=i.f?d==i.ln-1?i.w-l:i.g[d+1].position().left-i.cs-a:1/0;if(o=c.max(h,c.min(p,o)),r.x=o,r.css("left",o+s),f){var g=i.c[r.i];r.w=g.w+o-r.l}if(i.opt.liveDrag){if(f)g.width(r.w),i.w=i.width();else C(i,d);b(i);var u=i.opt.onDrag;if(u)t.currentTarget=i[0],u(t)}return!1},L=function(e){if(i.unbind("touchend."+d+" mouseup."+d).unbind("touchmove."+d+" mousemove."+d),t("head :last-child").remove(),!r)return;r.removeClass(r.t.opt.draggingClass);var n=r.t,o=n.opt.onResize,a=r.i,s=a==n.ln-1,l=n.g[a].c;if(s)l.width(r.w),l.w=r.w;else C(n,a,!0);if(!n.f)R(n);if(b(n),o)e.currentTarget=n[0],o(e);if(n.p&&p)m(n);r=null},J=function(o){var a=t(this).data(d),s=n[a.t],l=o.originalEvent.touches;if(!s)return!1;var f=s.g[a.i];if(f.ox=l?l[0].pageX:o.pageX,f.l=f.position().left,i.bind("touchmove."+d+" mousemove."+d,x).bind("touchend."+d+" mouseup."+d,L),e.append("<style type='text/css'>*{cursor:"+s.opt.dragCursor+"!important}</style>"),f.addClass(s.opt.draggingClass),r=f,s.c[a.i].l)for(var c=0,h;c<s.ln;++c)h=s.c[c],h.l=!1,h.w=h.width();return!1},y=function(){for(t in n){var t=n[t],i,e=0;if(t.removeClass(d),t.f&&t.w!=t.width()){for(t.w=t.width(),i=0;i<t.ln;++i)e+=t.c[i].w;for(i=0;i<t.ln;++i)t.c[i].css("width",c.round(1e3*t.c[i].w/e)/10+"%").l=!0}b(t.addClass(d))}};t(window).bind("resize."+d,y),t.fn.extend({colResizable:function(i){var e={draggingClass:"JCLRgripDrag",gripInnerHtml:"",liveDrag:!1,fixed:!0,minWidth:15,headerOnly:!1,hoverCursor:"e-resize",dragCursor:"e-resize",postbackSafe:!1,flush:!1,marginLeft:null,marginRight:null,disable:!1,partialRefresh:!1,onDrag:null,onResize:null},i=t.extend(e,i);return this.each(function(){u(this,i)})}})}(W.JQW.$);
+                W.$ = W.JQW.$;
+                W.$.insertAt = function(tr, index, $parent) { if(index == 0) { $parent.prepend(tr); return; } $parent.children().eq(index - 1).after(tr); }
+                W.mainJuerg = mainJuerg;
+              }
+             }
+            })();
+            if(!W.$) { return; }
+            try {
+              var mainW = (W[OPR] && W[OPR].W ? W[OPR].W : false);
+              if(mainW) {
+                if("uploadRulesSize" in mainW) { W.uploadRulesSize = mainW.uploadRulesSize; }
+                if("uploadRulesExt" in mainW) { W.uploadRulesExt = mainW.uploadRulesExt; }
+                if("uploadRulesAllowExt" in mainW) { W.uploadRulesAllowExt = mainW.uploadRulesAllowExt; }
+                if("uploadRulesRun" in mainW) { W.uploadRulesRun = mainW.uploadRulesRun; }
+                if("maxParallelUploads" in mainW) { W.maxParallelUploads = mainW.maxParallelUploads; }
+                try {
+                  if("MB" in mainW && mainW.MB) {
+                    var myTitle = DOC.getElementById("title");
+                    if(myTitle) { 
+                      try { myTitle.onclick = function(e) { WIND.closefilesiframe(); return false; }; } catch(exc) { }
+                    }
+                  }
+                } catch(ex2) { }
+                try { if("DropBox" in mainW && mainW.DropBox && mainW.DropBox.verify) { mainW.DropBox.verify(); } } catch(ex3) { }
+              }
+            } catch(exc) { }
+
+            if(content && W.path_main) {
+                var innerhtml = "";
+                var folderarr = (W.folders.length > 0 ? W.folders.split("|").sort() : []);
+                var filearr = (W.files.length > 0 ? W.files.split("|") : []);
+                var filesizearr = (W.filesizes.length > 0 ? W.filesizes.split("|") : []);
+                var filearrnew = [];
+                if(filearr.length > 0) {
+                  for(var i = 0; i < filearr.length; i++) { filearrnew[i] = [ filearr[i], filesizearr[i] ]; }
+                  filearrnew = filearrnew.sort();
+                  filearr = [];
+                  filesizearr = [];
+                  for(var i = 0; i < filearrnew.length; i++) {
+                    if(filearrnew[i][0].length > 0 && filearrnew[i][1].length > 0) {
+                      filearr.push(filearrnew[i][0]);
+                      filesizearr.push(filearrnew[i][1]);
+                    }
+                  }
+                }
+                if(W.showshared && W.path_shared.length < 1) {
+                    innerhtml += "<tr><td class=\"left\"><a draggable=\"false\" href=\"" + "../../../uploads/" + WIND.uniquetab + "/list/?path=" + WIND.repURI(W.path_main) + (W.login.length > 0 ? "&login=" + W.login : "") + "&pathadd=/shared\">../shared</a></td><td></td><td></td><td class=\"right\"></td></tr>";
+                }
+                var trimlook = trimmed.indexOf("/");
+                if(trimlook > -1) {
+                    trimlook = trimmed.substring(trimlook + 1);
+                }
+
+                if(trimlook.length > 0) {
+                    var tops = W.path_main;
+                    if(W.path_shared.length > 0) {
+                        tops = W.path_shared;
+                    }
+                    var laind = tops.lastIndexOf("/");
+                    if(laind > -1) {
+                        laind = WIND.repURI(tops.substring(0, laind));
+                        var pshare = WIND.repURI(W.path_shared);
+                        if(pshare.length > 0) {
+                            pshare = laind;
+                            laind = WIND.repURI(W.path_main);
+                        }
+                        innerhtml += "<tr><td class=\"left\"><a draggable=\"false\" href=\"" + "../../../uploads/" + WIND.uniquetab + "/list/?path=" + laind + (W.login.length > 0 ? "&login=" + W.login : "") + (!W.showshared ? "&no=no" : "") + (pshare.length > 0 ? "&pathadd=" + pshare : "") + "\">..</a></td><td></td><td></td><td class=\"right\"></td></tr>";
+                    }
+                }
+                var folderarrS;
+                for(var i = 0; i < folderarr.length; i++) {
+                    folderarrS = folderarr[i];
+                    if(folderarrS.length < 1) {
+                        continue;
+                    }
+                    folderarrS = WIND.repURI(folderarrS); 
+                    var laind = WIND.repURI(W.path_main) + "/" + folderarrS;
+                    var pshare = W.path_shared;
+                    var delLink = W.login + WIND.makeFile(W.path_main) + "/";
+                    if(pshare.length > 0) { 
+                        delLink = (pshare.substring(0, 1) === "/" ? pshare.substring(1) : pshare) + "/";
+                        laind = WIND.repURI(W.path_main);
+                        pshare = WIND.repURI(pshare) + "/" + folderarrS; 
+                    }
+                    innerhtml += "<tr><td class=\"left\"><a draggable=\"false\" href=\"" + "../../../uploads/" + WIND.uniquetab + "/list/?path=" + laind + (W.login.length > 0 ? "&login=" + W.login : "") + (!W.showshared ? "&no=no" : "") + (pshare.length > 0 ? "&pathadd=" + pshare : "") + "\"><b style=\"color:blue;\">" + folderarr[i] + "</b></a></td><td></td><td></td><td class=\"right\" onclick=\"window.removeTR(this, false, '" + delLink + folderarr[i] + "');\">X</td></tr>";
+                }
+
+                if(W.path_shared.length > 0) {
+                    W.login = "";
+                    W.path_main = W.path_shared;
+                    if(W.path_main.indexOf("/") == 0) {
+                        W.path_main = W.path_main.substring(1);
+                    }
+                }
+
+                var delLink = W.login + WIND.makeFile(W.path_main) + "/";
+                var fulllink = "../../../.." + WIND.getDialog() + "/download5/" + delLink;
+                for(var i = 0; i < filearr.length; i++) {
+                    if(filearr[i].length < 1) {
+                        continue;
+                    }
+                    var fileEncoded = WIND.repURI(fulllink + filearr[i] + WIND.getFakeExt());
+                    innerhtml += "<tr><td class=\"left\"><a onchange=\"window.actLink='" + fileEncoded + "';\" ondragend=\"window.avoidHover=false;window.deleteHover();\" ondragstart=\"window.avoidHover=true;window.getDataSet(this, event);\" draggable=\"true\" data-auto-download target=\"_blank\" href=\"" + fileEncoded + "\">" + filearr[i] + "</a></td><td class=\"chMid\"><input onclick=\"window.checkMyBox(this);\" type=\"checkbox\" /></td><td>"+WIND.coSize(filesizearr[i])+"</td><td class=\"right\" onclick=\"window.removeTR(this, false, '" + delLink + filearr[i] + "');\">X</td></tr>";
+                }
+
+                if(innerhtml.length > 0) {
+                  try {
+                    content[INR] = innerhtml;
+                  } catch(exc) {   
+                    try {
+                      var trA = $(innerhtml);
+                      if(trA && trA.length) {
+                        for(var ii = 0; ii < trA.length; ii += 1) {
+                          content.appendChild(trA[ii]); 
+                        }
+                      }
+                    } catch(exc2) { }
+                  }
+                } else {
+                  var hs = DOC.getElementById("hastransfer");
+                  if(hs) { hs.style.display = ""; }
+                }
+                $("#tabelle").colResizable({liveDrag:true, postbackSafe:true}); 
+            }
+            WIND.firstload();
+        };
+
+        WIND.appendFile = function(filename, size, xhr) {
+           var tr = $("<tr></tr>"); 
+           var delLink = W.login + WIND.makeFile(W.path_main) + "/" + filename;
+           var fulllink = "../../../.." + WIND.getDialog() + "/download5/" + delLink;
+           var fileEncoded = WIND.repURI(fulllink + WIND.getFakeExt());
+           var content = $("#content");
+           tr[0][INR] = "<td class=\"left\">" + filename + "</td><td></td><td>"+WIND.coSize(size)+"</td><td class=\"right\">X</td>";
+           var childs = content[0].childNodes;
+           for(var i = 0; i < childs.length; i++) {
+              try {
+                 if(childs[i].firstChild && childs[i].firstChild[INR].indexOf(">" + filename + "</a>") == childs[i].firstChild[INR].length - (">" + filename + "</a>").length) { 
+                   WIND.remChild(childs[i]);
+                 }
+              } catch(ad) { }
+           }
+           W.$.insertAt(tr, 0, content);
+           tr = tr[0].childNodes;
+           try { (tr[3] || tr[2]).onclick = function(a) { try { xhr.abortThat(); } catch(jh) { } }; } catch(exc) { }
+           tr[0].hrefdisabled = "<a onchange=\"window.actLink='" + fileEncoded + "';\" ondragend=\"window.avoidHover=false;window.deleteHover();\" ondragstart=\"window.avoidHover=true;window.getDataSet(this, event);\" draggable=\"true\" data-auto-download target=\"_blank\" href=\"" + fileEncoded + "\">" + filename + "</a>";
+           tr[0].hrefdel = delLink;
+           return tr;
+        };
+
+        WIND.sendF5 = function(avoidF5) {
+            WIND.onSentHandle();
+            if(!avoidF5) {
+              try {
+                if(WIND[OPR] && WIND[OPR].W) {
+                    WIND[OPR].W.sendF5();
+                }
+              } catch(e) { }
+            }
+            if(selfDropFileReadyWait) {
+              selfDropFileReadyWait = false;
+              try {
+                if(WIND[OPR] && WIND[OPR].W && WIND[OPR].W.filedropfinalclose === false) {
+                  if(!avoidF5) { return true; }
+                }
+              } catch(exc) { }
+              WIND.closefilesiframe();
+              return false;
+            } else { 
+              try {
+                if(WIND[OPR] && WIND[OPR].W && WIND[OPR].W.filedropfinalclose > 1) {
+                  WIND.closefilesiframe();
+                  return false;
+                }
+              } catch(exc) { }
+            }
+            return true;
+        };
+
+        WIND.sendFinishUpload = function(a, f, d, u) {
+            try {
+                if(WIND[OPR] && WIND[OPR].W) {
+                    WIND[OPR].W.sendFinishUpload(a, f, WIND.allFilesNumber, d, u);
+                }
+            } catch(e) {}
+        };
+         
+        var closeTimerun = false;
+
+        WIND.closefilesiframe = function() {
+            try {
+                if(WIND["op"+"en"+"er"]) {
+                    WIND.close();
+                } else if(WIND[OPR] && WIND[OPR].W && WIND[OPR].W.closefilesiframe) {
+                    WIND[OPR].W.closefilesiframe();
+                }
+            } catch(ea) { }
+        };
+
+        WIND.launchCenter = function(url, name, width, height, winstyle) {
+            var str = "height=" + height + ",innerHeight=" + height;
+            str += ",width=" + width + ",innerWidth=" + width;
+            if(WIND.screen) {
+                var ah = screen.availHeight - 30;
+                var aw = screen.availWidth - 10;
+                var xc = (aw - width) / 2;
+                var yc = (ah - height) / 2;
+                str += ",left=" + xc + ",screenX=" + xc;
+                str += ",top=" + yc + ",screenY=" + yc;
+            }
+            return WIND.open(WIND.repURI(url), name, str + "," + winstyle);
+        };
+
+        WIND.PopWindow = function(strURL, width, height) {
+           return WIND.launchCenter(strURL, "_blank", width, height, "scrollbars=no,toolbar=no,location=no,menubar=no,resizable=yes")
+        };
+        
+        WIND.my64Enc = function(a) { 
+           if(!a || a.length < 1) { return ""; } else { return WIND.jsencode64(WIND.escape(a)).replace(/=/g, "_"); } 
+        };
+
+        WIND.clearValue = function(a) {
+           if(!a) { a = DOC.getElementById("file"); }
+           if(a) { try { a.value = ""; } catch(exc) { } }          
+        };
+
+        WIND.uploadme = function() {
+            if(WIND.forupload) { 
+                if(WIND.newstyle) { 
+                    WIND.NewLoadme();
+                    return;
+                }
+                try {
+                  var k = WIND.PopWindow("../../../uploads/" + WIND.uniquetab + "/upload/?path=" + WIND.forupload, 300, 150);
+                  if(k && !k.closed && k.window && k.location) {
+                    var toEv = "window.pIaR = { 'timing': '_" + (+ new WIND.Date()) + "'";
+                    if(WIND.uploadRulesSize) { toEv += ", 'uploadRulesSize': '" + WIND.uploadRulesSize + "'"; }
+                    if(WIND.uploadRulesExt) { toEv += ", 'uploadRulesExt': '" + WIND.uploadRulesExt + "'"; }
+                    if(WIND.uploadRulesAllowExt) { toEv += ", 'uploadRulesAllowExt': '" + WIND.uploadRulesAllowExt + "'"; }
+                    if(WIND.uploadRulesRun) { toEv += ", 'uploadRulesRun': '" + WIND.uploadRulesRun + "'"; }
+                    toEv += " }";
+                    toEv = WIND.my64Enc(toEv);
+                    try { 
+                      if(toEv) {
+                        k["win"+"dow"].name = toEv;
+                        if("sessionStorage" in k["win"+"dow"]) { k["win"+"dow"].sessionStorage["win_name_jwts"] = toEv; }
+                      }
+                    } catch(exa) { }
+                  }
+                } catch(exc) { }
+            }
+        };
+
+        WIND.uploadmeCheck = function() {
+          if(WIND.tryCheckDownload && WIND.tryCheckDownload(false)) { return; }
+          WIND.uploadme();  
+        };
+
+        WIND.iterateIframes = function() {
+            var k = false;
+            try {
+                if(WIND[OPR] && WIND[OPR].W) {
+                    k = WIND[OPR];
+                }
+                if(k && k.W && k.W.iterateIframes) {
+                    return k.W.iterateIframes(WIND);
+                }
+            } catch(e) { }
+            return false;
+        };
+      })(); 
+    </script> 
+</head>
+
+<body width="100%" height="100%" onload="window.onloadFunc();">
+    <div id="fileHide">
+        <div id="fileTransfer">
+            <div id="title" style="cursor:pointer;">
+                <p onclick="window.closefilesiframe();if(window.event && window.event.stopPropagation){try{window.event.stopPropagation();}catch(ex){}}return false;" style="color:#959595">X&nbsp;</p>
+                <p onclick="if(!window.sent){window.self.location.reload(true);}if(window.event && window.event.stopPropagation){try{window.event.stopPropagation();}catch(ex){}}return false;" id="owngl5">&nbsp;File transfer&nbsp;&nbsp;<span style="display:inline-block;transform:rotate(90deg);">&#8635;</span></p>
+            </div>
+            <div style="text-align:center;">
+                <a id="owngl1" draggable="false" href="#" onclick="window.uploadmeCheck();" class="uploadButton">Click or drop files to upload</a>
+                <table id="tabelle" width="100%" border="0" cellpadding="0" cellspacing="0">
+                    <thead>
+                      <tr id="mainrow"><th id="ownglu1" style="width:60%;text-align:left;">&nbsp;File Name</th><th id="ownglu4" style="width:7%;">Mark</th><th id="ownglu2" style="width:13%;">Size</th><th id="ownglu3" style="width:20%;cursor:pointer;">Action</th></tr>
+                    </thead>
+                    <tbody id="content">
+                    </tbody>
+                </table>
+                <div id="hastransfer" style="display:none;">                    
+                        <br />
+                        <br />
+                        <br />
+                        <br />
+                        <br /><p id="owngl2">No file has been transferred yet.</p>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="forform" style="text-align:left;display:none;"></div>
+</body>
+</html>

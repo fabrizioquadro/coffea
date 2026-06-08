@@ -1,0 +1,675 @@
+<!-- ##TEMPLATEVALUES## -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="cache-control" content="no-store" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <title>##APPSPAGETITLE##</title>
+    <link rel="stylesheet" href="style.css">
+    <style type="text/css">
+        @font-face {
+            font-display: swap;
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 400;
+            src: local('Inter Regular'), local('Inter-Regular'), url(software/js/inter-v13-latin_latin-ext-regular.woff) format('woff');
+        }
+
+        @font-face {
+            font-display: swap;
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 500;
+            src: local('Inter Medium'), local('Inter-Medium'), url(software/js/inter-v13-latin_latin-ext-500.woff) format('woff');
+        }
+
+        @font-face {
+            font-display: swap;
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 600;
+            src: local('Inter SemiBold'), local('Inter-SemiBold'), url(software/js/inter-v13-latin_latin-ext-600.woff) format('woff');
+        }
+
+        @font-face {
+            font-display: swap;
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 700;
+            src: local('Inter Bold'), local('Inter-Bold'), url(software/js/inter-v13-latin_latin-ext-700.woff) format('woff');
+        }
+    </style>
+    <style>
+        .logo {
+            max-height: 50px;
+            max-width: 250px;
+        }
+
+        .logOffIcon2 path{
+            stroke: ##SECONDARYCOLOR## !important; 
+        }
+
+        *{
+            font-family: Inter, sans-serif !important;
+        }
+        #panel-blur{
+            width: 100%;
+            padding-left: 77px;
+            padding-right: 79px;
+            padding-top: 69px;
+            display: block;
+            height: 100vh !important;
+            padding-bottom: 50px;
+            border: none;
+            background: ##PAGEBACKGROUNDCOLOR## ;
+            backdrop-filter:blur(##PANELBLUR##);
+            -webkit-backdrop-filter:blur(##PANELBLUR##);
+        }
+        #panel-blur > img {
+            margin-bottom: 38px;
+        }
+        .app-wrapper{
+            position: relative;
+            width: auto !important;
+            height:auto;
+            margin-top: 22px;
+            padding-bottom: 46px;
+            padding-top: 27px;
+            transform: translateY(-10px);
+
+            
+        }
+        @media screen and (max-width:520px) {
+            #panel-blur{
+                padding-left: 5%;
+                padding-right: 5%;
+                padding-top: 55px;
+            }
+        } 
+        .app-wrapper::before{
+            width: 100%;
+            height: 1px;
+            background:##PAGECOLOR##;
+            position: absolute;
+            top: 0;
+            left: 0;
+            content: "";
+        }
+        .app{
+            transition: all 2s;
+            max-height: 370px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            height:auto;
+            display: flex;
+            gap: 8px;
+            position: relative;
+            flex-wrap:wrap;
+            text-align: center;
+        }
+        .appbutton{
+            margin: 5px;
+            transition: all 2s;
+            height: 100px;
+            width: 100px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+            flex-shrink: 0;
+            transition: transform .2s ease-in-out;
+            -webkit-transition: -moz-transform .3s ease-out; 
+            -moz-transition: -webkit-transform .3s ease-out; 
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.90);
+            /* app box */
+            box-shadow: 0px 6px 6px 0px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(50px); 
+            -webkit-backdrop-filter:blur(50px);
+            text-align: center;
+            font-family: Inter;
+            font-size: 12px !important;
+            font-style: normal;
+            font-weight: 600;
+            line-height: 12px; /* 100% */ 
+            color: rgb(74,74,74);
+            text-decoration: none;
+            padding: 10px;
+        }
+        .appbutton:hover{
+            filter: brightness(90%);
+            cursor: pointer;
+            transform: scale(1.1);
+            transition: filter 0.3s ease ,transform 0.3s ease;
+           -webkit-transition: filter 0.3s ease , transform 0.3s ease;
+  
+         
+            
+        }
+        .logOff  {
+          transition: all 0.3s ease ;
+           -webkit-transition: all 0.3s ease ;
+        }
+     
+        .appbutton h1 {
+            text-align: center;
+            font-family: Inter;
+            font-style: normal;
+            font-weight: 700;
+
+            font-family: Inter;
+            font-size: 25px;
+            font-weight: 700;
+            line-height: normal; 
+                    
+        }
+        .appbutton h2 {
+        
+                text-align: center;
+                font-family: Inter;
+                font-size: 12px;
+                font-style: normal;
+                font-weight: 700;
+                line-height: 12px; /* 100% */
+                opacity: 0.8;
+                color: ##SECONDARYCOLOR## !important;
+             }
+        .logOff{
+            width: 97px;
+            height: 38px; 
+            position: absolute;
+            right: 79px;
+            border: 0;
+            border-radius: 6px;
+            display: flex;
+            gap: 10px;
+            font-weight: 600 !important;
+            color : #4a4a4a;
+            margin-top: 10px;
+            bottom: 40px;
+
+        }
+        .logOff:hover{
+            filter: brightness(55%);
+
+        }
+        .blur{
+            width: 100%;
+            height: 20px;
+            background-color: #000000;
+            position: fixed;
+            z-index: 5;
+        }
+       
+    
+select::-ms-expand {
+  display:none!important ;
+}
+    
+
+input:-webkit-autofill { 
+  -webkit-background-clip: text;
+}
+.primary-text{
+  color:  ##PAGECOLOR## !important;
+
+}
+
+.primary-button{
+  color:##MAINBUTTONTEXTCOLOR##; 
+  background-color:##MAINBUTTONCOLOR##;  
+  font-family: Inter, sans-serif !important; 
+}
+.secondary-button{
+  color: ##SECONDARYBUTTONTEXTCOLOR## ;
+  background-color: ##SECONDARYBUTTONCOLOR## !important;
+}
+
+
+.secondary-text{
+  color:  ##PAGECOLOR## !important ;  /* ##PAGECOLOR## */
+  opacity:  0.6  !important;
+}
+
+
+
+.secondary-button:hover {
+  -webkit-transition: 0.3s -webkit-filter ease;
+  -moz-transition: 0.3s -moz-filter linear;
+  -moz-transition: 0.3s filter linear;
+  -ms-transition: 0.3s -ms-filter linear;
+  -o-transition: 0.3s -o-filter linear;
+  transition: 0.3s filter linear, 0.3s -webkit-filter linear;
+  filter: brightness(85%)
+}
+
+.primary-button:hover {
+  opacity: 0.7
+}
+
+
+
+
+
+
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Inter, sans-serif !important;
+  scroll-behavior: smooth !important;
+}
+
+button {
+  transition: opacity 0.3s ease;
+  -webkit-transition: opacity 0.3s ease;
+
+}
+
+a {
+  color: ##SECONDARYCOLOR##;
+}
+body {
+  width: 100%;
+  background: url("##PHOTONAME##") no-repeat center fixed;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -o-font-smoothing: antialiased ;
+  overflow:hidden;
+}
+
+
+
+
+.blank {
+  height: 100px;
+  width: 100%
+}
+.panel-blur {
+  position: absolute;
+  justify-content: space-between;
+  min-height: 100%;
+  width: 525px;
+  border-left: 1px solid rgba(255, 255, 255, .4);
+  border-right: 1px solid rgba(255, 255, 255, .4);
+  background:  ##PAGEBACKGROUNDCOLOR## ; 
+  backdrop-filter:blur(##PANELBLUR##px); 
+  -webkit-backdrop-filter:blur(##PANELBLUR##px);
+  display: flex;
+  flex-direction: column
+}
+
+.left-blur{
+  left: 0 !important;
+} 
+#right-blur{
+  right: 0 !important;
+} 
+
+#center-blur{
+  top: 50%0 !important ; 
+  left: 50%0 !important ; 
+  transform: translate(-50%,-50%) !important ;  
+} 
+
+
+.header--left-blur {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin-bottom: 50px;
+  position: relative;
+  top: 100px;
+  padding-left: 79px
+}
+.header--left-blur__logo {
+  display: flex;
+  flex-direction: column;
+  gap: 30px
+}
+.header--left-blur__t1 {
+
+  font-size: 33px;
+  font-style: normal;
+  font-weight: bold;
+  line-height: normal ;
+  transform: translateY(-3px);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 30px
+}
+.input-container {
+  width: 320px;
+  position: relative ;
+}
+
+#hidden-item {
+  display: none;
+}
+#no-border::before{
+  height:80px;
+}
+input {
+  width: 320px;
+  height: 35px;
+  background: none !important;
+  border: none;
+  border-bottom: transparent 2px solid;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  outline-offset: 15px;
+  padding-left: 10px;
+  position: relative;
+  overflow: hidden !important;
+  text-overflow: ellipsis  !important;
+  padding-right: 40px !important;
+  box-sizing:content-box  !important;
+}
+select {
+  color: #4a4a4a
+}
+input:focus {
+  color: #4a4a4a
+}
+
+.input-container::before {
+  content: "";
+  transition: width 2s;
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  background: #4A4A4A;  /* ##PAGECOLOR##  */
+  bottom: 0;
+  left: 0
+}
+
+#underline {
+  position: relative;
+  bottom: 0;
+  height: 2px;
+  width: 100%
+}
+#underline::before {
+  content: "";
+  transition: width 2s;
+  position: absolute;
+  width: 0;
+  height: 2px;
+  background-color:  #4A4A4A ;  /* ##PAGECOLOR## */
+  bottom: -1px;   /* old : 0 */
+  left: 0;
+  transition: width .5s ease
+}
+.input-container input:focus~#underline::before {
+  width: 100%;
+}
+input:focus {
+  outline: 0
+}
+input:hover {
+  cursor: text
+}
+.input-select, button {
+  cursor: pointer;
+  font-weight: 500
+}
+button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+
+}
+
+.cd-buttons input {
+  transition: opacity 0.3s ease;
+  -webkit-transition: opacity 0.3s ease;
+}
+
+
+.btn-container {
+  width: 320px;
+  height: 45px;
+  display: flex;
+  font-size: 15px;
+  gap: 1px;
+  position: relative;
+  margin-top: 10px
+}
+.btn-container h2 {
+  position: absolute;
+  bottom: -30px;
+  text-align: center;
+  font-family: Inter;
+  font-size: 12px;
+  width: 100%
+}
+.submiBtn {
+  height: 100%;
+  border: none;
+  font-size: 18px;
+  font-size: 600
+}
+
+#submiBtn-extanded {
+  width: 100%;
+  border-radius: 6px 6px 6px 6px;
+}
+.htm5lBtn {
+  font-weight: 500;
+  transition-property: color;
+  transition-duration: .2s;
+  transition-timing-function: ease ;
+  position: relative;
+  left: 0px;
+}
+.htm5lBtn:hover{
+  cursor: pointer;
+  filter: brightness(75%);
+}
+
+.btn-container button:first-child {
+  width: 70%;
+  text-align: center;
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  border-radius: 6px 0 0 6px
+}
+
+#arrow {
+  position: absolute;
+  top: 50%;
+  right: -12px;
+  transform: translateY(-30%);
+  pointer-events: none;
+}
+.input-select {
+  width: 100px;
+  border: none;
+  background: #a3a3a3;
+  color: #fff;
+  border-radius: 0 6px 6px 0;
+  display: flex;
+  justify-content: center;
+  padding-left: 15px;
+  font-family: Inter;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  height: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+
+}
+.select-wrapper {
+  position: relative;
+  width: 77px;
+  height: 45px;
+  background: #a3a3a3;
+  border-radius: 0 6px 6px 0;
+}
+
+.input-select>* {
+  background: #a3a3a3
+}
+.footer--left-blur {
+  height: 130px;
+  width: 100%;
+  border: linear-gradient(270deg, rgba(136, 136, 136, .2) 0, rgba(136, 136, 136, .45) 100%) 1px solid;
+  position: relative;
+  display: flex;
+  padding-left: 79px;
+  align-items: center
+}
+.footer--left-blur__before {
+  height: auto;
+  width: 100%;
+  position: relative
+}
+.footer--left-blur__before::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  background: #4A4A4A;  /* ##PAGECOLOR##  */
+  top: 0
+}
+.footer--left-blur a {
+  color:  #4A4A4A ;  /* ##PAGECOLOR## */
+  font-family: Inter;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  text-decoration-line: underline
+}
+.footer--left-blur h2 {
+  text-align: center;
+  font-family: Inter;
+  font-size: 12px;
+  color: rgba(74, 74, 74, .8);
+  font-family: Inter;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal
+}
+.password-container {
+  position: relative;
+  width: 320px
+}
+
+
+footer, header {
+  display: block
+}
+body {
+  line-height: 1
+}
+ul {
+  list-style: none
+}
+
+header {
+  height: 200px;
+  line-height: 200px;
+  text-align: center;
+  background-color: #5e6e8d;
+  color: #fff
+}
+header h1 {
+  font-size: 20px;
+  font-size: 1.25rem ;
+  
+}
+
+
+
+
+
+
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+   .logOffIcon{
+    margin-left: 11px;
+   }
+  .popup-f2a__container , .cd-popup-container  {
+      
+     position: absolute;
+     top: 50%;
+     left: 50%;
+     transform: translate(-50%, -50%);   
+    }
+  }
+
+
+ 
+
+  </style>
+    <script src="software/js/jquery.min.js"></script>
+    <script type="text/javascript" src="software/remoteapp2.js?v=17.20"></script>
+    <script>var numberOfAppsPerLine = 0; /* not applicable to new themes */</script>
+    <script src="software/common_applications.js?v=5"></script>
+    <link rel="stylesheet" type="text/css" href="custom.css" />
+    <script type="text/javascript" src="custom.js"></script>
+</head>
+<body onload="displayAssignedApps(false);">
+    <section class="panel-blur" id="panel-blur">
+          <img src="##LOGO##" class="logo">
+          <h1 class="header--left-blur__t1 primary-text">##APPSTITLE##</h1>
+          <div class="app-wrapper">
+            <div class="app " id="apps">
+
+                <!-- Apps icon here -->
+                <div class="appbutton">
+                    <img src="templates/creative/img/outlook.png" style="width: 45px;">
+                    <h2 class="primary-text">Outlook</h2    >
+                </div>
+                <!-- end of Apps icon  -->
+            </div>
+
+            
+          </div>
+          <button class="logOff primary-button" onclick="window.name = ''; window.location.replace(window.applications_portal_return_url ? window.applications_portal_return_url : '/index.html'); return false;">
+            ##APPSLOGOFF##
+          </button> 
+    </section>
+    <script defer>
+      console.log("hello")
+       const isIE = !!document.documentMode;
+      if(isIE){
+        var myDiv = document.querySelector('#panel-blur');
+        var bgColor = myDiv.currentStyle.backgroundColor;
+        var newColor = bgColor.replace(/0\.2\)/, '1)');
+
+         // Display the background color in the console
+         console.log('Background Color:', newColor);
+         myDiv.style.backgroundColor = newColor;
+      }
+
+    </script>
+</body>
+
+</html>

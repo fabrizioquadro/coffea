@@ -1,0 +1,379 @@
+/* Two FA popin style */
+
+.twofa-popin {
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	overflow: auto;
+	opacity: 0;
+	visibility: hidden;
+	color: black;
+	background-color: rgba(0,0,0,0.5);
+	-webkit-transition: all 0.4s ease;
+	-moz-transition: all 0.4s ease;
+	-ms-transition: all 0.4s ease;
+	-o-transition: all 0.4s ease;
+	transition: all 0.4s ease;
+}
+
+.twofa-popin h2 {
+	margin-top: 0;
+}
+
+.twofa-popin p {
+	margin-top: 0;
+}
+
+.twofa-popin img {
+	width: 250px;
+}
+
+.twofa-popin input {
+	color: black;
+	border: 1px solid #000000;
+}
+
+.twofa-popin input[type="button"] {
+	background: #FFFFFF;
+}
+
+.twofa-popin:target {
+	opacity: 1;
+	visibility: visible;
+}
+
+.twofa-popin .sp-table {
+	display: table;
+	height: 100%;
+	width: 100%;
+}
+
+.twofa-popin .sp-cell {
+	display: table-cell;
+	vertical-align: middle;
+	padding: 10px;
+}
+
+.twofa-popin .sp-body {
+	z-index: 1;
+	min-width: 425px;
+	margin: 0 auto;
+	background-color: white;
+	padding: 2em;
+	-webkit-box-shadow: 0 3px 5px 1px rgba(0,0,0,0.25);
+	box-shadow: 0 3px 5px 1px rgba(0,0,0,0.25);
+	width: 30%;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.twofa-popin .sp-body * {
+	max-width: 100%;
+}
+
+.twofa-popin .sp-close {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 36px;
+	height: 36px;
+	text-align: center;
+	line-height: 36px;
+	font-size: 1.6em;
+	color: #000000;
+	font-weight: 900;
+	text-decoration: none;
+}
+
+.twofa-popin input.invalid {
+	border-color: #900;
+	background-color: #FDD;
+}
+
+.twofa-popin input.invalid {
+	border-color: #900;
+	background-color: #FDD;
+}
+
+.twofa-popin input:focus.invalid {
+	outline: none;
+}
+
+.twofa-popin .error {
+	width: 100%;
+	padding: 0;
+	font-size: 80%;
+	color: white;
+	background-color: #900;
+	border-radius: 0 0 5px 5px;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.twofa-popin .error.active {
+	padding: 0.3em;
+}
+
+/* Expiration password alert popin style */
+
+.expiration-password-reminder-popin {
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	overflow: auto;
+	opacity: 0;
+	visibility: hidden;
+	color: black;
+	background-color: rgba(0,0,0,0.5);
+	-webkit-transition: all 0.4s ease;
+	-moz-transition: all 0.4s ease;
+	-ms-transition: all 0.4s ease;
+	-o-transition: all 0.4s ease;
+	transition: all 0.4s ease;
+}
+
+.expiration-password-reminder-popin h2 {
+	margin-top: 0;
+}
+
+.expiration-password-reminder-popin p {
+	margin-top: 0;
+}
+
+.expiration-password-reminder-popin img {
+	width: 250px;
+}
+
+.expiration-password-reminder-popin input {
+	color: black;
+	border: 1px solid #000000;
+	display: inline;
+}
+
+.reset-windows-password-popin input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+	color: grey;
+	opacity: 1; /* Firefox */
+}
+
+.reset-windows-password-popin input:-ms-input-placeholder { /* Internet Explorer 10-11 */
+	color: grey;
+}
+
+.reset-windows-password-popin input::-ms-input-placeholder { /* Microsoft Edge */
+	color: grey;
+}
+
+.expiration-password-reminder-popin input[type="button"] {
+	background: #FFFFFF;
+}
+
+.expiration-password-reminder-popin:target {
+	opacity: 1;
+	visibility: visible;
+}
+
+.expiration-password-reminder-popin .sp-table {
+	display: table;
+	height: 100%;
+	width: 100%;
+}
+
+.expiration-password-reminder-popin .sp-cell {
+	display: table-cell;
+	vertical-align: middle;
+	padding: 10px;
+}
+
+.expiration-password-reminder-popin .sp-body {
+	z-index: 1;
+	min-width: 425px;
+	margin: 0 auto;
+	background-color: white;
+	padding: 2em;
+	-webkit-box-shadow: 0 3px 5px 1px rgba(0,0,0,0.25);
+	box-shadow: 0 3px 5px 1px rgba(0,0,0,0.25);
+	width: 30%;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.expiration-password-reminder-popin .sp-body * {
+	max-width: 100%;
+}
+
+.expiration-password-reminder-popin .sp-close {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 36px;
+	height: 36px;
+	text-align: center;
+	line-height: 36px;
+	font-size: 1.6em;
+	color: #000000;
+	font-weight: 900;
+	text-decoration: none;
+}
+
+.expiration-password-reminder-popin input.invalid {
+	border-color: #900;
+	background-color: #FDD;
+}
+
+.expiration-password-reminder-popin input.invalid {
+	border-color: #900;
+	background-color: #FDD;
+}
+
+.expiration-password-reminder-popin input:focus.invalid {
+	outline: none;
+}
+
+.expiration-password-reminder-popin .error {
+	width: 100%;
+	padding: 0;
+	font-size: 80%;
+	color: white;
+	background-color: #900;
+	border-radius: 0 0 5px 5px;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.expiration-password-reminder-popin .error.active {
+	padding: 0.3em;
+}
+
+/* Reset windows password popin style */
+
+.reset-windows-password-popin {
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	overflow: auto;
+	opacity: 0;
+	visibility: hidden;
+	color: black;
+	background-color: rgba(0,0,0,0.5);
+	-webkit-transition: all 0.4s ease;
+	-moz-transition: all 0.4s ease;
+	-ms-transition: all 0.4s ease;
+	-o-transition: all 0.4s ease;
+	transition: all 0.4s ease;
+}
+
+.reset-windows-password-popin h2 {
+	margin-top: 0;
+}
+
+.reset-windows-password-popin p {
+	margin-top: 0;
+}
+
+.reset-windows-password-popin img {
+	width: 250px;
+}
+
+.reset-windows-password-popin input {
+	color: black;
+	border: 1px solid #000000;
+}
+
+.reset-windows-password-popin input[type="button"] {
+	background: #FFFFFF;
+}
+
+.reset-windows-password-popin:target {
+	opacity: 1;
+	visibility: visible;
+}
+
+.reset-windows-password-popin .sp-table {
+	display: table;
+	height: 100%;
+	width: 100%;
+}
+
+.reset-windows-password-popin .sp-cell {
+	display: table-cell;
+	vertical-align: middle;
+	padding: 10px;
+}
+
+.reset-windows-password-popin .sp-body {
+	z-index: 1;
+	min-width: 425px;
+	margin: 0 auto;
+	background-color: white;
+	padding: 2em;
+	-webkit-box-shadow: 0 3px 5px 1px rgba(0,0,0,0.25);
+	box-shadow: 0 3px 5px 1px rgba(0,0,0,0.25);
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.reset-windows-password-popin .sp-body * {
+	max-width: 100%;
+	margin-right: auto;
+	margin-left: auto;
+	text-align: center;
+}
+
+.reset-windows-password-popin .sp-body input {
+	width: 300px;
+}
+
+.reset-windows-password-popin .sp-close {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 36px;
+	height: 36px;
+	text-align: center;
+	line-height: 36px;
+	font-size: 1.6em;
+	color: #000000;
+	font-weight: 900;
+	text-decoration: none;
+}
+
+.reset-windows-password-popin input.invalid {
+	border-color: #900;
+	background-color: #FDD;
+}
+
+.reset-windows-password-popin input.invalid {
+	border-color: #900;
+	background-color: #FDD;
+}
+
+.reset-windows-password-popin input:focus.invalid {
+	outline: none;
+}
+
+.reset-windows-password-popin .error {
+	width: 100%;
+	padding: 5px;
+	font-size: 80%;
+	color: white;
+	background-color: #900;
+	border-radius: 5px 5px 5px 5px;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.reset-windows-password-popin .error.active {
+	padding: 0.3em;
+}

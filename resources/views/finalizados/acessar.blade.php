@@ -154,6 +154,14 @@ if($requisicao->qrcode()){
                 <b>{{ $requisicao->justificativa }}</b>
             </div>
         </div>
+        @if($requisicao->documentos)
+        <div class="row mt-2 gy-2 borda_de_linha">
+            <div class="col-md-12 form-group">
+                <label for="documentos">Documentos:</label><br>
+                <b>{!! nl2br(e($requisicao->documentos)) !!}</b>
+            </div>
+        </div>
+        @endif
         <div class="row mt-2 gy-2 align-items-end">
             <div class="col-md-6 form-group borda_de_linha">
                 <label for="qtd_itens_pedido">Total Quantidade:</label><br>

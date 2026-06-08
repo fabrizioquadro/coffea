@@ -304,6 +304,14 @@ if($requisicao->qrcode()){
                 <b>{{ $requisicao->justificativa }}</b>
             </div>
         </div>
+        @if($requisicao->documentos)
+        <div class="row mt-2 gy-2 borda_de_linha">
+            <div class="col-md-12 form-group">
+                <label for="documentos">Documentos:</label><br>
+                <b>{!! nl2br(e($requisicao->documentos)) !!}</b>
+            </div>
+        </div>
+        @endif
         <hr>
         <div class="d-flex justify-content-between mt-3 mb-3">
             <h5 class="card-title">Itens</h5>
@@ -385,6 +393,32 @@ if($requisicao->qrcode()){
                             @foreach($requisicao->anexos as $anexo)
                                 <tr id='linha_anexo_cadastrado_{{ $anexo->id }}'>
                                     <td>{{ $anexo->fornecedor->nome }}</td>
+                                    <td>
+                                        <a title="Abrir" target='_blank' href="/public/anexo_requisicoes/{{ $anexo->requisicao_id."/".$anexo->link_anexo }}" class="btn rounded-pill btn-icon btn-outline-primary waves-effect">
+                                            <span class="tf-icons mdi mdi-folder-outline"></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+        <hr>
+        <div class="d-flex justify-content-between mt-3 mb-3">
+            <h5 class="card-title">Anexos Gerais</h5>
+        </div>
+        <div id="div_anexos_gerais">
+            @if($requisicao->anexos_gerais()->count() > 0)
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class="table-light">
+                            <th>Arquivo</th>
+                        </thead>
+                        <tbody>
+                            @foreach($requisicao->anexos_gerais as $anexo)
+                                <tr id='linha_anexo_geral_cadastrado_{{ $anexo->id }}'>
                                     <td>
                                         <a title="Abrir" target='_blank' href="/public/anexo_requisicoes/{{ $anexo->requisicao_id."/".$anexo->link_anexo }}" class="btn rounded-pill btn-icon btn-outline-primary waves-effect">
                                             <span class="tf-icons mdi mdi-folder-outline"></span>

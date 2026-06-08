@@ -1,0 +1,162 @@
+<!-- ##TEMPLATEVALUES## -->
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]> <html class="lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]> <html class="lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="cache-control" content="max-age=0" />
+  <meta http-equiv="cache-control" content="no-cache" />
+  <meta http-equiv="expires" content="0" />
+  <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+  <meta http-equiv="pragma" content="no-cache" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>##APPSPAGETITLE##</title>
+  <script src="software/js/jquery.min.js"></script>
+  <script type="text/javascript" src="software/remoteapp2.js?v=17.20"></script>
+  <style>
+   body {
+	  font: 13px/20px 'Lucida Grande', Tahoma, Verdana, sans-serif;
+	  color: #000000;
+	  background: rgb(##THEMECOLORRGB##);
+	}
+
+	.container {
+	  margin: 20px auto;
+	  max-width: 800px;
+	}
+	.logo {
+		width: 100%;
+		max-width: 200px;
+	}
+	.applications {
+	text-align: center;
+	  position: relative;
+	  margin: 0 auto;
+	  padding: 20px 20px 20px;
+	  max-width: 800px;
+	  background: white;
+	  border-radius: 3px;
+	  -webkit-box-shadow: 0 0 200px rgba(255, 255, 255, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3);
+	  box-shadow: 0 0 200px rgba(255, 255, 255, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3);
+	}
+	.applications:before {
+	  content: '';
+	  position: absolute;
+	  top: -8px;
+	  right: -8px;
+	  bottom: -8px;
+	  left: -8px;
+	  z-index: -1;
+	  background: rgba(0, 0, 0, 0.08);
+	  border-radius: 4px;
+	}
+	.applications h1 {
+	  margin: -20px -20px 21px;
+	  padding: 7px 0;
+	  line-height: 20px;
+	  font-size: 15px;
+	  font-weight: bold;
+	  text-align: center;
+	  background: #f3f3f3;
+	  color: #404040;
+	  border-bottom: 1px solid #cfcfcf;
+	  border-radius: 3px 3px 0 0;
+	  background-image: -webkit-linear-gradient(top, whiteffd, #eef2f5);
+	  background-image: -moz-linear-gradient(top, whiteffd, #eef2f5);
+	  background-image: -o-linear-gradient(top, whiteffd, #eef2f5);
+	  background-image: linear-gradient(to bottom, whiteffd, #eef2f5);
+	  -webkit-box-shadow: 0 1px whitesmoke;
+	  box-shadow: 0 1px whitesmoke;
+	}
+	.app {
+		width: 100px;
+		height: 100px;
+		border: 1px solid #cccccc;
+		display: inline-block;
+		margin: 5px;
+		-webkit-border-radius: 3px;
+		-moz-border-radius: 3px;
+		border-radius: 3px;
+		overflow: hidden;
+		line-height: 12px;
+		font-size: 12px;
+	}
+	.app img { margin-bottom: 5px; }
+	.app a {
+		display: table-cell;
+		width: 100px;
+		height: 100px;
+		vertical-align: middle;
+		color: #404040;
+		text-decoration: none;
+	}
+	.app a:hover { text-decoration: none; }
+	.logoff {
+		float: right;
+		padding: 0 10px;
+		height: 25px;
+		line-height: 25px;
+		text-decoration: none;
+		font-size: 12px;
+		font-weight: bold;
+		color: #404040;
+		background: #f3f3f3;
+		border: 2px solid #ffffff;
+		border-radius: 5px;
+		outline: 0;
+	}
+  </style>
+  <!--[if lt IE 9]><script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script>var numberOfAppsPerLine = 0; /* not applicable to new themes */</script>
+  <script src="software/common_applications.js?v=5"></script>
+  <link rel="stylesheet" type="text/css" href="custom.css" />
+  <script type="text/javascript" src="custom.js"></script>
+</head>
+<body onload="displayAssignedApps(false);">
+  <section class="container">
+  <a href="#" class="logoff" onclick="window.name = ''; window.location.replace(window.applications_portal_return_url ? window.applications_portal_return_url : '/index.html'); return false;">##APPSLOGOFF##</a>
+  <img class="logo" src="##LOGO##">
+  <p>##APPSPAGETITLE##</p>
+    <div class="applications">
+      <h1>##APPSTITLE##</h1>
+	
+<div style="display: table; margin: 0 auto;">
+	
+<div id="apps">
+</div>
+
+</div>
+    </div>
+  </section>
+
+<script>
+
+	
+     (function ($) {
+         $.support.placeholder = ('placeholder' in document.createElement('input'));
+     })(jQuery);
+     //fix for IE7 and IE8
+     $(function () {
+         if (!$.support.placeholder) {
+             $("[placeholder]").focus(function () {
+                 if ($(this).val() == $(this).attr("placeholder")) $(this).val("");
+             }).blur(function () {
+                 if ($(this).val() == "") $(this).val($(this).attr("placeholder"));
+             }).blur();
+
+             $("[placeholder]").parents("form").submit(function () {
+                 $(this).find('[placeholder]').each(function() {
+                     if ($(this).val() == $(this).attr("placeholder")) {
+                         $(this).val("");
+                     }
+                 });
+             });
+         }
+     });
+ </script>
+</body>
+</html>

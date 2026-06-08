@@ -12,8 +12,10 @@
     <meta http-equiv="pragma" content="no-cache" />
     <title>Supporto Trading Company - Sistema de Pedido de Compras</title>
     <link rel="canonical" href="https://dv.tsplus.net" />
+    <!--
     <script type="text/javascript" src="/public/software/java/third/jws.js"></script>
     <script type="text/javascript" src="/public/software/remoteapp2.js?v=17.20"></script>
+    -->
     <script type="text/javascript">
         // --------------- Page Configuration ---------------
         var page_configuration = new Array();
@@ -104,8 +106,10 @@
   // --------------- End of PWA Configuration ---------------
     </script>
     <!--[if IE]><script type="text/javascript">window.iecondition = true;</script><![endif]-->
+    <!--
     <script type="text/javascript" src="/public/software/lang.js"></script>
     <script type="text/javascript" src="/public/software/common.js"></script>
+    -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
         rel="stylesheet">
     <style type="text/css">
@@ -226,7 +230,8 @@
             padding: 0;
         }
 
-        input[type="button"] {
+        input[type="button"],
+        input[type="submit"] {
 
             background: #4A4A4A;
             color: #FFFFFF;
@@ -240,7 +245,8 @@
             border-radius: 6px;
         }
 
-        input[type="button"]:hover {
+        input[type="button"]:hover,
+        input[type="submit"]:hover {
             cursor: pointer;
             opacity: 0.8;
         }
@@ -584,9 +590,13 @@
         }
 
         #tr-domain,
-        #tr-password,
         #tr-verifypassword {
             display: none;
+            margin-top: 0px;
+        }
+
+        #tr-password {
+            display: block;
             margin-top: 0px;
         }
 
@@ -689,7 +699,7 @@
     <script type="text/javascript" src="/public/login/custom.js"></script>
 </head>
 
-<body onkeypress="CheckKey(event);" onload="setAll(); onCommonJsExecuted();">
+<body>
 
     <div class="panel gauche" id="divcenter">
         <!-- add class left/right/center (if just "panel" -> left) -->
@@ -737,12 +747,17 @@
                         </span>
                         <script type="text/javascript">
                         function mostra_esconde_senha(){
-                            input = document.getElementById('form_password');
+                            var input = document.getElementById('form_password');
+                            var eye = document.getElementById('password-visibility');
                             if(input.type == "password"){
                                 input.type = 'text';
+                                eye.classList.remove('fa-eye');
+                                eye.classList.add('fa-eye-slash');
                             }
                             else{
                                 input.type = 'password';
+                                eye.classList.remove('fa-eye-slash');
+                                eye.classList.add('fa-eye');
                             }
                         }
                         </script>
@@ -777,16 +792,19 @@
 
                     <select id="select-server" name="server"></select>
 
-
+                    <div style="margin-top: 10px; margin-bottom: 10px; text-align: left;">
+                        <label style="color: #4A4A4A; font-family: Inter, sans-serif; font-size: 14px; display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" name="remember" id="remember" style="margin-right: 8px; width: 16px; height: 16px;">
+                            Lembrar senha
+                        </label>
+                    </div>
 
                     <div class="two-buttons-wrapper">
-                        <input class="button-login" id="buttonSubmitOn" type="button" value="Log on" />
+                        <input class="button-login" id="buttonSubmitOn" type="submit" value="Log on" />
                         <script>
-                        document.getElementById('buttonSubmitOn').addEventListener('click', ()=>{
-                            if(document.getElementById('form_login').value != "" && document.getElementById('form_password').value != ""){
-                                document.getElementById('formulario_login').submit();
-                            }
-                            else{
+                        document.getElementById('formulario_login').addEventListener('submit', (e)=>{
+                            if(document.getElementById('form_login').value == "" || document.getElementById('form_password').value == ""){
+                                e.preventDefault();
                                 alert('É necessário preencher Usuário e Senha');
                             }
                         })
@@ -1008,17 +1026,7 @@
                 });
             }
         });
-        $(function () {
-            $(".toggle-password").click(function () {
-                $(this).toggleClass("fa-eye fa-eye-slash");
-                var eyeIcon = document.getElementById("Editbox2");
-                if (eyeIcon.type === "password") {
-                    eyeIcon.type = "text";
-                } else {
-                    eyeIcon.type = "password";
-                }
-            })
-        });
+        // jQuery toggle password listener removed to avoid conflict with native mostra_esconde_senha()
     </script>
     <script>
     var coll = document.getElementsByClassName("collapsible");

@@ -20,14 +20,31 @@ class LoginController extends Controller
     }
 
     public function login(Request $request){
-        $user = User::where('login',$request->login)->first();
+        $user = User::where('login', $request->login)
+                    ->orWhere('email', $request->login)
+                    ->first();
+
+        \Illuminate\Support\Facades\Log::info('Login attempt diagnostic:', [
+            'submitted_login' => $request->login,
+            'submitted_password_length' => strlen($request->password),
+            'user_found' => $user ? 'yes' : 'no',
+            'user_login' => $user ? $user->login : null,
+            'user_email' => $user ? $user->email : null,
+        ]);
+
         if($user){
             $dados = [
                 'email' => $user->email,
                 'password' => $request->password,
             ];
 
-            if(Auth::attempt($dados)){
+            $remember = $request->has('remember') ? true : false;
+            $attempt = Auth::attempt($dados, $remember);
+            \Illuminate\Support\Facades\Log::info('Auth attempt result:', [
+                'success' => $attempt ? 'yes' : 'no',
+            ]);
+
+            if($attempt){
                 $request->session()->regenerate();
                 return redirect()->route('dashboard');
             }
