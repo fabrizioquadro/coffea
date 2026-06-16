@@ -285,6 +285,11 @@
 var modalItem;
 
 document.getElementById('botao_adicionar_item').addEventListener('click', ()=>{
+    $('#modal_item form')[0].reset();
+    $('#grupo_id').val('').trigger('change');
+    $('#item_id').val('').trigger('change');
+    $('#ds_unidade').val('').trigger('change');
+
     modalItem = new bootstrap.Modal(document.getElementById('modal_item'));
     modalItem.show();
 });

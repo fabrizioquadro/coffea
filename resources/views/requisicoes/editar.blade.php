@@ -681,11 +681,22 @@ var modalFinanceiro;
 //});
 
 document.getElementById('botao_adicionar_item').addEventListener('click', ()=>{
+    $('#modal_item form')[0].reset();
+    $('#grupo_id').val('').trigger('change');
+    $('#item_id').val('').trigger('change');
+    $('#ds_unidade').val('').trigger('change');
+
     modalItem = new bootstrap.Modal(document.getElementById('modal_item'));
     modalItem.show();
 });
 
 document.getElementById('botao_adicionar_financeiro').addEventListener('click', ()=>{
+    $('#modal_financeiro form')[0].reset();
+    $('#financeiro_operacao_id').val('');
+    $('#financeiro_operacao_id').parent().find('input[type=text]').val('');
+    $('#financeiro_conta_pagamento_id').val('').trigger('change');
+    $('#financeiro_tipo_pagamento').val('').trigger('change');
+
     total_pedido = document.getElementById('total_pedido').value;
     total_financeiro = document.getElementById('total_financeiro').value;
 

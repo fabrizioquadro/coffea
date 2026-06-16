@@ -254,8 +254,10 @@ if(!function_exists('enviarMail')){
             $mail->Send();
         }
         catch (Exception $e) {
-            die($mail->ErrorInfo);
+            // die($mail->ErrorInfo);
+            return false;
         }
+        return true;
     }
 }
 ?>

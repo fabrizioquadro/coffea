@@ -111,9 +111,9 @@ $user = auth()->user();
 
 window.addEventListener('load',()=>{
     $('#table-index').DataTable({
-      pageLength: 50,
-      "pageLength": 50,
-      order: [[1, 'asc']],
+      pageLength: 10,
+      "pageLength": 10,
+      order: [[1, 'desc']],
       "language": {
               "sEmptyTable": "Nenhum registro encontrado",
         "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",

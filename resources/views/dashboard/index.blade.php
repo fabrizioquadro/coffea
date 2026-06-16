@@ -145,7 +145,7 @@
             <hr>
             <h6 class="card-title mt-1">{{ $dash_view }}</h6>
             <div class="table-responsive">
-                <table class="tabela-index table" id="table-preparar">
+                <table class="tabela-index table" id="table-dash">
                     <thead class="table-light">
                         <tr>
                             <th></th>
@@ -502,9 +502,42 @@
 </div>
 <script>
 window.addEventListener('load',()=>{
+      $('#table-dash').DataTable({
+      pageLength: 10,
+        "pageLength": 10,
+        @if(isset($dash_view) && $dash_view == 'Pedidos Finalizados')
+        order: [[1, 'desc']],
+        @else
+        order: [[1, 'asc']],
+        @endif
+        "language": {
+    			"sEmptyTable": "Nenhum registro encontrado",
+          "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+          "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
+          "sInfoFiltered": "(Filtrados de _MAX_ registros)",
+          "sInfoPostFix": "",
+          "sInfoThousands": ".",
+          "sLengthMenu": "_MENU_ resultados por página",
+          "sLoadingRecords": "Carregando...",
+          "sProcessing": "Processando...",
+          "sZeroRecords": "Nenhum registro encontrado",
+          "sSearch": "Pesquisar",
+          "oPaginate": {
+            "sNext": "Próximo",
+            "sPrevious": "Anterior",
+            "sFirst": "Primeiro",
+            "sLast": "Último"
+          },
+          "oAria": {
+            "sSortAscending": ": Ordenar colunas de forma ascendente",
+            "sSortDescending": ": Ordenar colunas de forma descendente"
+          }
+        }
+      });
+
       $('#table-preparar').DataTable({
-      pageLength: 50,
-        "pageLength": 50,
+      pageLength: 10,
+        "pageLength": 10,
         order: [[1, 'asc']],
         "language": {
     			"sEmptyTable": "Nenhum registro encontrado",
@@ -532,8 +565,8 @@ window.addEventListener('load',()=>{
       });
 
       $('#table-validacao').DataTable({
-      pageLength: 50,
-        "pageLength": 50,
+      pageLength: 10,
+        "pageLength": 10,
         order: [[1, 'asc']],
         "language": {
     			"sEmptyTable": "Nenhum registro encontrado",
@@ -561,8 +594,8 @@ window.addEventListener('load',()=>{
       });
 
       $('#table-autorizacao').DataTable({
-      pageLength: 50,
-        "pageLength": 50,
+      pageLength: 10,
+        "pageLength": 10,
         order: [[1, 'asc']],
         "language": {
     			"sEmptyTable": "Nenhum registro encontrado",
